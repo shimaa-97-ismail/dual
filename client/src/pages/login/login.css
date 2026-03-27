@@ -1,0 +1,24 @@
+button {
+  color: var(--text-light) ;
+  padding: 10px 20px;
+  border-radius: 6px;
+  /* border: none; */
+  cursor: pointer;
+  margin-top: 15px;
+  display: flex;
+  /* margin-left: auto; */
+  justify-content:center
+
+}
+
+.colorBtn:hover {
+  background: #2c4d8c; /* darker blue */
+}
+.colorBtn{
+background: var(--primary) ;
+}
+.error {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}

@@ -1,0 +1,134 @@
+.attendance-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.progress-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.progress-steps::before {
+  content: '';
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #e0e0e0;
+  z-index: -1;
+}
+
+.step {
+  background: white;
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 2px solid #e0e0e0;
+  position: relative;
+}
+
+.step.active {
+  border-color: #b3ca24;
+  background: #b3ca24;
+  color: white;
+}
+
+.selection-area {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 30px;
+  min-height: 400px;
+}
+
+.step-content h3 {
+  margin-bottom: 30px;
+  color: #333;
+  text-align: center;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.card {
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card.selected {
+  border-color: #4CAF50;
+  background: #f0f9f0;
+}
+
+.stages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.stage-card {
+  background: white;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  padding: 30px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stage-card:hover,
+.stage-card.selected {
+  border-color: #2196F3;
+  background: #f0f8ff;
+}
+
+.classes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.class-card {
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.class-card:hover {
+  border-color: #FF9800;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.back-btn {
+  background: #a8a8a8;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.back-btn:hover {
+  background: #d1d2d3;
+}

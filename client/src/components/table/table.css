@@ -1,0 +1,41 @@
+.titleAndIcon {
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.textRight{
+    text-align:right
+}
+
+@media print {
+  .hide-on-print {
+    display: none !important;
+  }
+}
+@media print {
+   .print-content {
+    margin: 0;
+    padding: 0;
+  }
+  .print-content .overflow-x-auto {
+    overflow: visible !important;
+  }
+  /* Make the scroll container overflow visible (remove scrollbar) */
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+
+  /* Ensure the table uses full page width */
+  .overflow-x-auto table {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Allow text to wrap in cells (remove nowrap) */
+  .overflow-x-auto td,
+  .overflow-x-auto th {
+    white-space: normal !important;
+  }
+  
+}
