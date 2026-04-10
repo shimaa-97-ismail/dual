@@ -17,14 +17,16 @@ const schoolSchema = new mongoose.Schema(
       type: String,
       max: 50,
     },
-    phone: {
-      type: [String], //mult
-      max: 11,
-    },
+    phone: 
+      {
+        type: String,
+        maxlength: 11,
+      }
+    ,
     email: {
       type: String,
       unique: true,
-    sparse: true,
+      sparse: true,
     },
     studentAffairs: {
       type: String,
@@ -52,7 +54,7 @@ const schoolSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const School = mongoose.model("school", schoolSchema);

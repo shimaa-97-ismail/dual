@@ -26,7 +26,9 @@ export const getSchools = async (req, res) => {
 export const createSchool = async (req, res) => {
   try {
     console.log(req.body);
-    
+    if (!req.body.email) {
+  delete req.body.email;
+}
     const newSchool = new schoolModel(req.body);
     await newSchool.save();
 

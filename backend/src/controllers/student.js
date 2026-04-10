@@ -105,13 +105,21 @@ export const getStudentById = async (req, res) => {
 //absent
 function formatLocalDate(date) {
   const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
 // Arabic day names (1=Saturday, 2=Sunday, ..., 7=Friday)
-const arabicDays = ["السبت", "الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة"];
+const arabicDays = [
+  "السبت",
+  "الأحد",
+  "الإثنين",
+  "الثلاثاء",
+  "الأربعاء",
+  "الخميس",
+  "الجمعة",
+];
 
 function getArabicDayName(dayNumber) {
   return arabicDays[dayNumber - 1];
@@ -123,7 +131,8 @@ function getWeekOfMonth(saturdayDate) {
   const month = saturdayDate.getMonth();
   const firstDayOfMonth = new Date(year, month, 1);
   let firstSaturday = new Date(firstDayOfMonth);
-  while (firstSaturday.getDay() !== 6) { // find first Saturday of month
+  while (firstSaturday.getDay() !== 6) {
+    // find first Saturday of month
     firstSaturday.setDate(firstSaturday.getDate() + 1);
   }
   // If the given Saturday is before the first Saturday of its month,
@@ -131,11 +140,15 @@ function getWeekOfMonth(saturdayDate) {
   if (saturdayDate < firstSaturday) {
     return Math.ceil(saturdayDate.getDate() / 7);
   }
-  const diffWeeks = Math.floor((saturdayDate - firstSaturday) / (1000 * 60 * 60 * 24 * 7));
+  const diffWeeks = Math.floor(
+    (saturdayDate - firstSaturday) / (1000 * 60 * 60 * 24 * 7),
+  );
   return diffWeeks + 1;
-}function convertToWeeklyAttendance(weekStart, attendanceData) {
+}
+
+function convertToWeeklyAttendance(weekStart, attendanceData) {
   // Parse weekStart as local date (e.g., "2026-02-28")
-  const [year, month, day] = weekStart.split('-').map(Number);
+  const [year, month, day] = weekStart.split("-").map(Number);
   const startLocal = new Date(year, month - 1, day);
   startLocal.setHours(0, 0, 0, 0);
 
@@ -145,57 +158,60 @@ function getWeekOfMonth(saturdayDate) {
     const currentDate = new Date(startLocal);
     currentDate.setDate(startLocal.getDate() + i);
     const dateStr = formatLocalDate(currentDate);
-    const status = attendanceData[dateStr] || "حاضر";
+
+    // Get attendance entry (default to "حاضر" with empty note)
+    const entry = attendanceData[dateStr] || { status: "حاضر", reason: "" };
+    const status = entry.status;
+    const notes = entry.reason || ""; // reason from frontend goes to notes
 
     days.push({
-      day_number: i + 1,                      // 1=Saturday, 2=Sunday, ..., 7=Friday
+      day_number: i + 1, // 1=Saturday, 2=Sunday, ..., 7=Friday
       day_name_ar: getArabicDayName(i + 1),
-      date: currentDate,                     // stored as Date (local)
+      date: currentDate,
       status,
-      notes: "",
+      notes, // ← now stores the reason
     });
   }
 
-  // Summary statistics
+  // Summary statistics (unchanged)
   const total_days = days.length;
-  const present_days = days.filter(d => d.status === "حاضر").length;
-  const absent_days = days.filter(d => d.status === "غائب").length;
-  const excused_absences = days.filter(d => d.status === "اجازه").length;
-  const attendance_rate = total_days > 0 ? (present_days / total_days) * 100 : 0;
+  const present_days = days.filter((d) => d.status === "حاضر").length;
+  const absent_days = days.filter((d) => d.status === "غائب").length;
+  const excused_absences = days.filter((d) => d.status === "اجازه").length;
+  const attendance_rate =
+    total_days > 0 ? (present_days / total_days) * 100 : 0;
 
-  // Week start/end as local strings
   const weekStartStr = formatLocalDate(startLocal);
   const endDate = new Date(startLocal);
   endDate.setDate(startLocal.getDate() + 6);
   const weekEndStr = formatLocalDate(endDate);
-
-  // Week number within the month (based on the Saturday)
   const week_number = getWeekOfMonth(startLocal);
 
-  return [{
-    year: startLocal.getFullYear(),
-    month: startLocal.getMonth() + 1,
-    week_number,
-    week_start_date: weekStartStr,   // ✅ stored as string
-    week_end_date: weekEndStr,       // ✅ stored as string
-    days,
-    summary: {
-      total_days,
-      present_days,
-      absent_days,
-      excused_absences,
-      late_days: 0,
-      attendance_rate,
+  return [
+    {
+      year: startLocal.getFullYear(),
+      month: startLocal.getMonth() + 1,
+      week_number,
+      week_start_date: weekStartStr,
+      week_end_date: weekEndStr,
+      days,
+      summary: {
+        total_days,
+        present_days,
+        absent_days,
+        excused_absences,
+        late_days: 0,
+        attendance_rate,
+      },
+      recorded_at: new Date(),
     },
-    recorded_at: new Date(),
-  }];
+  ];
 }
-
 
 //add absent per student per week
 export const addStudentAbsent = async (req, res) => {
   try {
-    const studentId = req.params.id;
+    const studentId = req.params.studentId || req.body.studentId;
     const { startDate, attendanceData } = req.body;
 
     if (!startDate) {
@@ -206,7 +222,8 @@ export const addStudentAbsent = async (req, res) => {
     if (!student) {
       return res.status(404).json({ success: false, message: "الطالب غير موجود" });
     }
-const existingWeek = student.weekly_attendance.find(
+
+    const existingWeek = student.weekly_attendance.find(
       (week) => week.week_start_date === startDate
     );
     if (existingWeek) {
@@ -215,69 +232,88 @@ const existingWeek = student.weekly_attendance.find(
         message: `تم تسجيل حضور هذا الأسبوع بالفعل (${startDate})`,
       });
     }
+
     const weeklyAttendance = convertToWeeklyAttendance(startDate, attendanceData);
 
-    const updatedStudent = await studentModel.findByIdAndUpdate(
-      studentId,
-      { $push: { weekly_attendance: { $each: weeklyAttendance } } },
-      { new: true, runValidators: true }
-    ).populate("stdSpecial school stdTrainningPlace");
+    const updatedStudent = await studentModel
+      .findByIdAndUpdate(
+        studentId,
+        { $push: { weekly_attendance: { $each: weeklyAttendance } } },
+        { new: true, runValidators: true }
+      )
+      .populate("stdSpecial school stdTrainningPlace");
 
-    res.status(200).json({ success: true, message: "تم تسجيل الغياب بنجاح", data: updatedStudent });
+    res.status(200).json({
+      success: true,
+      message: "تم تسجيل الغياب بنجاح",
+      data: updatedStudent,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
+
 //get all absent per student
 
-// controllers/student.js
+// controllers/student.js getStudentAttendance
 export const getStudentAttendance = async (req, res) => {
   try {
     const { studentId } = req.params;
+console.log("her",req.params);
 
     // جلب الطالب مع حقل weekly_attendance فقط (لتقليل البيانات)
-    const student = await studentModel.findById(studentId).select('weekly_attendance');
+    const student = await studentModel
+      .findById(studentId)
+      .select("weekly_attendance");
     if (!student) {
-      return res.status(404).json({ success: false, message: 'الطالب غير موجود' });
+      return res
+        .status(404)
+        .json({ success: false, message: "الطالب غير موجود" });
     }
-console.log(student);
+    console.log(student);
 
     // إرجاع مصفوفة الغياب (مرتبة حسب تاريخ البداية تنازلياً – الأحدث أولاً)
-    const attendance = student.weekly_attendance.sort((a, b) => 
-      b.week_start_date.localeCompare(a.week_start_date)
+    const attendance = student.weekly_attendance.sort((a, b) =>
+      b.week_start_date.localeCompare(a.week_start_date),
     );
     console.log(attendance);
-    
 
     res.status(200).json({ success: true, data: attendance });
   } catch (error) {
-    console.error('Error fetching student attendance:', error);
+    console.error("Error fetching student attendance:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
 
 export const getWeekAttendance = async (req, res) => {
   try {
     const { studentId, weekStart } = req.params;
 
     // جلب الطالب مع حقل weekly_attendance فقط
-    const student = await studentModel.findById(studentId).select('weekly_attendance');
+    const student = await studentModel
+      .findById(studentId)
+      .select("weekly_attendance");
     if (!student) {
-      return res.status(404).json({ success: false, message: 'الطالب غير موجود' });
+      return res
+        .status(404)
+        .json({ success: false, message: "الطالب غير موجود" });
     }
 
     // البحث عن الأسبوع المطلوب باستخدام week_start_date
-    const week = student.weekly_attendance.find(w => w.week_start_date === weekStart);
+    const week = student.weekly_attendance.find(
+      (w) => w.week_start_date === weekStart,
+    );
     if (!week) {
-      return res.status(404).json({ success: false, message: 'لا يوجد سجل غياب لهذا الأسبوع' });
+      return res
+        .status(404)
+        .json({ success: false, message: "لا يوجد سجل غياب لهذا الأسبوع" });
     }
 
     res.status(200).json({ success: true, data: week });
   } catch (error) {
-    console.error('Error fetching week attendance:', error);
+    console.error("Error fetching week attendance:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -289,15 +325,18 @@ export const updateWeekAttendance = async (req, res) => {
 
     // التحقق من وجود الأيام
     if (!days || !Array.isArray(days) || days.length !== 7) {
-      return res.status(400).json({ success: false, message: 'يجب إرسال مصفوفة تحتوي على 7 أيام' });
+      return res
+        .status(400)
+        .json({ success: false, message: "يجب إرسال مصفوفة تحتوي على 7 أيام" });
     }
 
     // حساب الملخص الجديد
     const total_days = days.length;
-    const present_days = days.filter(d => d.status === 'حاضر').length;
-    const absent_days = days.filter(d => d.status === 'غائب').length;
-    const excused_absences = days.filter(d => d.status === 'اجازه').length;
-    const attendance_rate = total_days > 0 ? (present_days / total_days) * 100 : 0;
+    const present_days = days.filter((d) => d.status === "حاضر").length;
+    const absent_days = days.filter((d) => d.status === "غائب").length;
+    const excused_absences = days.filter((d) => d.status === "اجازه").length;
+    const attendance_rate =
+      total_days > 0 ? (present_days / total_days) * 100 : 0;
 
     const newSummary = {
       total_days,
@@ -310,107 +349,131 @@ export const updateWeekAttendance = async (req, res) => {
 
     // تحديث الأسبوع باستخدام $set مع عامل المصفوفة $
     const updatedStudent = await studentModel.findOneAndUpdate(
-      { _id: studentId, 'weekly_attendance.week_start_date': weekStart },
+      { _id: studentId, "weekly_attendance.week_start_date": weekStart },
       {
         $set: {
-          'weekly_attendance.$.days': days,
-          'weekly_attendance.$.summary': newSummary,
-          'weekly_attendance.$.recorded_at': new Date(),
+          "weekly_attendance.$.days": days,
+          "weekly_attendance.$.summary": newSummary,
+          "weekly_attendance.$.recorded_at": new Date(),
         },
       },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!updatedStudent) {
-      return res.status(404).json({ success: false, message: 'الطالب أو الأسبوع غير موجود' });
+      return res
+        .status(404)
+        .json({ success: false, message: "الطالب أو الأسبوع غير موجود" });
     }
 
     // إعادة الأسبوع المعدل من البيانات
-    const updatedWeek = updatedStudent.weekly_attendance.find(w => w.week_start_date === weekStart);
+    const updatedWeek = updatedStudent.weekly_attendance.find(
+      (w) => w.week_start_date === weekStart,
+    );
 
     res.status(200).json({ success: true, data: updatedWeek });
   } catch (error) {
-    console.error('Error updating week attendance:', error);
+    console.error("Error updating week attendance:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
 export const deleteWeekAttendance = async (req, res) => {
   try {
     const { studentId, weekStart } = req.params;
-console.log("delete",studentId, weekStart );
+    console.log("delete", studentId, weekStart);
 
     // استخدام $pull لإزالة العنصر الذي week_start_date يساوي weekStart
     const updatedStudent = await studentModel.findByIdAndUpdate(
       studentId,
       { $pull: { weekly_attendance: { week_start_date: weekStart } } },
-      { new: true } // إرجاع الوثيقة المحدثة
+      { new: true }, // إرجاع الوثيقة المحدثة
     );
 
     if (!updatedStudent) {
-      return res.status(404).json({ success: false, message: 'الطالب غير موجود' });
+      return res
+        .status(404)
+        .json({ success: false, message: "الطالب غير موجود" });
     }
 
     // التحقق من أن العنصر قد تم حذفه فعلاً
     const stillExists = updatedStudent.weekly_attendance.some(
-      (week) => week.week_start_date === weekStart
+      (week) => week.week_start_date === weekStart,
     );
     if (stillExists) {
-      return res.status(500).json({ success: false, message: 'فشل في حذف الأسبوع' });
+      return res
+        .status(500)
+        .json({ success: false, message: "فشل في حذف الأسبوع" });
     }
 
-    res.status(200).json({ success: true, message: 'تم حذف الأسبوع بنجاح' });
+    res.status(200).json({ success: true, message: "تم حذف الأسبوع بنجاح" });
   } catch (error) {
-    console.error('Error deleting week attendance:', error);
+    console.error("Error deleting week attendance:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
-
-
 
 ////
 // controllers/studentController.js
 export const updateStudent = async (req, res) => {
   try {
+    console.log("update stud");
     const { id } = req.params;
-    const updateData = { ...req.body };
+    let updateData = req.body;
+    console.log(updateData);
 
-    // Parse JSON fields that might be sent as strings
+    // Parse JSON fields...
     if (updateData.phones) {
-      try {
-        updateData.phones = JSON.parse(updateData.phones);
-      } catch (e) {
-        // If parsing fails, assume it's already an array
-      }
+      try { updateData.phones = JSON.parse(updateData.phones); } catch(e) {}
     }
     if (updateData.current_stage) {
-      try {
-        updateData.current_stage = JSON.parse(updateData.current_stage);
-      } catch (e) {}
+      try { updateData.current_stage = JSON.parse(updateData.current_stage); } catch(e) {}
     }
 
-    // Handle file uploads (if any)
+    // Handle file uploads
     if (req.files) {
-      if (req.files.fatherDeathCert) {
-        updateData.fatherDeathCert = req.files.fatherDeathCert[0].path;
-      }
-      if (req.files.motherDeathCert) {
-        updateData.motherDeathCert = req.files.motherDeathCert[0].path;
+      if (req.files.fatherDeathCert) updateData.fatherDeathCert = req.files.fatherDeathCert[0].path;
+      if (req.files.motherDeathCert) updateData.motherDeathCert = req.files.motherDeathCert[0].path;
+    }
+
+    // ----- EMAIL validation -----
+    if (updateData.email !== undefined) {
+      if (updateData.email === "") {
+        delete updateData.email;
+      } else {
+        const existingStudent = await studentModel.findOne({
+          email: { $regex: new RegExp(`^${updateData.email}$`, "i") },
+          _id: { $ne: id },
+        });
+        if (existingStudent) {
+          return res.status(400).json({ success: false, message: "البريد الإلكتروني مسجل مسبقاً لطالب آخر" });
+        }
       }
     }
 
-    // Check if studID already exists for another student
+    // ----- CODE validation -----
+    if (updateData.code !== undefined) {
+      if (updateData.code === "") {
+        delete updateData.code;
+      } else {
+        const existingStudent = await studentModel.findOne({
+          code: updateData.code,
+          _id: { $ne: id },
+        });
+        if (existingStudent) {
+          return res.status(400).json({ success: false, message: "الكود مسجل مسبقاً لطالب آخر" });
+        }
+      }
+    }
+
+    // ----- studID validation (already present) -----
     if (updateData.studID) {
       const existingStudent = await studentModel.findOne({
         studID: updateData.studID,
         _id: { $ne: id },
       });
       if (existingStudent) {
-        return res.status(400).json({
-          success: false,
-          message: 'الرقم القومي مسجل مسبقاً لطالب آخر',
-        });
+        return res.status(400).json({ success: false, message: "الرقم القومي مسجل مسبقاً لطالب آخر" });
       }
     }
 
@@ -422,15 +485,16 @@ export const updateStudent = async (req, res) => {
     );
 
     if (!updatedStudent) {
-      return res.status(404).json({ success: false, message: 'الطالب غير موجود' });
+      return res.status(404).json({ success: false, message: "الطالب غير موجود" });
     }
 
     res.status(200).json({
       success: true,
-      message: 'تم تحديث الطالب بنجاح',
+      message: "تم تحديث الطالب بنجاح",
       data: updatedStudent,
     });
   } catch (error) {
+    console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -500,12 +564,11 @@ export const getStudentBySChool = async (req, res) => {
 
 export const getStudentByTrainningPlace = async (req, res) => {
   try {
-    const { trainningId } = req.params;
-
-    console.log(trainningId);
+    console.log("trainning");
+    const { id } = req.params;
 
     const students = await studentModel
-      .find({ stdTrainningPlace: trainningId })
+      .find({ stdTrainningPlace: id })
       .populate("stdSpecial", "specialName")
       .populate("school", "schoolName")
       .populate("stdTrainningPlace", "name address phone")
@@ -517,6 +580,8 @@ export const getStudentByTrainningPlace = async (req, res) => {
       data: students,
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -576,12 +641,12 @@ export const bulkUpdateStudents = async (req, res) => {
     if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'يرجى توفير قائمة بمعرفات الطلاب',
+        message: "يرجى توفير قائمة بمعرفات الطلاب",
       });
     }
 
     // Validate updates - only allowed fields
-    const allowedFields = ['studStatus', 'stage_name', 'current_class'];
+    const allowedFields = ["studStatus", "stage_name", "current_class"];
     const updateData = {};
     for (const field of allowedFields) {
       if (updates[field] !== undefined) {
@@ -592,7 +657,7 @@ export const bulkUpdateStudents = async (req, res) => {
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({
         success: false,
-        message: 'لا توجد بيانات محدثة',
+        message: "لا توجد بيانات محدثة",
       });
     }
 
@@ -600,20 +665,20 @@ export const bulkUpdateStudents = async (req, res) => {
     // Adjust based on your schema. If you have current_stage as an object, we need to set it correctly.
     // Let's assume you have current_stage.stage_name.
     if (updateData.stage_name) {
-      updateData['current_stage.stage_name'] = updateData.stage_name;
+      updateData["current_stage.stage_name"] = updateData.stage_name;
       delete updateData.stage_name; // remove top-level field
     }
 
     const result = await studentModel.updateMany(
       { _id: { $in: studentIds } },
       { $set: updateData },
-      { runValidators: true }
+      { runValidators: true },
     );
 
     if (result.matchedCount === 0) {
       return res.status(404).json({
         success: false,
-        message: 'لم يتم العثور على أي طلاب',
+        message: "لم يتم العثور على أي طلاب",
       });
     }
 
@@ -890,11 +955,9 @@ export const repeatStage = async (req, res) => {
       stage_name,
     });
     if (stageEnrollments.length >= 2) {
-      return res
-        .status(400)
-        .json({
-          message: "لا يمكن إعادة السنة أكثر من مرة واحدة لهذه المرحلة",
-        });
+      return res.status(400).json({
+        message: "لا يمكن إعادة السنة أكثر من مرة واحدة لهذه المرحلة",
+      });
     }
     let targetAcademicYear = providedAcademicYear;
 

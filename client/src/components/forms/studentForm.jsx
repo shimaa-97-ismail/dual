@@ -14,12 +14,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useParams } from "react-router-dom";
 import { useSchoolById, useSchools } from "@/hooks/useSchools";
 import { useTrainningPlaces } from "@/hooks/useTrainngPlace";
+import { Button } from "@/components/ui/button";
 
-export const StudentForm = ({ value, onChange, mode }) => {
+export const StudentForm = ({ value, onChange, mode, errors = {},onSubmit }) => {
   console.log(value);
   const { schoolId } = useParams();
   const { data: allSchool } = useSchools();
-  const { data: school, isLoading, isError, error, refetch } = useSchoolById(value?.school);
+  const { data: school, isLoading, isError, error, refetch } = useSchoolById(value?.school );
   const { data: trainningPlaces } = useTrainningPlaces();
 
   const DEFAULT_PHONES = [
@@ -77,7 +78,11 @@ export const StudentForm = ({ value, onChange, mode }) => {
     onChange("school", selectedId);
     onChange("stdSpecial", "");
   };
+  const handleSubmit=()=>{
+onSubmit(value)
+  }
 
+  const handleCancel=()=>{}
   if (isLoading) return <div>بيانات المدارس بتتحمل...</div>;
   if (isError)
     return (
@@ -99,8 +104,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
             value={value?.stdName || ""}
             onChange={(e) => onChange("stdName", e.target.value)}
             placeholder="أدخل اسم الطالب"
+            className={errors?.stdName ? 'border-red-500' : ''}
             required
           />
+          {errors?.stdName && <p className="text-red-500 text-sm mt-1">{errors.stdName}</p>}
         </div>
         <div className="space-y-2 w-1/2 m-2">
           <LabelForm htmlFor="studID" title="رقم القومى" required />
@@ -109,8 +116,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
             value={value?.studID || ""}
             onChange={(e) => onChange("studID", e.target.value)}
             placeholder="أدخل رقم القومى"
+            className={errors?.studID ? 'border-red-500' : ''}
             required
           />
+          {errors?.studID && <p className="text-red-500 text-sm mt-1">{errors.studID}</p>}
         </div>
         <div className="flex w-full justify-between items-center flex-wrap lg:flex-nowrap">
           <div className="space-y-2 w-1/2 m-3">
@@ -120,8 +129,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
               type="date"
               value={formatDateForInput(value?.stdBOD)}
               onChange={(e) => onChange("stdBOD", e.target.value)}
+              className={errors?.stdBOD ? 'border-red-500' : ''}
               required
             />
+            {errors?.stdBOD && <p className="text-red-500 text-sm mt-1">{errors.stdBOD}</p>}
           </div>
           <div className="space-y-2 w-1/2 mb-2">
             <LabelForm htmlFor="stdGender" title="الجنس" required />
@@ -140,6 +151,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
                 <Label htmlFor="option-two">أنثى</Label>
               </div>
             </RadioGroup>
+            {errors?.stdGender && <p className="text-red-500 text-sm mt-1">{errors.stdGender}</p>}
           </div>
         </div>
         <div className="flex w-full justify-between items-center flex-wrap lg:flex-nowrap">
@@ -151,8 +163,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.phones?.[0]?.number || ""}
               onChange={(e) => handlePhoneChange(0, e.target.value)}
               placeholder="أدخل رقم التليفون"
+              className={errors?.phones ? 'border-red-500' : ''}
               required
             />
+            {errors?.phones && <p className="text-red-500 text-sm mt-1">{errors.phones}</p>}
           </div>
           <div className="space-y-2 w-1/2 mt-6 m-3">
             <LabelForm htmlFor="alternatePhone" title="رقم تليفون اخر" />
@@ -171,10 +185,11 @@ export const StudentForm = ({ value, onChange, mode }) => {
             name="stdAddress"
             value={value?.stdAddress || ""}
             onChange={(e) => onChange("stdAddress", e.target.value)}
-            className="border"
+            className={`border ${errors?.stdAddress ? 'border-red-500' : ''}`}
             rows="4"
             cols="100"
           />
+          {errors?.stdAddress && <p className="text-red-500 text-sm mt-1">{errors.stdAddress}</p>}
         </div>
       </section>
 
@@ -189,8 +204,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.fatherName || ""}
               onChange={(e) => onChange("fatherName", e.target.value)}
               placeholder="أدخل اسم الاب"
+              className={errors?.fatherName ? 'border-red-500' : ''}
               required
             />
+            {errors?.fatherName && <p className="text-red-500 text-sm mt-1">{errors.fatherName}</p>}
           </div>
           <div className="space-y-2 w-1/2 m-2">
             <LabelForm htmlFor="fatherID" title="رقم القومى" required />
@@ -199,8 +216,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.fatherID || ""}
               onChange={(e) => onChange("fatherID", e.target.value)}
               placeholder="أدخل رقم القومى"
+              className={errors?.fatherID ? 'border-red-500' : ''}
               required
             />
+            {errors?.fatherID && <p className="text-red-500 text-sm mt-1">{errors.fatherID}</p>}
           </div>
         </div>
         <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
@@ -211,8 +230,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.fatherPhone || ""}
               onChange={(e) => onChange("fatherPhone", e.target.value)}
               placeholder="أدخل رقم التليفون"
+              className={errors?.fatherPhone ? 'border-red-500' : ''}
               required
             />
+            {errors?.fatherPhone && <p className="text-red-500 text-sm mt-1">{errors.fatherPhone}</p>}
           </div>
           <div className="space-y-2 w-1/2 m-3">
             <LabelForm htmlFor="fatherJobTitle" title="وظيفه الاب" required />
@@ -223,7 +244,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
               detailsValue={value?.fatherJobDetails}
               onDetailsChange={(val) => handleJobDetailsChange("father", val)}
               onFileChange={(file) => handleFileChange("fatherDeathCert", file)}
+              errors={errors?.fatherJobTitle || errors?.fatherJobDetails}
             />
+            {errors?.fatherJobTitle && <p className="text-red-500 text-sm mt-1">{errors.fatherJobTitle}</p>}
+            {errors?.fatherJobDetails && <p className="text-red-500 text-sm mt-1">{errors.fatherJobDetails}</p>}
           </div>
         </div>
       </section>
@@ -239,8 +263,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.motherName || ""}
               onChange={(e) => onChange("motherName", e.target.value)}
               placeholder="أدخل اسم الام"
+              className={errors?.motherName ? 'border-red-500' : ''}
               required
             />
+            {errors?.motherName && <p className="text-red-500 text-sm mt-1">{errors.motherName}</p>}
           </div>
           <div className="space-y-2 w-1/2 m-2">
             <LabelForm htmlFor="motherID" title="رقم القومى" required />
@@ -249,8 +275,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.motherID || ""}
               onChange={(e) => onChange("motherID", e.target.value)}
               placeholder="أدخل رقم القومى"
+              className={errors?.motherID ? 'border-red-500' : ''}
               required
             />
+            {errors?.motherID && <p className="text-red-500 text-sm mt-1">{errors.motherID}</p>}
           </div>
         </div>
         <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
@@ -272,7 +300,10 @@ export const StudentForm = ({ value, onChange, mode }) => {
               detailsValue={value?.motherJobDetails}
               onDetailsChange={(val) => handleJobDetailsChange("mother", val)}
               onFileChange={(file) => handleFileChange("motherDeathCert", file)}
+              errors={errors?.motherJobTitle || errors?.motherJobDetails}
             />
+            {errors?.motherJobTitle && <p className="text-red-500 text-sm mt-1">{errors.motherJobTitle}</p>}
+            {errors?.motherJobDetails && <p className="text-red-500 text-sm mt-1">{errors.motherJobDetails}</p>}
           </div>
         </div>
       </section>
@@ -289,7 +320,9 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.email || ""}
               onChange={(e) => onChange("email", e.target.value)}
               placeholder="أدخل البريد الالكترونى"
+              className={errors?.email ? 'border-red-500' : ''}
             />
+            {errors?.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
           </div>
           <div className="space-y-2 w-1/2 m-2">
             <LabelForm htmlFor="password" title="رقم السرى" />
@@ -303,7 +336,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
           </div>
         </div>
         <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 w-1/2 m-3">
+          <div className="space-y-2 w-1/2 m-3 ">
             <LabelForm htmlFor="preparatorySchoolTotalScore" title="مجموع الاعدادى" required />
             <Input
               id="preparatorySchoolTotalScore"
@@ -311,10 +344,12 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.preparatorySchoolTotalScore || ""}
               onChange={(e) => onChange("preparatorySchoolTotalScore", e.target.value)}
               placeholder="أدخل المجموع"
+              className={errors?.preparatorySchoolTotalScore ? 'border-red-500' : ''}
               required
             />
+            {errors?.preparatorySchoolTotalScore && <p className="text-red-500 text-sm mt-1">{errors.preparatorySchoolTotalScore}</p>}
           </div>
-          <div className="space-y-2 m-2 w-1/2">
+          <div className="space-y-2 m-3 w-1/2">
             <LabelForm htmlFor="code" title="الكود" />
             <Input
               id="code"
@@ -322,6 +357,8 @@ export const StudentForm = ({ value, onChange, mode }) => {
               onChange={(e) => onChange("code", e.target.value)}
               placeholder="أدخل الكود"
             />
+            {errors?.code && <p className="text-red-500 text-sm mt-1">{errors.code}</p>}
+
           </div>
         </div>
       </section>
@@ -333,7 +370,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
           <div className="space-y-2 m-2 w-1/2">
             <LabelForm htmlFor="school" title="المدرسه" required />
             <Select value={value?.school} onValueChange={changeSchool}>
-              <SelectTrigger className="text-black!">
+              <SelectTrigger className={`text-black! ${errors?.school ? 'border-red-500' : ''}`}>
                 <SelectValue placeholder="اختر المدرسه" />
               </SelectTrigger>
               <SelectContent>
@@ -342,6 +379,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
                 ))}
               </SelectContent>
             </Select>
+            {errors?.school && <p className="text-red-500 text-sm mt-1">{errors.school}</p>}
           </div>
           <div className="space-y-2 m-2 w-1/2">
             <LabelForm htmlFor="studStatus" title="حاله الطالب" required />
@@ -349,7 +387,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.studStatus || ""}
               onValueChange={(val) => onChange("studStatus", val)}
             >
-              <SelectTrigger className="text-black!">
+              <SelectTrigger className={errors?.studStatus ? 'border-red-500 text-black!' : 'text-black!'}>
                 <SelectValue placeholder="اختر الحاله" />
               </SelectTrigger>
               <SelectContent>
@@ -358,6 +396,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
                 ))}
               </SelectContent>
             </Select>
+            {errors?.studStatus && <p className="text-red-500 text-sm mt-1">{errors.studStatus}</p>}
           </div>
           <div className="space-y-2 m-2 w-1/2">
             <LabelForm htmlFor="stage_name" title="المرحله الدراسيه" required />
@@ -365,7 +404,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
               value={value?.current_stage?.stage_name || ""}
               onValueChange={(val) => handleFieldChange("current_stage.stage_name", val)}
             >
-              <SelectTrigger className="text-black!">
+              <SelectTrigger className={errors?.current_stage ? 'text-black! border-red-500' : 'text-black!'}>
                 <SelectValue placeholder="اختر النوع" />
               </SelectTrigger>
               <SelectContent>
@@ -374,6 +413,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
                 <SelectItem value="الصف الثالث">الصف الثالث</SelectItem>
               </SelectContent>
             </Select>
+            {errors?.current_stage && <p className="text-red-500 text-sm mt-1">{errors.current_stage}</p>}
           </div>
           <div className="space-y-2 w-1/2 m-2">
             <LabelForm htmlFor="stdSpecial" title="التخصص" required />
@@ -382,7 +422,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
               onValueChange={(val) => onChange("stdSpecial", val)}
               disabled={!value?.school}
             >
-              <SelectTrigger className="text-black!">
+              <SelectTrigger className={errors?.stdSpecial ? 'text-black! border-red-500' : 'text-black!'}>
                 <SelectValue placeholder="اختر التخصص" />
               </SelectTrigger>
               <SelectContent>
@@ -391,6 +431,7 @@ export const StudentForm = ({ value, onChange, mode }) => {
                 ))}
               </SelectContent>
             </Select>
+            {errors?.stdSpecial && <p className="text-red-500 text-sm mt-1">{errors.stdSpecial}</p>}
           </div>
         </div>
         <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
@@ -438,6 +479,18 @@ export const StudentForm = ({ value, onChange, mode }) => {
             />
           </div>
         </div>
+      </section>
+      <section className="flex justify-end">
+         {/* <Button variant="outline" className=" bg-[#831e2e] hover:bg-[#a42338]" onClick={handleCancel} type="button">
+            الغاء
+          </Button> */}
+          <Button
+            onClick={handleSubmit}
+            // disabled={disabled || isLoading}
+            type="button"
+          >
+            حفظ
+          </Button>
       </section>
     </div>
   );

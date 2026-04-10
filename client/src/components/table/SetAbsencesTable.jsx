@@ -23,7 +23,7 @@ export function SetAbsencesTable() {
 
   const attendanceMutation = useAddAttendanceStudent();
   const [attendance, setAttendance] = useState({});
-
+ const [absenceReasons, setAbsenceReasons] = useState({});
   // Days of the week starting with Saturday
   const arabicDays = [
     "السبت",
@@ -63,6 +63,16 @@ export function SetAbsencesTable() {
 
   const handleAttendanceChange = (date, status) => {
     setAttendance((prev) => ({ ...prev, [date]: status }));
+    if (status !== "غائب" && status !== "اجازه") {
+      setAbsenceReasons((prev) => {
+        const newReasons = { ...prev };
+        delete newReasons[date];
+        return newReasons;
+      });
+    }
+  };
+    const handleReasonChange = (date, reason) => {
+    setAbsenceReasons((prev) => ({ ...prev, [date]: reason }));
   };
 
   const handleSubmit = () => {
@@ -70,10 +80,17 @@ export function SetAbsencesTable() {
       alert("لا يوجد تاريخ بدء الأسبوع");
       return;
     }
+    const attendanceData = {};
+     Object.keys(attendance).forEach((date) => {
+      const status = attendance[date];
+      const reason = absenceReasons[date] || "";
+      attendanceData[date] = { status, reason };
+    });
     attendanceMutation.mutate({
       studentId,
       startDate,
-      attendanceData: attendance,
+      attendanceData,
+
     });
     navigate(`/trainning-place/${trainningId}/details`);
   };
@@ -128,6 +145,7 @@ export function SetAbsencesTable() {
                   اجازه
                 </div>
               </TableHead>
+                <TableHead className="text-center">سبب الغياب/الإجازة</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -136,6 +154,8 @@ export function SetAbsencesTable() {
               const dayName = arabicDays[index];
               const formattedDate = day.toLocaleDateString("ar-EG");
               const currentStatus = attendance[dateString] || "";
+                  const currentReason = absenceReasons[dateString] || "";
+                const showReasonInput = currentStatus === "غائب" || currentStatus === "اجازه";
               console.log(day, dateString, dayName);
               return (
                 <TableRow key={dateString}>
@@ -188,6 +208,17 @@ export function SetAbsencesTable() {
                       }
                     />
                     <span className="mr-2">اجازه</span>
+                  </TableCell>
+                   <TableCell className="text-center">
+                    {showReasonInput && (
+                      <input
+                        type="text"
+                        placeholder={currentStatus === "غائب" ? "سبب الغياب" : "سبب الإجازة"}
+                        value={currentReason}
+                        onChange={(e) => handleReasonChange(dateString, e.target.value)}
+                        className="border rounded px-2 py-1 w-full max-w-[150px] text-right"
+                      />
+                    )}
                   </TableCell>
                 </TableRow>
               );

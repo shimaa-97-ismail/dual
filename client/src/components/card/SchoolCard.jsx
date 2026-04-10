@@ -19,8 +19,9 @@ import {
   BookType,
   Phone,
   CircleUser,
-  Cast
+  Cast,
 } from "lucide-react";
+import { LiaLayerGroupSolid } from "react-icons/lia";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   useUpdateSchool,
@@ -34,7 +35,7 @@ import { toast } from "react-hot-toast";
 
 export const SchoolCard = memo(({ data }) => {
   console.log(data);
-  
+
   const { departmentId } = useParams();
   console.log(departmentId);
 
@@ -55,7 +56,7 @@ export const SchoolCard = memo(({ data }) => {
           toast.success("تم تحديث بيانات المدرسه بنجاح");
           queryClient.invalidateQueries({ queryKey: schoolKeys.all });
         },
-      }
+      },
     );
     setModalOpen(false);
   };
@@ -63,58 +64,15 @@ export const SchoolCard = memo(({ data }) => {
   const handleDelete = async () => {
     console.log(data._id);
 
-    deleteMutation.mutate(data._id),
+    (deleteMutation.mutate(data._id),
       {
         onSuccess: () => {
           toast.success("تم حذف المدرسه بنجاح");
           queryClient.invalidateQueries({ queryKey: schoolKeys.all });
           setDeleteModalOpen(false);
         },
-      };
+      });
   };
-  // const handleModalSubmit = async (formData) => {
-  //   try {
-  //     updateMutation.mutate(
-  //       { id: data._id, formData },
-  //       {
-  //         onSuccess: () => {
-  //           toast.success("تم تحديث المدرسة بنجاح");
-  //           queryClient.invalidateQueries({ queryKey: schoolKeys.all });
-  //           setModalOpen(false);
-  //         },
-  //       }
-  //     );
-
-  //     // const result=  await dispatch(updateSchool({ id: data._id, data: formData })).unwrap();
-  //     //  console.log(result);
-  //     // toast.success("تم تحديث المدرسة بنجاح");
-  //   } catch (error) {
-  //     toast.error("فشل في تحديث المدرسة");
-  //     console.error("Update error:", error);
-  //   }
-  // };
-
-  // معالجة الحذف
-  // const handleDelete = async () => {
-  //   try {
-  //     await dispatch(deleteSchool(data._id)).unwrap();
-  //     toast.success("تم حذف المدرسة بنجاح");
-  //     setDeleteModalOpen(false);
-  //   } catch (error) {
-  //     toast.error("فشل في حذف المدرسة");
-  //     console.error("Delete error:", error);
-  //   }
-  // };
-
-  // عرض رسالة خطأ إذا وجدت
-  // React.useEffect(() => {
-  //   if (updateError) {
-  //     toast.error(updateError);
-  //   }
-  //   if (deleteError) {
-  //     toast.error(deleteError);
-  //   }
-  // }, [updateError, deleteError]);
 
   return (
     <>
@@ -123,12 +81,12 @@ export const SchoolCard = memo(({ data }) => {
           <CardHeader
             className="flex-grow-0 space-y-3 cursor-pointer"
             onClick={() =>
-              (window.location.href = `/department/${data.departement._id}/school/${data._id}`)
+              (window.location.href = `/department/${data?.departement?._id}/school/${data?._id}`)
             }
           >
             <div className="flex justify-between items-start">
               <CardTitle className="text-xl font-bold text-gray-800">
-                {data.name}
+                {data?.name}
               </CardTitle>
               <span
                 className={`text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-800`}
@@ -138,61 +96,76 @@ export const SchoolCard = memo(({ data }) => {
             </div>
 
             <CardDescription className="space-y-2">
-               <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   <span className="text-sm">
-                    ادارة: {data.departement?.name || "غير محدد"}
+                    ادارة: {data?.departement?.name || "غير محدد"}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
                   <BookOpen className="w-4 h-4" />
                   <span className="text-sm">
-                    {data.special?.length || 0} اقسام
+                    {data?.special?.length || 0} اقسام
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <BookType className="w-4 h-4" />
                 <span className="text-sm">
-                  {data.type?.name || "لا يوجد نوع"}
+                  {data?.type?.name || "لا يوجد نوع"}
                 </span>
               </div>
-               <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-gray-600">
                 <CircleUser className="w-4 h-4" />
-                
+
                 <span className="text-sm">
-                  المدير: {data.managerName || "غير محدد"}
+                  المدير: {data?.managerName || "غير محدد"}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <Phone className="w-4 h-4" />
                 <span className="text-sm">
-                  الهاتف: {data.phone || "غير محدد"}
+                  الهاتف: {data?.phone || "غير محدد"}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-gray-600">
                 <MapPin className="w-4 h-4" />
                 <span className="text-sm">
-                  {data.address || "لا يوجد عنوان"}
+                  {data?.address || "لا يوجد عنوان"}
                 </span>
               </div>
-                 
             </CardDescription>
           </CardHeader>
 
           <CardContent className="flex-grow">
             <div className="mb-4">
               <h3 className="text-lg font-semibold mb-2 text-gray-700 flex items-center gap-2">
-                <Cast className="w-5 h-5"/>
+                <Cast className="w-5 h-5" />
                 معلومات الاتصال
               </h3>
               <div className="space-y-1 text-base text-gray-600">
-                <p>شئون الطلابه: {data.studentAffairs || "غير محدد"}</p>
+                <p>شئون الطلابه: {data?.studentAffairs || "غير محدد"}</p>
                 <p>
-                  هاتف شئون الطلابه: {data.studentAffairsPhone || "غير محدد"}
+                  هاتف شئون الطلابه: {data?.studentAffairsPhone || "غير محدد"}
                 </p>
-                <p>البريد الالكترونى: {data.email || "غير محدد"}</p>
+                <p>البريد الالكترونى: {data?.email || "غير محدد"}</p>
+              </div>
+            </div>
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold mb-2 text-gray-700 flex items-center gap-2">
+                <LiaLayerGroupSolid className="w-5 h-5" />
+                الدفعات المتاحة
+              </h3>
+
+              <div className="space-y-1 text-base text-gray-600">
+                {data?.intakes && data.intakes.length > 0 ? (
+                  data.intakes.map((intake, index) => (
+                    <p key={index}>{intake}</p>
+                  ))
+                ) : (
+                  <p>لا توجد دفعات متاحة</p>
+                )}
               </div>
             </div>
 
@@ -202,32 +175,28 @@ export const SchoolCard = memo(({ data }) => {
                 الأقسام المتاحة
               </h3>
               <div className="flex flex-wrap gap-2">
-                {data.special?.length > 0 ? (
-                  data.special.map(
-                    (item) => (
-                      (
-                        <Button
-                          key={item._id}
-                          variant="outline"
-                          size="sm"
-                          className="hover:bg-primary  transition-colors text-black! hover:text-[#ffff]! "
-                          style={{
-                            border: "1px solid rgba(52, 94, 166, 0.3)",
-                          }}
-                          // onClick={() =>
-                          //   onSpecialClick(
-                          //     item._id,
-                          //     item.name,
-                          //     data._id,
-                          //     data.name
-                          //   )
-                          // }
-                        >
-                          {item.name}
-                        </Button>
-                      )
-                    )
-                  )
+                {data?.special?.length > 0 ? (
+                  data?.special.map((item) => (
+                    <Button
+                      key={item._id}
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-primary  transition-colors text-black! hover:text-[#ffff]! "
+                      style={{
+                        border: "1px solid rgba(52, 94, 166, 0.3)",
+                      }}
+                      // onClick={() =>
+                      //   onSpecialClick(
+                      //     item._id,
+                      //     item.name,
+                      //     data._id,
+                      //     data.name
+                      //   )
+                      // }
+                    >
+                      {item.name}
+                    </Button>
+                  ))
                 ) : (
                   <p className="text-gray-500 text-sm py-2">
                     لا توجد أقسام متاحة

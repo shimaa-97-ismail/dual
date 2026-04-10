@@ -2,7 +2,7 @@ import {TrainningPlace} from "../models/trainningPlace.js";
 
 export const createTrainningPlace = async (req, res) => {
   try {
-    console.log("here traninig place new");
+    console.log("here traninig place new",req.body);
     
      const trainningPlace = new TrainningPlace(req.body);
     await trainningPlace.save();

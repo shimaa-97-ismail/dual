@@ -21,17 +21,10 @@ export function SchoolForm({
   specials,
   errors = {},
 }) {
-  console.log(data?.intakes);
+  console.log(data);
 
   return (
     <div className=" grid gap-4">
-      {/* رسالة الخطأ */}
-      {/* {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )} */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 scrollable-form-wrapper">
         {/* اسم المدرسة */}
         <div className="space-y-2 md:col-span-2">
@@ -67,7 +60,7 @@ export function SchoolForm({
             )}
             {typesOfSchools?.length > 0 ? (
               <Select
-                value={data.type.name }
+                value={data.type }
                 onValueChange={(value) => onChange("type", value)}
               >
                 <SelectTrigger className="text-black!">
@@ -239,40 +232,35 @@ export function SchoolForm({
 </div>
 
         {/* التخصصات */}
-        <div className="space-y-3 w-100">
-          <Label>التخصصات المتاحة</Label>
-          {specials?.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-3 border rounded-lg">
-              {specials?.map((special) => (
-                <div key={special._id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`special-${special._id}`}
-                    checked={data.special.some(
-                      (item) => item._id === special._id,
-                    )}
-                    onCheckedChange={() => onChange("special", special._id)}
-                    disabled={
-                      !special._id || special._id.toString().trim() === ""
-                    }
-                  />
-                  <label
-                    htmlFor={`special-${special._id}`}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                  >
-                    {special.name}
-                  </label>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="p-4 border rounded-lg bg-gray-50">
-              <p className="text-sm text-gray-500 text-center">
-                لا توجد تخصصات متاحة. تأكد من اتصال الخادم أو استخدم بيانات
-                افتراضية.
-              </p>
-            </div>
-          )}
+   <div className="space-y-3 w-100">
+  <Label>التخصصات المتاحة</Label>
+  {specials?.length > 0 ? (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-3 border rounded-lg">
+      {specials.map((special) => (
+        <div key={special._id} className="flex items-center space-x-2">
+          <Checkbox
+            id={`special-${special._id}`}
+            checked={data.special?.includes(special._id) || false}
+            onCheckedChange={() => onChange("special", special._id)}
+            disabled={!special._id || special._id.toString().trim() === ""}
+          />
+          <label
+            htmlFor={`special-${special._id}`}
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+          >
+            {special.name}
+          </label>
         </div>
+      ))}
+    </div>
+  ) : (
+    <div className="p-4 border rounded-lg bg-gray-50">
+      <p className="text-sm text-gray-500 text-center">
+        لا توجد تخصصات متاحة. تأكد من اتصال الخادم أو استخدم بيانات افتراضية.
+      </p>
+    </div>
+  )}
+</div>
       </div>
     </div>
   );

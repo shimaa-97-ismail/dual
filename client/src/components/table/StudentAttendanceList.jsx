@@ -68,17 +68,20 @@ export const StudentAttendanceList = () => {
 
   return (
     <>
+    <div className="flex justify-center items-center  mt-6 mb-6">
+      <h2 className="text-2xl font-bold mb-4 text-center">سجل الغياب</h2>
+    </div>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>بداية الأسبوع</TableHead>
-            <TableHead>نهاية الأسبوع</TableHead>
-            <TableHead>أيام الحضور</TableHead>
-            <TableHead>أيام الغياب</TableHead>
-            <TableHead>إجازات</TableHead>
-            <TableHead>مدرسة</TableHead>
-            <TableHead> تعديل </TableHead>
-            <TableHead> حذف </TableHead>
+            <TableHead className="text-center">بداية الأسبوع</TableHead>
+            <TableHead className="text-center">نهاية الأسبوع</TableHead>
+            <TableHead className="text-center">أيام الحضور</TableHead>
+            <TableHead className="text-center">أيام الغياب</TableHead>
+            <TableHead className="text-center">إجازات</TableHead>
+            <TableHead className="text-center">مدرسة</TableHead>
+            <TableHead className="text-center"> تعديل </TableHead>
+            <TableHead className="text-center"> حذف </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -86,7 +89,7 @@ export const StudentAttendanceList = () => {
             <TableRow
               key={week.week_start_date}
               onClick={() => handleRowClick(week.week_start_date)}
-              className="cursor-pointer hover:bg-gray-100"
+              className="cursor-pointer text-center hover:bg-gray-100"
             >
               <TableCell>{week.week_start_date}</TableCell>
               <TableCell>{week.week_end_date}</TableCell>
@@ -96,14 +99,19 @@ export const StudentAttendanceList = () => {
               <TableCell>
                 {week.days.filter((d) => d.status === "مدرسه").length}
               </TableCell>
-              <TableCell onClick={(e) => e.stopPropagation()}>
-                <button
-                  onClick={(e) => handleEditClick(week.week_start_date, e)}
-                >
-                  <SquarePen size={20} color="#b3ca24" />
-                </button>
+              <TableCell >
+                <div className="flex justify-center items-center gap-2"  onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={(e) => handleEditClick(week.week_start_date, e)}
+                  >
+                    <SquarePen size={20} color="#b3ca24" />
+                  </button>
+                </div>
               </TableCell>
-              <TableCell onClick={(e) => e.stopPropagation()}>
+              <TableCell
+                className="flex justify-center items-center"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button onClick={(e) => handleDelete(week.week_start_date, e)}>
                   <Trash2 size={20} color="#831e2e" />
                 </button>
@@ -120,7 +128,7 @@ export const StudentAttendanceList = () => {
         studentId={studentId}
       />
       <WeekDetailsEditor
-        l
+        
         open={editModalOpen}
         studentId={studentId}
         weekStart={selectedWeekStart}

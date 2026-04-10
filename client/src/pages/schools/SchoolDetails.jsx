@@ -136,8 +136,8 @@ export function SchoolDetails() {
             onAddButtonClick={() =>
               navigate(`/school/student/add`)
             }
-            title={`  اداره ${department?.name} `}
-            description={`${school?.name} `}
+            title={`${school?.name} `}
+            description={`اداره ${department?.name}`}
           />
         )}
         {/* شريط البحث والفلترة */}

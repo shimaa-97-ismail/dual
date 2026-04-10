@@ -11,29 +11,34 @@ const trainningPlaceSchema = new mongoose.Schema({
   },
   phone: {
     type: String,
-  
   },
-  email:{
+  email: {
     type: String,
     // unique: true,
   },
   supervisorName: {
-   type:String,
-   
+    type: String,
   },
-  supervisorPhone:{
-    type:String,
+  supervisorPhone: {
+    type: String,
   },
-  owner:{
-   type:String,
+  owner: {
+    type: String,
   },
-  ownerPhone:{
-    type:String,
+  ownerPhone: {
+    type: String,
   },
-  commercialRegister:{
-    // type:file,
+  commercialRegister: {
+    type: String,
   },
-  max_participants: {type:Number},
+  idCard: {
+    type: String,
+  }, // URL for national ID
+  taxFile: {
+    type: String,
+  }, // URL for tax file
+  socialMedia: { type: String },
+  max_participants: { type: Number },
   current_participants: { type: Number, default: 0 },
 });
 const TrainningPlace = mongoose.model("trainningPlace", trainningPlaceSchema);

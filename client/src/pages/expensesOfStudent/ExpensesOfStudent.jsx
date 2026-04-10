@@ -303,7 +303,7 @@ export function ExpensesOfStudent() {
                   <div>
                      {!isGraduated && enrollment.stage_name !== "الصف الثالث" && (
                       <button
-                        className="bg-blue-600 text-white px-4 py-2 rounded"
+                        className="bg-primary text-white px-4 py-2 rounded"
                         onClick={() => promoteStage(enrollment.stage_name, enrollment.academicYear)}
                       >
                         الانتقال للمرحلة التالية
@@ -311,7 +311,7 @@ export function ExpensesOfStudent() {
                     )}
                     {canRepeat && (
                       <button
-                        className="bg-orange-500 text-white px-4 py-2 rounded"
+                        className="bg-secondary text-white px-4 py-2 rounded"
                         onClick={() => createRepeatStage(enrollment.stage_name)}
                       >
                         إعادة السنة

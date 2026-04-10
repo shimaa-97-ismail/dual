@@ -75,18 +75,18 @@ function App() {
             <Route path="/special" element={<Specials />} />
             <Route path="/special/schools" element={<SchoolByData />} />
             <Route path="/special/:specialId/school" element={<Specials />} />
-            <Route
+            {/* <Route
               path="/students/:schoolName/:special"
               element={<Student />}
-            />
-            <Route path="/student" element={<Student />} />
+            /> */}
+            {/* <Route path="/student" element={<Student />} /> */}
             <Route
               path="/school/student/add"
-              element={<StudentForm />}
+              element={<Student />}
             />
             <Route
               path="/school/student/edit/:studentId"
-              element={<StudentForm />}
+              element={<Student />}
             />
           
              <Route path="/student/expenses/:studentId" element={<ExpensesOfStudent/>}/>

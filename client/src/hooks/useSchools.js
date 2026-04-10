@@ -128,6 +128,8 @@ export const useUpdateSchool = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ id, updateData }) => {
+      console.log(updateData);
+      
       await schoolsApi.update(id, updateData);
     },
     onSuccess: (data, variables) => {

@@ -28,7 +28,9 @@ export function StudentTable({ data, showCheckbox, refetch }) {
   // Edit: open modal with selected student data
   const handleEdit = (studentData) => {
     setSelectedStudent(studentData);
-    setModalOpen(true);
+     navigate(`/school/student/edit/${studentData._id}`);
+            
+    // setModalOpen(true);
   };
 
   // Submit update

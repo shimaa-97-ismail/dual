@@ -43,7 +43,7 @@ export function Clearance() {
   }, [searchQuery, refetch]);
   return (
     <>
-      <div className="flex justify-end m-4">
+      <div className="flex justify-end m-2">
         <Button onClick={() => setShowApplicantModel(true)}>
           بيانات مقدم الطلب{" "}
         </Button>
@@ -124,7 +124,7 @@ export function Clearance() {
             </div>
           </div>
         </div>
-        <div className=" flex justify-between m-4">
+        <div className=" flex justify-between m-2">
           <h5>
             قنا - حوض عشرة امام مسجد ابو بكر الصديق- الدور الرابع - ميدان
             الشهداء

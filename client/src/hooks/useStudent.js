@@ -5,22 +5,25 @@ export const studentApi = {
   getAll: () => axioInstance.get("student"),
   getById: (id) => axioInstance.get(`student/${id}`),
   create: (data) => axioInstance.post("student", data),
-  addAttendance: (id, data) => axioInstance.post(`student/${id}/attendance`, data),
-  getAttendance: (studentId) => axioInstance.get(`/student/${studentId}/attendance`),
-    getWeekAttendance: (studentId, weekStart) => 
+  addAttendance: (id, data) =>
+    axioInstance.post(`student/${id}/attendance`, data),
+  getAttendance: (studentId) =>
+    axioInstance.get(`/student/${studentId}/attendance`),
+  getWeekAttendance: (studentId, weekStart) =>
     axioInstance.get(`/student/${studentId}/attendance/${weekStart}`),
-     updateWeekAttendance: (studentId, weekStart, days) =>
+  updateWeekAttendance: (studentId, weekStart, days) =>
     axioInstance.put(`/student/${studentId}/attendance/${weekStart}`, { days }),
-      deleteWeekAttendance: (studentId, weekStart) =>
+  deleteWeekAttendance: (studentId, weekStart) =>
     axioInstance.delete(`/student/${studentId}/attendance/${weekStart}`),
-
+  // update: (studentId, data) => axioInstance.patch(`student/${studentId}`, data),
   delete: (id) => axioInstance.delete(`student/${id}`),
   getBySchool: (id) => axioInstance.get(`student/by-school/${id}`),
   getByTrainningPlace: (id) =>
     axioInstance.get(`student/by-trainning-place/${id}`),
   search: (searchTerm) =>
     axioInstance.get("student/search", { params: { query: searchTerm } }),
-  changeStatus:(ids,updates)=> axioInstance.patch("student/bulkUpdateStudents",ids,updates)
+  changeStatus: (ids, updates) =>
+    axioInstance.patch("student/bulkUpdateStudents", ids, updates),
 };
 export const studentKeys = {
   all: ["students"],
@@ -31,7 +34,6 @@ export const studentKeys = {
   bySchool: (schoolId) => [...studentKeys.all, schoolId],
   byTrainnigPlace: (trainningId) => [...studentKeys.all, trainningId],
   search: (query) => [...studentKeys.all, "search", query],
-  
 };
 
 export const useStudents = () => {
@@ -77,17 +79,17 @@ export const useCreateStudent = () => {
 };
 export const useUpdateStudent = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
-    mutationFn: async ({ id, data }) => {
-      const response = await axioInstance.put(`/student/${id}`, data, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+    mutationFn: async ({ studentId, data }) => {
+      console.log(data);
+      
+      const response = await axioInstance.patch(`/student/${studentId}`, data);
       return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: studentKeys.lists() });
-      alert("تم تحديث الطالب بنجاح" )// or relevant query keys
+      alert("تم تحديث الطالب بنجاح"); // or relevant query keys
     },
   });
 };
@@ -106,12 +108,11 @@ export const useDeleteStudent = () => {
   });
 };
 
-
 export const useChangeStatusOfStudents = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ studentIds, updates }) => {
-      const response = await axioInstance.patch('/student/bulk-update', {
+      const response = await axioInstance.patch("/student/bulk-update", {
         studentIds,
         updates,
       });
@@ -141,7 +142,7 @@ export const useStudentBySchool = (schoolId) => {
 };
 
 export const useStudentByTrainningPlace = (trainningId) => {
-  // console.log(trainningId);
+  console.log(trainningId);
 
   return useQuery({
     queryKey: studentKeys.byTrainnigPlace(trainningId),
@@ -168,30 +169,30 @@ export const useAddAttendanceStudent = () => {
     },
     onError: (error) => {
       console.error("Attendance error:", error);
-      alert(`فشل في التسجيل: ${error.response?.data?.message || error.message}`);
+      alert(
+        `فشل في التسجيل: ${error.response?.data?.message || error.message}`,
+      );
     },
   });
 };
 export const useStudentAttendance = (studentId) => {
   return useQuery({
-    queryKey: ['student-attendance', studentId],
+    queryKey: ["student-attendance", studentId],
     queryFn: () => studentApi.getAttendance(studentId),
     enabled: !!studentId, // لا يتم الجلب إلا إذا كان studentId موجوداً
     select: (response) => response.data.data, // استخراج المصفوفة من الاستجابة
   });
 };
 
-
 export const useWeekAttendance = (studentId, weekStart, options = {}) => {
   return useQuery({
-    queryKey: ['week-attendance', studentId, weekStart],
+    queryKey: ["week-attendance", studentId, weekStart],
     queryFn: () => studentApi.getWeekAttendance(studentId, weekStart),
     enabled: !!studentId && !!weekStart,
     select: (response) => response.data.data,
     ...options,
   });
 };
-
 
 export const useUpdateWeekAttendance = () => {
   const queryClient = useQueryClient();
@@ -201,14 +202,16 @@ export const useUpdateWeekAttendance = () => {
       studentApi.updateWeekAttendance(studentId, weekStart, days),
     onSuccess: (data, variables) => {
       // تحديث ذاكرة التخزين المؤقت للاستعلامات المتأثرة
-      queryClient.invalidateQueries({ queryKey: ['student-attendance', variables.studentId] });
       queryClient.invalidateQueries({
-        queryKey: ['week-attendance', variables.studentId, variables.weekStart],
+        queryKey: ["student-attendance", variables.studentId],
       });
-      alert('تم تحديث الغياب بنجاح');
+      queryClient.invalidateQueries({
+        queryKey: ["week-attendance", variables.studentId, variables.weekStart],
+      });
+      alert("تم تحديث الغياب بنجاح");
     },
     onError: (error) => {
-      console.error('Update error:', error);
+      console.error("Update error:", error);
       alert(`فشل التحديث: ${error.response?.data?.message || error.message}`);
     },
   });
@@ -222,32 +225,20 @@ export const useDeleteWeekAttendance = () => {
       studentApi.deleteWeekAttendance(studentId, weekStart),
     onSuccess: (_, variables) => {
       // تحديث ذاكرة التخزين المؤقت للاستعلامات المتأثرة
-      queryClient.invalidateQueries({ queryKey: ['student-attendance', variables.studentId] });
       queryClient.invalidateQueries({
-        queryKey: ['week-attendance', variables.studentId, variables.weekStart],
+        queryKey: ["student-attendance", variables.studentId],
       });
-      alert('تم حذف الأسبوع بنجاح');
+      queryClient.invalidateQueries({
+        queryKey: ["week-attendance", variables.studentId, variables.weekStart],
+      });
+      alert("تم حذف الأسبوع بنجاح");
     },
     onError: (error) => {
-      console.error('Delete error:', error);
+      console.error("Delete error:", error);
       alert(`فشل الحذف: ${error.response?.data?.message || error.message}`);
     },
   });
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ////
 
@@ -267,14 +258,13 @@ export const useStudentById = (id) => {
 export const useStudentSearch = (searchTerm, options = {}) => {
   console.log(searchTerm);
   let term;
-  if (typeof searchTerm === 'object' && searchTerm.studentName) {
+  if (typeof searchTerm === "object" && searchTerm.studentName) {
     term = searchTerm.studentName;
-  } else if (typeof searchTerm === 'string') {
+  } else if (typeof searchTerm === "string") {
     term = searchTerm;
     console.log(term);
-
   } else {
-    term = '';
+    term = "";
   }
   console.log(term);
 
@@ -295,10 +285,10 @@ export const useStudentSearch = (searchTerm, options = {}) => {
 //       // response هو ما يعيده السيرفر (مثلاً { matchedCount, modifiedCount, ... })
 //       // variables هو البيانات التي أرسلتها { studentIds, updates }
 //       console.log('Update successful:', response, variables);
-      
+
 //       // إبطال استعلامات الطلاب لإعادة جلب البيانات
 //       queryClient.invalidateQueries({ queryKey: studentKeys.all });
-      
+
 //       // يمكنك أيضًا تحديث الكاش مباشرة إذا أردت (اختياري)
 //       // queryClient.setQueryData(studentKeys.lists(), (old) => ...)
 //     },

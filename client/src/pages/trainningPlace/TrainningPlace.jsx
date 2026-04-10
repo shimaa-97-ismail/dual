@@ -28,7 +28,7 @@ import {
   Search,
   Filter,
 } from "lucide-react";
-
+import { FaFacebook, FaInstagram } from "react-icons/fa";
 export const TrainningPlacesList = () => {
   const navigate = useNavigate();
   const {
@@ -42,12 +42,17 @@ export const TrainningPlacesList = () => {
     addTrainningPlace,
     editTrainningPlace,
   } = useTrainningPlaces();
-
+  const icons = {
+    facebook: "📘",
+    instagram: "📷",
+    whatsapp: "💬",
+    link: "🔗",
+  };
   // const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterSupervisor, setFilterSupervisor] = useState("all");
+  // const [isDeleting, setIsDeleting] = useState(false);
+  // const [searchTerm, setSearchTerm] = useState("");
+  // const [filterSupervisor, setFilterSupervisor] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   // Fetch places on component mount
@@ -97,20 +102,20 @@ export const TrainningPlacesList = () => {
     }
   };
 
-  // Filter and search logic
-  const filteredPlaces = trainningPlaces.filter((place) => {
-    const matchesSearch =
-      place.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      place.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      place.owner?.toLowerCase().includes(searchTerm.toLowerCase());
+  // // Filter and search logic
+  // const filteredPlaces = trainningPlaces.filter((place) => {
+  //   const matchesSearch =
+  //     place.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     place.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     place.owner?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesFilter =
-      filterSupervisor === "all" ||
-      (filterSupervisor === "with" && place.supervisorName) ||
-      (filterSupervisor === "without" && !place.supervisorName);
+  //   const matchesFilter =
+  //     filterSupervisor === "all" ||
+  //     (filterSupervisor === "with" && place.supervisorName) ||
+  //     (filterSupervisor === "without" && !place.supervisorName);
 
-    return matchesSearch && matchesFilter;
-  });
+  //   return matchesSearch && matchesFilter;
+  // });
 
   // Extract unique supervisors for filtering
   // const supervisors = [
@@ -128,7 +133,7 @@ export const TrainningPlacesList = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">أماكن التدريب</h1>
           <p className="text-gray-600 mt-2">
-           جميع أماكن التدريب في محافظة قنا تحت نظام التعليم الفنى المزدوج
+            جميع أماكن التدريب في محافظة قنا تحت نظام التعليم الفنى المزدوج
           </p>
         </div>
 
@@ -159,21 +164,18 @@ export const TrainningPlacesList = () => {
       ) : (
         <>
           {/* Empty State */}
-          {filteredPlaces.length === 0 ? (
+          {trainningPlaces.length === 0 ? (
             <EmptyState
               title="لا توجد أماكن تدريب"
-              description={searchTerm || filterSupervisor !== "all"
-                ? "لم يتم العثور على نتائج تطابق معايير البحث. حاول تعديل البحث أو التصفية."
-                : "لم يتم إضافة أي أماكن تدريب بعد. ابدأ بإضافة أول مكان تدريب."}
+              description={ "لم يتم إضافة أي أماكن تدريب بعد. ابدأ بإضافة أول مكان تدريب."
+              }
               actionText="إضافة مكان تدريب"
               onAction={handleAddNew}
             />
-
-          
           ) : (
             /* Cards Grid */
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredPlaces.map(
+              {trainningPlaces.map(
                 (place) => (
                   console.log(place),
                   (
@@ -181,22 +183,65 @@ export const TrainningPlacesList = () => {
                       key={place._id}
                       className="hover:shadow-lg transition-shadow duration-300"
                     >
-                      <CardHeader
-                        className="cursor-pointer"
-                        onClick={() =>
-                          navigate(`/trainning-place/${place._id}/details`)
-                        }
-                      >
+                      <CardHeader className="">
                         <div className="flex justify-between items-start">
                           <div>
-                            <CardTitle className="text-xl">
+                            <CardTitle
+                              className="text-xl cursor-pointer"
+                              onClick={() =>
+                                navigate(
+                                  `/trainning-place/${place._id}/details`,
+                                )
+                              }
+                            >
                               {place.name}
                             </CardTitle>
                             <CardDescription className="mt-1">
-                              {place.commercialRegister
-                                ? `السجل: ${place.commercialRegister}`
-                                : "بدون سجل تجاري"}
+                              {place.commercialRegister ? (
+                                <a
+                                  href={place.commercialRegister}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                                >
+                                  {icons.link} عرض السجل التجاري
+                                </a>
+                              ) : (
+                                "بدون سجل تجاري"
+                              )}
+                              <br />
+                              {place.taxFile ? (
+                                <a
+                                  href={place.taxFile}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                                >
+                                  {icons.file || icons.link} عرض الملف الضريبي
+                                </a>
+                              ) : (
+                                "بدون ملف ضريبي"
+                              )}
                             </CardDescription>
+                          </div>
+                          <div className="mt-3">
+                            <a
+                              href={place.socialMedia}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block text-primary hover:text-blue-800 transition"
+                            >
+                              {" "}
+                              {place.socialMedia &&
+                              (place.socialMedia.includes("facebook.com") ||
+                                place.socialMedia.includes("fb.com")) ? (
+                                <FaFacebook className="h-5 w-5" />
+                              ) : place.socialMedia &&
+                                (place.socialMedia.includes("instagram.com") ||
+                                  place.socialMedia.includes("insta.com")) ? (
+                                <FaInstagram className="h-5 w-5" />
+                              ) : null}
+                            </a>
                           </div>
                           {/* <Badge
                         variant={place.supervisorName ? "default" : "secondary"}
@@ -273,26 +318,39 @@ export const TrainningPlacesList = () => {
 
                         {/* Owner */}
                         {place.owner && (
-                          <div className="flex items-center justify-between  gap-3">
-                            <div className="flex items-center gap-3">
-                              <Building className="h-5 w-5 text-gray-400" />
-                              <div>
-                                <p className="text-sm font-medium text-gray-700">
-                                  المالك
-                                </p>
-                                <p className="text-gray-600">{place.owner}</p>
+                          <>
+                            <div className="flex items-center justify-between  gap-3">
+                              <div className="flex items-center gap-3">
+                                <Building className="h-5 w-5 text-gray-400" />
+                                <div>
+                                  <p className="text-sm font-medium text-gray-700">
+                                    المالك
+                                  </p>
+                                  <p className="text-gray-600">{place.owner}</p>
+                                </div>
+                              </div>
+                              <div className=" flex gap-2 ms-6 mt-5">
+                                <Phone className="h-5 w-4 text-gray-400" />
+                                <a
+                                  href={`tel:${place.ownerPhone}`}
+                                  className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                                >
+                                  {place.ownerPhone}
+                                </a>
                               </div>
                             </div>
-                            <div className=" flex gap-2 ms-6 mt-5">
-                              <Phone className="h-5 w-4 text-gray-400" />
-                              <a
-                                href={`tel:${place.ownerPhone}`}
-                                className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                              >
-                                {place.ownerPhone}
-                              </a>
+                            <div className="flex items-center gap-3">
+                              {place.idCard && (
+                                <a
+                                target="_black"
+                                  href={`${place.idCard}`}
+                                  className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                                >
+                                  البطاقة الشخصية للمالك
+                                </a>
+                              )}
                             </div>
-                          </div>
+                          </>
                         )}
                       </CardContent>
 
@@ -379,7 +437,7 @@ export const TrainningPlacesList = () => {
         cancelText="إلغاء"
         onConfirm={confirmDelete}
         variant="destructive"
-        isLoading={isDeleting}
+        
       />
 
       <TrainningPlaceModel

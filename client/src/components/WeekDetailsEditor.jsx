@@ -42,13 +42,13 @@ export const WeekDetailsEditor = ({ studentId, weekStart, onClose ,open}) => {
 
   if (isLoading) return <div>جاري التحميل...</div>;
   if (error) return <div>خطأ: {error.message}</div>;
-  if (!weekData) return <div>لا توجد بيانات لهذا الأسبوع</div>;
+  // if (!weekData) return <div>لا توجد بيانات لهذا الأسبوع</div>;
 
   return (
         <Dialog open={open} onOpenChange={onClose}  dir="rtl">
    <DialogContent className="p-4 border rounded-lg">
       <DialogTitle className="text-lg font-bold mb-4">
-        تعديل الغياب للأسبوع: {weekData.week_start_date} إلى {weekData.week_end_date}
+        تعديل الغياب للأسبوع: {weekData?.week_start_date} إلى {weekData?.week_end_date}
       </DialogTitle>
       <DialogDescription className="overflow-x-auto">
         <table className="min-w-full border-collapse">
@@ -82,7 +82,7 @@ export const WeekDetailsEditor = ({ studentId, weekStart, onClose ,open}) => {
         </table>
       </DialogDescription>
       <DialogFooter className="flex justify-end gap-2 mt-4">
-        <Button variant="outline" onClick={onClose}>إلغاء</Button>
+        <Button className="bg-secondary" onClick={onClose}>إلغاء</Button>
         <Button onClick={handleSave} disabled={updateMutation.isLoading}>
           {updateMutation.isLoading ? 'جاري الحفظ...' : 'حفظ التعديلات'}
         </Button>

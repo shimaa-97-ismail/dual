@@ -52,14 +52,14 @@ const getSaturdayOfWeek = (date) => {
 
   return (
     <>
-      <div className="mb-6 text-center">
+      {/* <div className="mb-6 text-center">
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
           تسجيل الحضور الأسبوعي
         </h2>
         <p className="text-gray-600">
           اختر الأسبوع ثم سجل حضور كل يوم من السبت إلى الجمعة
         </p>
-      </div>
+      </div> */}
 
       <Table>
         <TableHeader>
