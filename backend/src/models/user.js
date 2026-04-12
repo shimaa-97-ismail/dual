@@ -20,8 +20,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["admin", "supervisor", "user"],
-      default: "user",
+      enum: ["admin", "supervisor", "manager"],
+      default: "supervisor",
     },
     passwordChangedAt: { type: Date },
   },

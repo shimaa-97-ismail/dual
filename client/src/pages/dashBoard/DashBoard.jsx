@@ -22,7 +22,7 @@ import {
 import { useSchools } from "@/hooks/useSchools";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useSpecials } from "@/hooks/useSpecial";
-import { useStudents } from "@/hooks/useStudent";
+import { useStudents,useGetPercentAbsence } from "@/hooks/useStudent";
 import { useTrainningPlaces } from "@/hooks/useTrainngPlace";
 import { useStudentsBySchool } from "@/hooks/useStudentsBySchool";
 import { useRecentActivities } from "@/hooks/useRecentActivities";
@@ -56,14 +56,16 @@ const handleSearchSubmit = async (formData) => {
   const { data: specials, isLoading: specialsLoading } = useSpecials();
   const { data: students, isLoading: studentsLoading } = useStudents();
   const { data: trainingPlaces, isLoading: trainingLoading } = useTrainningPlaces();
+  const { data: percentAbsence, isLoading: percentAbsenceLoading } = useGetPercentAbsence();
+console.log(percentAbsence);
 
   // Additional data
   const { data: studentsBySchool, isLoading: chartLoading } = useStudentsBySchool(selectedSchool);
   const { data: recentActivities, isLoading: activitiesLoading } = useRecentActivities();
-  const { data: attendanceStats, isLoading: attendanceLoading } = useAttendanceStats();
+  
 
   const isLoadingMetrics =
-    schoolsLoading || deptsLoading || specialsLoading || studentsLoading || trainingLoading;
+    schoolsLoading || deptsLoading || specialsLoading || studentsLoading || trainingLoading ||percentAbsenceLoading || chartLoading || activitiesLoading ;
 
   
 
@@ -71,18 +73,19 @@ const handleSearchSubmit = async (formData) => {
     <>
     <div className="p-4 md:p-6 space-y-6">
       {/* First Row of Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <MetricCard title="الإدارات" value={departments?.length || 0} color="green" />
-        <MetricCard title="إجمالي المدارس" value={schools?.length || 0} color="blue" />
+        <MetricCard title="إجمالي المدارس" value={schools?.count || 0} color="blue" />
         <MetricCard title="التخصصات المتاحة" value={specials?.length || 0} color="purple" />
-        <MetricCard title="إجمالي الطلاب" value={students?.count || 0} color="orange" />
       </div>
 
       {/* Second Row of Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <MetricCard title="إجمالي الطلاب" value={students?.count || 0} color="orange" />
+
         <MetricCard
-          title="نسبة الغياب"
-          value={attendanceStats?.absenceRate?.toFixed(1) + "%" || "0%"}
+          title={`  نسبة الغياب  ${percentAbsence?.[0]?.academicYear}`}
+          value={percentAbsence?.[0]?.absencePercentage + "%" || "0%"}
           color="pink"
         />
         <MetricCard
@@ -90,8 +93,7 @@ const handleSearchSubmit = async (formData) => {
           value={trainingPlaces?.length || 0}
           color="teal"
         />
-        <MetricCard title="الشركات المتعاونة" value={0} color="yellow" />
-        <MetricCard title="المشرفين" value={0} color="indigo" />
+
       </div>
 
       {/* Quick Actions */}
@@ -126,7 +128,7 @@ const handleSearchSubmit = async (formData) => {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">جميع المدارس</SelectItem>
-              {schools?.map((school) => (
+              {schools?.schools?.map((school) => (
                 <SelectItem key={school.id} value={school.id}>
                   {school.name}
                 </SelectItem>

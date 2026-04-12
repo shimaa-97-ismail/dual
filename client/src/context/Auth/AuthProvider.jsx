@@ -9,6 +9,14 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const hasRole = (requiredRole) => {
+  return user?.role === requiredRole;
+};
+
+const hasAnyRole = (roles) => {
+  return roles.includes(user?.role);
+};
+
   const login = async (data) => {
     // console.log("data",data);
     
@@ -59,6 +67,7 @@ export function AuthProvider({ children }) {
         loading,
         login,
         logout,
+         hasRole, hasAnyRole 
       }}
     >
       {children}

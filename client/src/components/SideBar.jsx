@@ -10,6 +10,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, useMatch, useResolvedPath } from "react-router-dom";
+
 const IsActive = (path) => {
   const resolved = useResolvedPath(path);
   const match = useMatch({ path: resolved.pathname, end: true });
@@ -25,6 +26,8 @@ export function AppSidebar() {
     { label: "المنشأت التدربيه", path: "/trainning-place" },
     // { label: " الطلاب", path: "/student" },
      { label: " التقارير", path: "/reports" },
+     { label: " المستخدمين", path: "/users" },
+
   ];
 
   return (

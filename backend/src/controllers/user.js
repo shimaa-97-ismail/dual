@@ -17,7 +17,7 @@ const generateToken = (user) => {
 
 export const getUser = async (req, res) => {
   try {
-    const users = await userModel.find();
+    const users = await userModel.find().select('-password');
     res.status(200).json({ success: true, data: users });
   } catch (error) {
     res.status(404).json({ success: false, message: error.message });
@@ -26,22 +26,31 @@ export const getUser = async (req, res) => {
 
 export const createUser = async (req, res) => {
   const { username, password, role, email } = req.body;
-  const newUser = new userModel({ username, password, role, email });
+   const assignedRole = req.user.role === 'admin' ? role : 'supervisor';
+  const newUser = new userModel({ username, password, role:assignedRole, email });
   try {
     await newUser.save();
-    res.status(201).json({ success: true, data: newUser });
+    const { password: _, ...userWithoutPassword } = newUser.toObject();
+    res.status(201).json({ success: true, data: userWithoutPassword });
   } catch (error) {
     res.status(409).json({ success: false, message: error.message });
   }
 };
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const user = req.body;
+  const  { username, email, role }  = req.body;
   try {
-    const updatedUser = await userModel.findByIdAndUpdate(id, user, {
-      new: true,
-    });
-    res.status(200).json({ success: true, data: updatedUser });
+      const user = await userModel.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+    }
+      if (username) user.username = username;
+    if (email) user.email = email;
+     if (role && req.user.role === 'admin') user.role = role;
+   
+    const updatedUser = await user.save();
+    const { password: _, ...userWithoutPassword } = updatedUser.toObject();
+    res.status(200).json({ success: true, data: userWithoutPassword });
   } catch (error) {
     res.status(409).json({ success: false, message: error.message });
   }
@@ -50,7 +59,10 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
-    await userModel.findByIdAndRemove(id);
+     const deletedUser = await userModel.findByIdAndDelete(id);
+    if (!deletedUser) {
+      return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+    }
     res.status(200).json({ success: true, data: id });
   } catch (error) {
     res.status(409).json({ success: false, message: error.message });

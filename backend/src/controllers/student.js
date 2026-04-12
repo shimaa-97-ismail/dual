@@ -413,6 +413,95 @@ export const deleteWeekAttendance = async (req, res) => {
   }
 };
 
+
+//percent 
+// 
+  export const absence_Percentage= async (req, res) => {
+  try {
+    const pipeline = [
+      // Unwind to individual days
+      { $unwind: "$weekly_attendance" },
+      { $unwind: "$weekly_attendance.days" },
+
+      // Ensure date is Date type
+      {
+        $addFields: {
+          dayDate: { $toDate: "$weekly_attendance.days.date" },
+          dayStatus: "$weekly_attendance.days.status"
+        }
+      },
+
+      // Extract year and month
+      {
+        $addFields: {
+          year: { $year: "$dayDate" },
+          month: { $month: "$dayDate" }
+        }
+      },
+
+      // Determine academic start year
+      {
+        $addFields: {
+          academicStartYear: {
+            $cond: [
+              { $gte: ["$month", 9] },  // Sep–Dec
+              "$year",
+              { $subtract: ["$year", 1] }
+            ]
+          }
+        }
+      },
+
+      // Group by academic year ONLY (all students combined)
+      {
+        $group: {
+          _id: "$academicStartYear",
+          totalDays: { $sum: 1 },
+          absentDays: {
+            $sum: { $cond: [{ $eq: ["$dayStatus", "غائب"] }, 1, 0] }
+          }
+        }
+      },
+
+      // Calculate percentage
+      {
+        $project: {
+          academicYear: {
+            $concat: [
+              { $toString: "$_id" },
+              "-",
+              { $toString: { $add: ["$_id", 1] } }
+            ]
+          },
+          totalDays: 1,
+          absentDays: 1,
+          absencePercentage: {
+            $round: [
+              {
+                $multiply: [
+                  { $divide: ["$absentDays", { $max: ["$totalDays", 1] }] },
+                  100
+                ]
+              },
+              2
+            ]
+          }
+        }
+      },
+
+      { $sort: { academicYear: 1 } }
+    ];
+
+    const results = await studentModel.aggregate(pipeline);
+    res.json(results);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+  }
+
+
 ////
 // controllers/studentController.js
 export const updateStudent = async (req, res) => {

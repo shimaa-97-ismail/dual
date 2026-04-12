@@ -14,8 +14,8 @@ export const getSchools = async (req, res) => {
       .populate("type", "name")
       .populate("intakes", "name");
     console.log(schools);
-
-    res.status(200).json(schools);
+const count = await schoolModel.countDocuments();
+    res.status(200).json({schools,count});
   } catch (error) {
     console.log(error.message);
 

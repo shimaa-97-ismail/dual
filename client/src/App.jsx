@@ -22,7 +22,8 @@ import {
   ResetPassword,
   SearchDetails,
   ExpensesOfStudent,
-  Class
+  Class,
+  Users
 } from "../src/pages";
 import { StudentAttendanceList } from "@/components/table/StudentAttendanceList";
 import { SetAbsencesTable } from "@/components/table/SetAbsencesTable";
@@ -104,7 +105,7 @@ function App() {
 
 
             <Route path="/search" element={<SearchDetails />} />
-            {/* <Route path="/reset-password" element={<ResetPassword />} /> */}
+           <Route path="/users" element={<Users/>}/>
           </Route>
         </Route>
       </Routes>

@@ -22,7 +22,8 @@ import {
   getWeekAttendance,
   updateWeekAttendance,
   deleteWeekAttendance,
-  updateStudent
+  updateStudent,
+  absence_Percentage
 } from "../controllers/student.js";
 
 const router = express.Router();
@@ -60,6 +61,7 @@ router.delete("/:studentId/enrollments/:enrollmentId/payments/:paymentId", delet
 router.get("/:studentId/enrollments/:enrollmentId/payments/:paymentId", getPaymentById);
 
 // ---------- Generic CRUD (parameter :id) ----------
+router.get('/overall-absence-percentage',absence_Percentage)
 router.get("/:id", getStudentById);     // must be LAST for GET with single param
 router.post("/", createStudent);
 router.get("/", getAllStudents);

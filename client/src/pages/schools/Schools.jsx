@@ -4,6 +4,7 @@ import { SchoolModel } from "../../components/model/School-model";
 import { useCreateSchool, useSchools } from "../../hooks/useSchools";
 import LoadingSpinner from "../../components/common/LoadingSpinner";
 import EmptyState from "../../components/common/EmptyState";
+import { ErrorState } from "../../components";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 export default function SchoolPage() {
@@ -130,14 +131,14 @@ export default function SchoolPage() {
   }
 
   // عرض حالة الخطأ
-  // if (errors.fetchSchools && !schools.length) {
-  //   return (
-  //     <ErrorState
-  //       error={errors.fetchSchools}
-  //       onRetry={handleRefresh}
-  //     />
-  //   );
-  // }
+  if (isError) {
+    return (
+      <ErrorState
+        title="خطأ في جلب البيانات"
+        message="حدث خطأ أثناء جلب بيانات المدارس."
+      />
+    );
+  }
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -236,15 +237,18 @@ export default function SchoolPage() {
             }
           >
             {data &&
-              data.map((school) => (
-                console.log(school),
-                
-                <SchoolCard
-                  key={school._id}
-                  data={school}
-                  onSpecialClick={handleSpecialClick}
-                />
-              ))}
+              data.schools.map(
+                (school) => (
+                  console.log(school),
+                  (
+                    <SchoolCard
+                      key={school._id}
+                      data={school}
+                      onSpecialClick={handleSpecialClick}
+                    />
+                  )
+                ),
+              )}
           </div>
 
           {/* الترقيم */}

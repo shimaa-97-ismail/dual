@@ -2,7 +2,6 @@ import React from "react";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -39,22 +38,7 @@ export function DisplayWeeklyAbsenr({
   const renderDayStatus = (day) => {
     if (!day || !day.status) return "";
 
-    const statusColors = {
-      حاضر: "text-green-600",
-      غائب: "text-red-600",
-      اجازه: "text-blue-600",
-      مدرسه: "text-purple-600",
-    };
-
-    const statusIcons = {
-      حاضر: "✓",
-      غائب: "✗",
-      اجازه: "ⓘ",
-      مدرسه: "🏫",
-    };
-
     const colorClass = "text-gray-600";
-    const icon = statusIcons[day.status] || "";
 
     return (
       <div className="flex flex-col items-center">
@@ -157,16 +141,12 @@ export function DisplayWeeklyAbsenr({
                   minHeight: "150px", // Ensure enough space for the rotated text
                   writingMode: "vertical-rl",
                   textOrientation: "mixed", // Keep Arabic letters upright
-                 
                 }}
               >
                 حضور التدريب
               </div>
             </TableHead>
-            <TableHead
-              className="text-center p-0 text-gray-600"
-              
-            >
+            <TableHead className="text-center p-0 text-gray-600">
               <div
                 className="flex items-center justify-center text-base"
                 style={{
@@ -174,17 +154,12 @@ export function DisplayWeeklyAbsenr({
                   minHeight: "150px", // Ensure enough space for the rotated text
                   writingMode: "vertical-rl",
                   textOrientation: "mixed", // Keep Arabic letters upright
-                
-                  
                 }}
               >
                 غياب التدريب
               </div>
             </TableHead>
-            <TableHead
-              className="text-center p-0 text-gray-600"
-     
-            >
+            <TableHead className="text-center p-0 text-gray-600">
               <div
                 className="flex items-center justify-center text-base"
                 style={{
@@ -192,8 +167,6 @@ export function DisplayWeeklyAbsenr({
                   minHeight: "150px", // Ensure enough space for the rotated text
                   writingMode: "vertical-rl",
                   textOrientation: "mixed", // Keep Arabic letters upright
-               
-              
                 }}
               >
                 الدراسه بالمدرسه
@@ -207,8 +180,6 @@ export function DisplayWeeklyAbsenr({
                   minHeight: "150px", // Ensure enough space for the rotated text
                   writingMode: "vertical-rl",
                   textOrientation: "mixed", // Keep Arabic letters upright
-                  
-                 
                 }}
               >
                 عطلات رسميه
@@ -230,13 +201,16 @@ export function DisplayWeeklyAbsenr({
                 <TableCell className="text-center p-2 font-medium">
                   <div className="text-right">{student.stdName}</div>
                 </TableCell>
-                {student.days && student.days.length > 0 && student.days.map((day, dayIndex) => (
-                  <TableCell
-                    key={day._id || dayIndex}
-                    className="text-center p-2">{day.status}</TableCell>
-                ))
-                  
-                }
+                {student.days &&
+                  student.days.length > 0 &&
+                  student.days.map((day, dayIndex) => (
+                    <TableCell
+                      key={day._id || dayIndex}
+                      className="text-center p-2"
+                    >
+                      {day.status}
+                    </TableCell>
+                  ))}
 
                 {/* عرض الأيام السبعة */}
                 {/* {Array.isArray(student.days) && student.days.length > 0
@@ -301,7 +275,7 @@ export function DisplayWeeklyAbsenr({
                 {attendance_summary.total_present_days ||
                   attendance_summary.present_students ||
                   0}
-                  {}
+                {}
               </TableCell>
               <TableCell className="text-center p-2 bg-red-100">
                 {attendance_summary.total_absent_days ||

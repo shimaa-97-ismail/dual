@@ -15,7 +15,8 @@ export const studentApi = {
     axioInstance.put(`/student/${studentId}/attendance/${weekStart}`, { days }),
   deleteWeekAttendance: (studentId, weekStart) =>
     axioInstance.delete(`/student/${studentId}/attendance/${weekStart}`),
-  // update: (studentId, data) => axioInstance.patch(`student/${studentId}`, data),
+  getPercentAbcence: () =>
+    axioInstance.get("student/overall-absence-percentage"),
   delete: (id) => axioInstance.delete(`student/${id}`),
   getBySchool: (id) => axioInstance.get(`student/by-school/${id}`),
   getByTrainningPlace: (id) =>
@@ -83,7 +84,7 @@ export const useUpdateStudent = () => {
   return useMutation({
     mutationFn: async ({ studentId, data }) => {
       console.log(data);
-      
+
       const response = await axioInstance.patch(`/student/${studentId}`, data);
       return response.data;
     },
@@ -240,6 +241,20 @@ export const useDeleteWeekAttendance = () => {
   });
 };
 
+
+export const useGetPercentAbsence = () => {
+  return useQuery({
+    queryKey: ["overallAbsence"],
+    queryFn: async () => {
+      const response = await studentApi.getPercentAbcence();
+      console.log(response);
+      
+      // Axios puts the actual data in response.data
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+};
 ////
 
 export const useStudentById = (id) => {

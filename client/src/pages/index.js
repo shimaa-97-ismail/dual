@@ -21,6 +21,7 @@ import { ResetPassword } from "./resetPassword/ResetPassword.jsx";
 import { SearchDetails } from "./searchDetails/SearchDetails.jsx";
 import {ExpensesOfStudent} from "./expensesOfStudent/ExpensesOfStudent.jsx";
 import { Class } from "./schools/Class.jsx";
+import { Users } from "./users/Users.jsx";
 export {
   Login,
   Home,
@@ -44,5 +45,6 @@ export {
   ResetPassword,
   SearchDetails,
   ExpensesOfStudent,
-  Class
+  Class,
+  Users
 };
