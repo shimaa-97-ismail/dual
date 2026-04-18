@@ -11,17 +11,17 @@ import {
 import { JobField } from "../jobField/JobField";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useParams } from "react-router-dom";
 import { useSchoolById, useSchools } from "@/hooks/useSchools";
 import { useTrainningPlaces } from "@/hooks/useTrainngPlace";
 import { Button } from "@/components/ui/button";
 
-export const StudentForm = ({ value, onChange, mode, errors = {},onSubmit }) => {
+export const StudentForm = ({ value, onChange, errors = {},onSubmit }) => {
   console.log(value);
-  const { schoolId } = useParams();
+
   const { data: allSchool } = useSchools();
   const { data: school, isLoading, isError, error, refetch } = useSchoolById(value?.school );
   const { data: trainningPlaces } = useTrainningPlaces();
+console.log(school);
 
   const DEFAULT_PHONES = [
     { number: "", type: "primary" },
@@ -70,19 +70,22 @@ export const StudentForm = ({ value, onChange, mode, errors = {},onSubmit }) => 
     onChange(`${parent}JobDetails`, details);
   };
 
-  const handleFileChange = (parent, file) => {
-    onChange(`${parent}DeathCert`, file);
-  };
+ 
 
+  const handleFileChange = (field, file) => {
+    console.log(field);
+    
+  onChange(field, file);
+};
   const changeSchool = (selectedId) => {
     onChange("school", selectedId);
     onChange("stdSpecial", "");
+    onchange("intake","")
   };
   const handleSubmit=()=>{
 onSubmit(value)
   }
 
-  const handleCancel=()=>{}
   if (isLoading) return <div>بيانات المدارس بتتحمل...</div>;
   if (isError)
     return (
@@ -119,7 +122,7 @@ onSubmit(value)
             className={errors?.studID ? 'border-red-500' : ''}
             required
           />
-          {errors?.studID && <p className="text-red-500 text-sm mt-1">{errors.studID}</p>}
+          {errors?.studID && <p className="text-red-500 text-sm mt-1">{errors?.studID}</p>}
         </div>
         <div className="flex w-full justify-between items-center flex-wrap lg:flex-nowrap">
           <div className="space-y-2 w-1/2 m-3">
@@ -191,6 +194,19 @@ onSubmit(value)
           />
           {errors?.stdAddress && <p className="text-red-500 text-sm mt-1">{errors.stdAddress}</p>}
         </div>
+<div className="space-y-2 m-2 w-1/2">
+  <LabelForm htmlFor="studentImage" title="صورة الطالب" />
+  <Input
+    id="studentImage"
+    type="file"
+    accept="image/*"
+    onChange={(e) => onChange("studentImage", e.target.files[0])}
+  />
+  {value?.studentImage && typeof value.studentImage === 'string' && (
+    <img src={`http://localhost:5000/${value.studentImage}`} alt="Student" className="w-24 h-24 object-cover mt-2" />
+  )}
+</div>
+
       </section>
 
       {/* Father Info */}
@@ -223,7 +239,23 @@ onSubmit(value)
           </div>
         </div>
         <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
+        
           <div className="space-y-2 w-1/2 m-3">
+            <LabelForm htmlFor="fatherJobTitle" title="وظيفه الاب" required />
+            <JobField
+              label="بيانات الأب"
+              jobValue={value?.fatherJobTitle}
+              onJobChange={(val) => handleJobSelect("father", val)}
+              detailsValue={value?.fatherJobDetails}
+              onDetailsChange={(val) => handleJobDetailsChange("father", val)}
+              onFileChange={(file) => handleFileChange("fatherDeathCert", file)}
+              fileValue={value?.fatherDeathCert} 
+              errors={errors?.fatherJobTitle || errors?.fatherJobDetails}
+            />
+            {errors?.fatherJobTitle && <p className="text-red-500 text-sm mt-1">{errors.fatherJobTitle}</p>}
+            {errors?.fatherJobDetails && <p className="text-red-500 text-sm mt-1">{errors.fatherJobDetails}</p>}
+          </div>
+            <div className="space-y-2 w-1/2 m-3">
             <LabelForm htmlFor="fatherPhone" title="رقم التليفون" required />
             <Input
               id="fatherPhone"
@@ -234,20 +266,6 @@ onSubmit(value)
               required
             />
             {errors?.fatherPhone && <p className="text-red-500 text-sm mt-1">{errors.fatherPhone}</p>}
-          </div>
-          <div className="space-y-2 w-1/2 m-3">
-            <LabelForm htmlFor="fatherJobTitle" title="وظيفه الاب" required />
-            <JobField
-              label="بيانات الأب"
-              jobValue={value?.fatherJobTitle}
-              onJobChange={(val) => handleJobSelect("father", val)}
-              detailsValue={value?.fatherJobDetails}
-              onDetailsChange={(val) => handleJobDetailsChange("father", val)}
-              onFileChange={(file) => handleFileChange("fatherDeathCert", file)}
-              errors={errors?.fatherJobTitle || errors?.fatherJobDetails}
-            />
-            {errors?.fatherJobTitle && <p className="text-red-500 text-sm mt-1">{errors.fatherJobTitle}</p>}
-            {errors?.fatherJobDetails && <p className="text-red-500 text-sm mt-1">{errors.fatherJobDetails}</p>}
           </div>
         </div>
       </section>
@@ -282,15 +300,7 @@ onSubmit(value)
           </div>
         </div>
         <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 w-1/2 m-3">
-            <LabelForm htmlFor="motherPhone" title="رقم التليفون" />
-            <Input
-              id="motherPhone"
-              value={value?.motherPhone || ""}
-              onChange={(e) => onChange("motherPhone", e.target.value)}
-              placeholder="أدخل رقم التليفون"
-            />
-          </div>
+         
           <div className="space-y-2 w-1/2 m-3">
             <LabelForm htmlFor="motherJobTitle" title="وظيفه الام" required />
             <JobField
@@ -300,10 +310,20 @@ onSubmit(value)
               detailsValue={value?.motherJobDetails}
               onDetailsChange={(val) => handleJobDetailsChange("mother", val)}
               onFileChange={(file) => handleFileChange("motherDeathCert", file)}
+              fileValue={value?.motherDeathCert}
               errors={errors?.motherJobTitle || errors?.motherJobDetails}
             />
             {errors?.motherJobTitle && <p className="text-red-500 text-sm mt-1">{errors.motherJobTitle}</p>}
             {errors?.motherJobDetails && <p className="text-red-500 text-sm mt-1">{errors.motherJobDetails}</p>}
+          </div>
+           <div className="space-y-2 w-1/2 m-3">
+            <LabelForm htmlFor="motherPhone" title="رقم التليفون" />
+            <Input
+              id="motherPhone"
+              value={value?.motherPhone || ""}
+              onChange={(e) => onChange("motherPhone", e.target.value)}
+              placeholder="أدخل رقم التليفون"
+            />
           </div>
         </div>
       </section>
@@ -374,7 +394,7 @@ onSubmit(value)
                 <SelectValue placeholder="اختر المدرسه" />
               </SelectTrigger>
               <SelectContent>
-                {allSchool?.map((sh) => (
+                {allSchool?.schoolsWithCount?.map((sh) => (
                   <SelectItem key={sh._id} value={sh._id}>{sh.name}</SelectItem>
                 ))}
               </SelectContent>
@@ -453,12 +473,21 @@ onSubmit(value)
           </div>
           <div className="space-y-2 w-1/2 m-3">
             <LabelForm htmlFor="intake" title="الدفعه" />
-            <Input
-              id="intake"
+             <Select
               value={value?.intake || ""}
-              onChange={(e) => onChange("intake", e.target.value)}
-              placeholder="2025/2026"
-            />
+              onValueChange={(val) => onChange("intake", val)}
+              disabled={!value?.school}
+            >
+              <SelectTrigger className={errors?.intake ? 'text-black! border-red-500' : 'text-black!'}>
+                <SelectValue placeholder="اختر الدفعه" />
+              </SelectTrigger>
+              <SelectContent>
+                {school?.intakes?.map((int) => (
+                  <SelectItem key={int} value={int}>{int}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          
           </div>
           <div className="space-y-2 w-1/2 m-3">
             <LabelForm htmlFor="graduationYear" title="سنة التخرج" />

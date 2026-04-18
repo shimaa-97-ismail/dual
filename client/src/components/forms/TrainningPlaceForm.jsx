@@ -83,7 +83,7 @@ export const TrainningPlaceForm = ({ onSubmit, initialData, loading }) => {
         {/* Place Name */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700">
-            اسم المكان <span className="text-red-500">*</span>
+            اسم المنشأه التدريبيه <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -92,7 +92,7 @@ export const TrainningPlaceForm = ({ onSubmit, initialData, loading }) => {
             onChange={handleChange}
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            placeholder="أدخل اسم المكان"
+            placeholder="أدخل اسم المنشأه التدريبيه"
           />
           {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
         </div>
@@ -303,9 +303,9 @@ export const TrainningPlaceForm = ({ onSubmit, initialData, loading }) => {
               جاري الحفظ...
             </span>
           ) : initialData ? (
-            "تحديث المكان"
+            "تحديث المنشأه التدريبيه"
           ) : (
-            "إضافة المكان"
+            "إضافة المنشأه التدريبيه"
           )}
         </button>
       </div>

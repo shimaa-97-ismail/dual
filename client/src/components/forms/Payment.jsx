@@ -37,7 +37,7 @@ const handleReceiptChange = (field) => (e) => {
   return (
     <>
       <div className="grid gap-4">
-        <div className="grid grid-cols-5 items-center mb-3">
+        <div className="grid grid-cols-3 items-center mb-3">
           <LabelForm
             htmlFor="academicYearForPayment"
             className="text-right"
@@ -48,7 +48,7 @@ const handleReceiptChange = (field) => (e) => {
             value={data?.academicyearForPayment || ""}
             onChange={(e) => onChange("academicyearForPayment", e.target.value)}
             required
-            className="border p-2 rounded col-span-4 w-70"
+            className="border p-2 rounded col-span-2 w-70"
           >
             <option value="" disabled>
               اختر السنة
@@ -63,30 +63,10 @@ const handleReceiptChange = (field) => (e) => {
         )}
       </div>
 
-      <div className="grid gap-4">
-        <div className="grid grid-cols-5 items-center mb-3">
-          <LabelForm
-            htmlFor="year"
-            className="text-right"
-            required={true}
-            title={"السنة"}
-          />
-          <Input
-            id="year"
-            value={data?.year || ""}
-            name="year"
-           type="text"
-             onChange={handleYearChange}
-            className="col-span-3"
-            required
-               placeholder="مثال: 2024"
-          />
-        </div>
-        {errors.year && <p className="text-sm text-red-600">{errors.year}</p>}
-      </div>
+     
 
       <div className="grid gap-4">
-        <div className="grid grid-cols-5 items-center w-full mb-3">
+        <div className="grid grid-cols-3 items-center w-full mb-3">
           <LabelForm
             htmlFor="month"
             title={"شهر"}
@@ -97,7 +77,7 @@ const handleReceiptChange = (field) => (e) => {
             value={data?.month || ""}
             onChange={(e) => onChange("month", e.target.value)}
             required
-            className="border p-2 rounded col-span-4 w-70"
+            className="border p-2 rounded col-span-2 w-70"
           >
             <option value="" disabled>
               اختر الشهر
@@ -111,51 +91,49 @@ const handleReceiptChange = (field) => (e) => {
         </div>
         {errors.month && <p className="text-sm text-red-600">{errors.month}</p>}
       </div>
-
-      <div className="grid gap-4">
-        <div className="grid grid-cols-5 items-center mb-3">
+ <div className="grid gap-4">
+        <div className="grid grid-cols-3 items-center mb-3">
           <LabelForm
-            htmlFor="amountDue"
+            htmlFor="year"
             className="text-right"
-            title={"القيمه"}
+            required={true}
+            title={"السنة"}
+          />
+          <Input
+            id="year"
+            value={data?.year || ""}
+            name="year"
+           type="text"
+             onChange={handleYearChange}
+            className="col-span-2"
+            required
+               placeholder="مثال: 2024"
+          />
+        </div>
+        {errors.year && <p className="text-sm text-red-600">{errors.year}</p>}
+      </div>
+      <div className="grid gap-4">
+        <div className="grid grid-cols-3 items-center mb-3">
+          <LabelForm
+            htmlFor="amountDueReceipt1"
+            className="text-right"
+            title={"قيمه الايصال الاول"}
             required={true}
           />
           <Input
-            id="amountDue"
-            value={data?.amountDue || ""}
-            name="amountDue"
+            id="amountDueReceipt1"
+            value={data?.amountDueReceipt1 || ""}
+            name="amountDueReceipt1"
             type="number"
-            onChange={(e) => onChange("amountDue", e.target.value)}
-            className="col-span-3"
+            onChange={(e) => onChange("amountDueReceipt1", e.target.value)}
+            className="col-span-2"
             required
           />
         </div>
-        {errors.amountDue && <p className="text-sm text-red-600">{errors.amountDue}</p>}
+        {errors.amountDueReceipt1 && <p className="text-sm text-red-600">{errors.amountDueReceipt1}</p>}
       </div>
-
-      <div className="grid gap-4">
-        <div className="grid grid-cols-5 items-center mb-3">
-          <LabelForm
-            htmlFor="paymentDate"
-            required={true}
-            title={"التاريخ"}
-            className="text-right"
-          />
-          <Input
-            id="paymentDate"
-            value={data?.paymentDate || ""}
-            name="paymentDate"
-            type="date"
-            onChange={(e) => onChange("paymentDate", e.target.value)}
-            className="col-span-3"
-            required
-          />
-        </div>
-        {errors.paymentDate && <p className="text-sm text-red-600">{errors.paymentDate}</p>}
-      </div>
-
-      <div className="grid gap-4">
-        <div className="grid grid-cols-5 items-center mb-3">
+         <div className="grid gap-4">
+        <div className="grid grid-cols-3 items-center mb-3">
           <LabelForm
             htmlFor="receipt1"
             title={"رقم الايصال 1"}
@@ -168,7 +146,7 @@ const handleReceiptChange = (field) => (e) => {
             name="receipt1"
             type="text"
             onChange={handleReceiptChange("receipt1")}
-            className="col-span-3"
+            className="col-span-2"
             required
           />
         </div>
@@ -176,7 +154,27 @@ const handleReceiptChange = (field) => (e) => {
       </div>
 
       <div className="grid gap-4">
-        <div className="grid grid-cols-5 items-center">
+        <div className="grid grid-cols-3 items-center mb-3">
+          <LabelForm
+            htmlFor="amountDueReceipt2"
+            className="text-right"
+            title={"قيمه الايصال الثانى"}
+            required={true}
+          />
+          <Input
+            id="amountDueReceipt2"
+            value={data?.amountDueReceipt2 || ""}
+            name="amountDueReceipt2"
+            type="number"
+            onChange={(e) => onChange("amountDueReceipt2", e.target.value)}
+            className="col-span-2"
+            required
+          />
+        </div>
+        {errors.amountDueReceipt2 && <p className="text-sm text-red-600">{errors.amountDueReceipt2}</p>}
+      </div>
+       <div className="grid gap-4">
+        <div className="grid grid-cols-3 items-center">
           <LabelForm
             htmlFor="receipt2"
             title={"رقم الايصال 2"}
@@ -189,12 +187,37 @@ const handleReceiptChange = (field) => (e) => {
             name="receipt2"
             type="text"
              onChange={handleReceiptChange("receipt2")}
-            className="col-span-3"
+            className="col-span-2"
             required
           />
         </div>
         {errors.receipt2 && <p className="text-sm text-red-600">{errors.receipt2}</p>}
       </div>
+
+      <div className="grid gap-4 mt-3">
+        <div className="grid grid-cols-3 items-center mb-3">
+          <LabelForm
+            htmlFor="paymentDate"
+            required={true}
+            title={"التاريخ"}
+            className="text-right"
+          />
+          <Input
+            id="paymentDate"
+            value={data?.paymentDate || ""}
+            name="paymentDate"
+            type="date"
+            onChange={(e) => onChange("paymentDate", e.target.value)}
+            className="col-span-2"
+            required
+          />
+        </div>
+        {errors.paymentDate && <p className="text-sm text-red-600">{errors.paymentDate}</p>}
+      </div>
+
+    
+
+     
     </>
   );
 }

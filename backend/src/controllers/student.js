@@ -1,6 +1,7 @@
 import { studentModel } from "../models/student.js";
 import { enrollmentModel } from "../models/payment.js";
-
+import fs from "fs";
+import path from "path";
 const stageMonths = {
   "الصف الأول": ["فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس"],
   "الصف الثاني": [
@@ -27,31 +28,60 @@ const stageMonths = {
 
 export const createStudent = async (req, res) => {
   try {
-    console.log("create student");
+    console.log("create student body:", req.body);
+    console.log("req.files:", req.files); // array of all uploaded files
 
+   
+    // Extract files by field name
+    let studentImageUrl, fatherDeathCertUrl, motherDeathCertUrl;
+    if (req.files && req.files.length) {
+      const studentImageFile = req.files.find(
+        (f) => f.fieldname === "studentImage",
+      );
+      const fatherCertFile = req.files.find(
+        (f) => f.fieldname === "fatherDeathCert",
+      );
+      const motherCertFile = req.files.find(
+        (f) => f.fieldname === "motherDeathCert",
+      );
+
+      if (studentImageFile)
+        studentImageUrl = `http://localhost:5000/${studentImageFile.path.replace(/\\/g, "/")}`;
+      if (fatherCertFile)
+        fatherDeathCertUrl = `http://localhost:5000/${fatherCertFile.path.replace(/\\/g, "/")}`;
+      if (motherCertFile)
+        motherDeathCertUrl = `http://localhost:5000/${motherCertFile.path.replace(/\\/g, "/")}`;
+    }
+    // Merge file paths into body
+    const studentData = { ...req.body };
+    if (studentImageUrl) studentData.studentImage = studentImageUrl;
+    if (fatherDeathCertUrl) studentData.fatherDeathCert = fatherDeathCertUrl;
+    if (motherDeathCertUrl) studentData.motherDeathCert = motherDeathCertUrl;
+  
+    // Check duplicate studID
     const existingStudent = await studentModel.findOne({
-      $or: [{ studID: req.body.studID }],
+      studID: studentData.studID,
     });
     if (existingStudent) {
-      return res.status(400).json({
-        success: false,
-        message: "الرقم القومي مسجل مسبقاً",
-      });
+      return res
+        .status(400)
+        .json({ success: false, message: "الرقم القومي مسجل مسبقاً" });
     }
 
-    const newStudent = new studentModel(req.body);
-
+    if (studentData.email === "") {
+      studentData.email = null;
+    }
+    if (req.body.code === "") req.body.code = null;
+    const newStudent = new studentModel(studentData);
     await newStudent.save();
-    //  const populatedStudent = await Student.findById(student._id)
-    //   .populate('stdSpecial')
-    //   .populate('school')
-    //   .populate('stdSupervisorName');
+
     res.status(201).json({
       success: true,
       message: "تم إضافة الطالب بنجاح",
       data: newStudent,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -215,16 +245,20 @@ export const addStudentAbsent = async (req, res) => {
     const { startDate, attendanceData } = req.body;
 
     if (!startDate) {
-      return res.status(400).json({ success: false, message: "startDate is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "startDate is required" });
     }
 
     const student = await studentModel.findById(studentId);
     if (!student) {
-      return res.status(404).json({ success: false, message: "الطالب غير موجود" });
+      return res
+        .status(404)
+        .json({ success: false, message: "الطالب غير موجود" });
     }
 
     const existingWeek = student.weekly_attendance.find(
-      (week) => week.week_start_date === startDate
+      (week) => week.week_start_date === startDate,
     );
     if (existingWeek) {
       return res.status(400).json({
@@ -233,13 +267,16 @@ export const addStudentAbsent = async (req, res) => {
       });
     }
 
-    const weeklyAttendance = convertToWeeklyAttendance(startDate, attendanceData);
+    const weeklyAttendance = convertToWeeklyAttendance(
+      startDate,
+      attendanceData,
+    );
 
     const updatedStudent = await studentModel
       .findByIdAndUpdate(
         studentId,
         { $push: { weekly_attendance: { $each: weeklyAttendance } } },
-        { new: true, runValidators: true }
+        { new: true, runValidators: true },
       )
       .populate("stdSpecial school stdTrainningPlace");
 
@@ -254,14 +291,13 @@ export const addStudentAbsent = async (req, res) => {
   }
 };
 
-
 //get all absent per student
 
 // controllers/student.js getStudentAttendance
 export const getStudentAttendance = async (req, res) => {
   try {
     const { studentId } = req.params;
-console.log("her",req.params);
+    console.log("her", req.params);
 
     // جلب الطالب مع حقل weekly_attendance فقط (لتقليل البيانات)
     const student = await studentModel
@@ -413,10 +449,9 @@ export const deleteWeekAttendance = async (req, res) => {
   }
 };
 
-
-//percent 
-// 
-  export const absence_Percentage= async (req, res) => {
+//percent
+//
+export const absence_Percentage = async (req, res) => {
   try {
     const pipeline = [
       // Unwind to individual days
@@ -427,16 +462,16 @@ export const deleteWeekAttendance = async (req, res) => {
       {
         $addFields: {
           dayDate: { $toDate: "$weekly_attendance.days.date" },
-          dayStatus: "$weekly_attendance.days.status"
-        }
+          dayStatus: "$weekly_attendance.days.status",
+        },
       },
 
       // Extract year and month
       {
         $addFields: {
           year: { $year: "$dayDate" },
-          month: { $month: "$dayDate" }
-        }
+          month: { $month: "$dayDate" },
+        },
       },
 
       // Determine academic start year
@@ -444,12 +479,12 @@ export const deleteWeekAttendance = async (req, res) => {
         $addFields: {
           academicStartYear: {
             $cond: [
-              { $gte: ["$month", 9] },  // Sep–Dec
+              { $gte: ["$month", 9] }, // Sep–Dec
               "$year",
-              { $subtract: ["$year", 1] }
-            ]
-          }
-        }
+              { $subtract: ["$year", 1] },
+            ],
+          },
+        },
       },
 
       // Group by academic year ONLY (all students combined)
@@ -458,9 +493,9 @@ export const deleteWeekAttendance = async (req, res) => {
           _id: "$academicStartYear",
           totalDays: { $sum: 1 },
           absentDays: {
-            $sum: { $cond: [{ $eq: ["$dayStatus", "غائب"] }, 1, 0] }
-          }
-        }
+            $sum: { $cond: [{ $eq: ["$dayStatus", "غائب"] }, 1, 0] },
+          },
+        },
       },
 
       // Calculate percentage
@@ -470,8 +505,8 @@ export const deleteWeekAttendance = async (req, res) => {
             $concat: [
               { $toString: "$_id" },
               "-",
-              { $toString: { $add: ["$_id", 1] } }
-            ]
+              { $toString: { $add: ["$_id", 1] } },
+            ],
           },
           totalDays: 1,
           absentDays: 1,
@@ -480,52 +515,68 @@ export const deleteWeekAttendance = async (req, res) => {
               {
                 $multiply: [
                   { $divide: ["$absentDays", { $max: ["$totalDays", 1] }] },
-                  100
-                ]
+                  100,
+                ],
               },
-              2
-            ]
-          }
-        }
+              2,
+            ],
+          },
+        },
       },
 
-      { $sort: { academicYear: 1 } }
+      { $sort: { academicYear: 1 } },
     ];
 
     const results = await studentModel.aggregate(pipeline);
     res.json(results);
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   }
-  }
-
+};
 
 ////
 // controllers/studentController.js
 export const updateStudent = async (req, res) => {
   try {
-    console.log("update stud");
+    console.log("update student");
     const { id } = req.params;
     let updateData = req.body;
     console.log(updateData);
 
-    // Parse JSON fields...
+    // Parse JSON fields
     if (updateData.phones) {
-      try { updateData.phones = JSON.parse(updateData.phones); } catch(e) {}
+      try {
+        updateData.phones = JSON.parse(updateData.phones);
+      } catch (e) {}
     }
     if (updateData.current_stage) {
-      try { updateData.current_stage = JSON.parse(updateData.current_stage); } catch(e) {}
+      try {
+        updateData.current_stage = JSON.parse(updateData.current_stage);
+      } catch (e) {}
     }
 
-    // Handle file uploads
+    // Handle file uploads (including student image)
     if (req.files) {
-      if (req.files.fatherDeathCert) updateData.fatherDeathCert = req.files.fatherDeathCert[0].path;
-      if (req.files.motherDeathCert) updateData.motherDeathCert = req.files.motherDeathCert[0].path;
+      // Get old student to optionally delete old files
+      const oldStudent = await studentModel.findById(id);
+
+      if (req.files.studentImage) {
+        updateData.studentImage = req.files.studentImage[0].path;
+        // Optionally delete old student image from disk
+        // if (oldStudent?.studentImage) fs.unlinkSync(oldStudent.studentImage);
+      }
+      if (req.files.fatherDeathCert) {
+        updateData.fatherDeathCert = req.files.fatherDeathCert[0].path;
+        // if (oldStudent?.fatherDeathCert) fs.unlinkSync(oldStudent.fatherDeathCert);
+      }
+      if (req.files.motherDeathCert) {
+        updateData.motherDeathCert = req.files.motherDeathCert[0].path;
+        // if (oldStudent?.motherDeathCert) fs.unlinkSync(oldStudent.motherDeathCert);
+      }
     }
 
-    // ----- EMAIL validation -----
+    // ----- Email validation -----
     if (updateData.email !== undefined) {
       if (updateData.email === "") {
         delete updateData.email;
@@ -535,12 +586,17 @@ export const updateStudent = async (req, res) => {
           _id: { $ne: id },
         });
         if (existingStudent) {
-          return res.status(400).json({ success: false, message: "البريد الإلكتروني مسجل مسبقاً لطالب آخر" });
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message: "البريد الإلكتروني مسجل مسبقاً لطالب آخر",
+            });
         }
       }
     }
 
-    // ----- CODE validation -----
+    // ----- Code validation -----
     if (updateData.code !== undefined) {
       if (updateData.code === "") {
         delete updateData.code;
@@ -550,31 +606,42 @@ export const updateStudent = async (req, res) => {
           _id: { $ne: id },
         });
         if (existingStudent) {
-          return res.status(400).json({ success: false, message: "الكود مسجل مسبقاً لطالب آخر" });
+          return res
+            .status(400)
+            .json({ success: false, message: "الكود مسجل مسبقاً لطالب آخر" });
         }
       }
     }
 
-    // ----- studID validation (already present) -----
+    // ----- studID validation -----
     if (updateData.studID) {
       const existingStudent = await studentModel.findOne({
         studID: updateData.studID,
         _id: { $ne: id },
       });
       if (existingStudent) {
-        return res.status(400).json({ success: false, message: "الرقم القومي مسجل مسبقاً لطالب آخر" });
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "الرقم القومي مسجل مسبقاً لطالب آخر",
+          });
       }
     }
 
     // Update student
-    const updatedStudent = await studentModel.findByIdAndUpdate(
-      id,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    );
+    const updatedStudent = await studentModel
+      .findByIdAndUpdate(
+        id,
+        { $set: updateData },
+        { new: true, runValidators: true },
+      )
+      .populate("stdSpecial school stdTrainningPlace"); // optional population
 
     if (!updatedStudent) {
-      return res.status(404).json({ success: false, message: "الطالب غير موجود" });
+      return res
+        .status(404)
+        .json({ success: false, message: "الطالب غير موجود" });
     }
 
     res.status(200).json({
@@ -590,13 +657,31 @@ export const updateStudent = async (req, res) => {
 export const deleteStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedStudent = await studentModel.findByIdAndDelete(id);
-    if (!deletedStudent) {
+    const student = await studentModel.findById(id);
+    if (!student) {
       return res.status(404).json({
         success: false,
         message: "الطالب غير موجود",
       });
     }
+    const filesToDelete = [
+      student.studentImage,
+      student.fatherDeathCert,
+      student.motherDeathCert,
+    ];
+    filesToDelete.forEach((filePath) => {
+      if (filePath && fs.existsSync(filePath)) {
+        try {
+          fs.unlinkSync(filePath);
+          console.log(`Deleted file: ${filePath}`);
+        } catch (err) {
+          console.error(`Error deleting file ${filePath}:`, err.message);
+        }
+      }
+    });
+
+    await studentModel.findByIdAndDelete(id);
+
     res
       .status(200)
       .json({ success: true, message: "تم حذف الطالب بنجاح", data: id });
@@ -658,8 +743,8 @@ export const getStudentByTrainningPlace = async (req, res) => {
 
     const students = await studentModel
       .find({ stdTrainningPlace: id })
-      .populate("stdSpecial", "specialName")
-      .populate("school", "schoolName")
+      .populate("stdSpecial", "name")
+      .populate("school", "name")
       .populate("stdTrainningPlace", "name address phone")
       .populate("intake", "name")
       .sort({ createdAt: -1 });
@@ -725,6 +810,8 @@ export const searchStudents = async (req, res) => {
 
 export const bulkUpdateStudents = async (req, res) => {
   try {
+    console.log(req.body);
+
     const { studentIds, updates } = req.body;
 
     if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
@@ -839,7 +926,7 @@ export const getAllPaymentByStudent = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-export const addPaymentForExistingEnrollment = (req, res) => {};
+
 
 export const updatePayment = async (req, res) => {
   const { studentId, enrollmentId, paymentId } = req.params;
@@ -1084,7 +1171,7 @@ export const repeatStage = async (req, res) => {
 export const createEnrollment = async (req, res) => {
   const { studentId } = req.params;
   const { stage_name, academicYear } = req.body;
-  console.log("createEnrollment called", studentId, stage_name, academicYear);
+  console.log("createEnrollment called", req.body, studentId, stage_name, academicYear);
   try {
     const existingEnrollment = await enrollmentModel.findOne({
       studentId,

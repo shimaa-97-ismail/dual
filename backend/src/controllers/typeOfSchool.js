@@ -126,7 +126,7 @@ export const getSchoolByType = async (req, res) => {
     const { id } = req.params;
     console.log(id);
     
-    const typeExists = await TypeOfSchool.findById(id);
+    const typeExists = await typeOfSchoolModel.findById(id);
     if (!typeExists) {
       return res.status(404).json({
         success: false,
@@ -144,6 +144,8 @@ console.log(schools);
       data: schools,
     });
   } catch (error) {
+    console.log(error);
+    
     res.status(500).json({
       success: false,
       message: "خطأ في جلب البيانات",

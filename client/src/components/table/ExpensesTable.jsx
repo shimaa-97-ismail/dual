@@ -23,16 +23,17 @@ export function ExpensesTable({
       <TableHeader>
         <TableRow>
           <TableHead
-            colSpan={3}
+            colSpan={2}
             className="border border-gray-300 w-[50px] font-bold text-lg text-center text-primary"
           >
             {title}
           </TableHead>
-          <TableHead className="customBorder font-bold text-lg text-center text-primary">
-            القيمة
+          <TableHead  colSpan={2} className="customBorder font-bold text-lg text-center text-primary">
+            الايصال الاول
           </TableHead>
-          <TableHead className="customBorder font-bold text-lg text-center text-primary">
-            إجمالي المسدد
+          <TableHead   colSpan={2} className="customBorder font-bold text-lg text-center text-primary">
+            الايصال التانى
+
           </TableHead>
         </TableRow>
       </TableHeader>
@@ -40,9 +41,10 @@ export function ExpensesTable({
         <TableRow>
           <TableHead className="customBorder">الشهر</TableHead>
           <TableHead className="customBorder">العام</TableHead>
-          <TableHead className="customBorder">القيمة</TableHead>
-          <TableHead className="customBorder">رقم الايصال</TableHead>
-          <TableHead className="customBorder">رقم الايصال</TableHead>
+          <TableHead className="customBorder"> القيمة الايصال 1</TableHead>
+          <TableHead className="customBorder">رقم الايصال 1</TableHead>
+          <TableHead className="customBorder"> القيمة الايصال 2</TableHead>
+          <TableHead className="customBorder">رقم الايصال 2</TableHead>
           <TableHead className="customBorder">التاريخ</TableHead>
           <TableHead className="customBorder">تعديل</TableHead>
           <TableHead className="customBorder">حذف</TableHead>
@@ -57,8 +59,9 @@ export function ExpensesTable({
             <TableRow key={month}>
               <TableCell className="customBorder">{month}</TableCell>
               <TableCell className="customBorder">{payment?.year}</TableCell>
-              <TableCell className="customBorder">{payment?.amountDue}</TableCell>
+              <TableCell className="customBorder">{payment?.amountDueReceipt1}</TableCell>
               <TableCell className="customBorder">{payment?.receipt1}</TableCell>
+              <TableCell className="customBorder">{payment?.amountDueReceipt2}</TableCell>
               <TableCell className="customBorder">{payment?.receipt2}</TableCell>
               <TableCell className="customBorder">
                 {payment?.paymentDate

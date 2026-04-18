@@ -25,9 +25,9 @@ export function useStudentsBySchool(selectedSchool) {
       return [{ name: school?.name, count: counts[selectedSchool] || 0 }];
     }
 
-    return schools?.schools.map((school) => ({
+    return schools?.schoolsWithCount.map((school) => ({
       name: school.name,
-      count: counts[school.id] || 0,
+      count:  school.studentCount,
     }));
   }, [students, schools, selectedSchool]);
 

@@ -2,9 +2,8 @@ import React, { useState } from "react";
 import {
   useTypeOfSchools,
   useCreateTypeOfSchool,
-  useGetSchoolByType,
 } from "../../hooks/useTypeOfSchool";
-import  EmptyState  from "../../components/common/EmptyState";
+import EmptyState from "../../components/common/EmptyState";
 import { TypesOfSchool } from "../../components/model/TypesOfSchool";
 import { TypeCard } from "@/components/card/TypeCard";
 import { MainHeader } from "@/components";
@@ -12,19 +11,17 @@ import { useNavigate } from "react-router-dom";
 export function TypeOfSchool() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState("grid");
-  const [typeId, setTypeId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const addMutation = useCreateTypeOfSchool();
   const { data, loading, error } = useTypeOfSchools();
-  const { data: schools, refetch } = useGetSchoolByType(typeId);
-  console.log(schools);
+
   if (loading) {
     return <div>جار التحميل...</div>;
   }
   if (error) {
     return <div>حدث خطأ: {error.message}</div>;
   }
-  
+
   const handleAdd = (data) => {
     addMutation.mutate(data, {
       onSuccess: () => {},
@@ -32,22 +29,11 @@ export function TypeOfSchool() {
     setModalOpen(false);
   };
   const handleTypyClick = async (id, typeName) => {
-    console.log("تم النقر على المكون، specialId:", id);
-    setTypeId(id);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    try {
-      const result = await refetch();
-      navigate("/type-of-school/schools", {
-        state: {
-          id: id,
-          name: typeName,
-          schools: result.data,
-        },
-      });
-    } catch (error) {
-      console.error("خطأ في جلب المدارس:", error);
-    }
+    navigate("/type-of-school/schools", {
+      state: { id, name: typeName }, // ✅ no 'schools' here
+    });
   };
+
   return (
     <>
       <MainHeader

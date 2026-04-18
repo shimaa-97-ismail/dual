@@ -110,9 +110,9 @@ export const ChooseClass = () => {
         stage: selectedStage,
         className: Class,
       });
-      const studentsData = result.data;
-      console.log(studentsData);
+console.log(result);
 
+      const studentsData = result?.data;
       navigate("/student-class", {
         state: {
           students: studentsData, // pass the students data
@@ -158,7 +158,12 @@ export const ChooseClass = () => {
       },
     });
   };
-
+  if(schoolsLoading){
+    return <div className="text-center p-8">جاري تحميل بيانات ...</div>
+  }
+if(schoolsError){
+  return <div>حدث خطا.....</div>
+}
   return (
     <div className="attendance-container">
       <div className="progress-steps">
@@ -175,7 +180,7 @@ export const ChooseClass = () => {
           <div className="step-content">
             <h3>اختر المدرسة</h3>
             <div className="cards-grid">
-              {schools?.map((school) => (
+              {schools?.schoolsWithCount?.map((school) => (
                 <SchoolCard
                   key={school.id}
                   school={school}

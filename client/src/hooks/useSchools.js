@@ -1,6 +1,6 @@
 import { axioInstance } from "../api/config";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-
+import {studentKeys} from "./useStudent";
 export const schoolsApi = {
   getAll: () => axioInstance.get("school"),
   getById: (id) => axioInstance.get(`school/${id}`),
@@ -14,7 +14,7 @@ export const schoolsApi = {
   getStudentByClass:(filters)=>axioInstance.get("school/student-by-class",{ params: filters }), 
   getSchoolBySpecial:(selectedSpecial)=>axioInstance.get(`school/schools-by-special/${selectedSpecial}`),
   getStudentInClasses:(filters)=>axioInstance.get("school/student-in-class",{ params: filters }),
-  
+     getSchoolByType:(selectedType)=>axioInstance.get(`school/schools-by-type/${selectedType}`),
 };
 export const schoolKeys = {
   all: ["schools"],
@@ -24,16 +24,18 @@ export const schoolKeys = {
   detail: (id) => [...schoolKeys.details(), id],
   byDept: (deptID) => [...schoolKeys.all, "dept", deptID],
   intakes: (schoolId) => [...schoolKeys.all, schoolId, 'intakes'],
-  special:(schoolId)=>[...schoolKeys.all, schoolId, 'special'],
+  special:(schoolId)=>["schools", 'special',schoolId],
   classes:(filters)=>[...schoolKeys.lists(), { filters }],
   students:(filters)=>[...schoolKeys.lists(),{filters}],
-  schoolBySpecial:(selectedSpecial)=>[...schoolKeys.all, "dept", selectedSpecial],
+  schoolBySpecial:(selectedSpecial)=>['schools', "special", selectedSpecial],
   studentInClass:(filters)=>[...schoolKeys.lists(), { filters }],
+    byType: (typeId) => ['schools', 'type', typeId],
+
 };
 
 export const useSchools = () => {
   return useQuery({
-    queryKey: schoolKeys.lists(),
+    queryKey: schoolKeys.all,
     queryFn: async  () => {
       try {
         let response = await schoolsApi.getAll();
@@ -78,10 +80,17 @@ onSuccess: (newSchool) => {
   console.log('New school data:', newSchool);
   
   // 1. تحديث cache جميع المدارس (الرئيسي)
-  queryClient.setQueryData(schoolKeys.lists(), (oldData) => {
-    const newData = oldData ? [...oldData, newSchool] : [newSchool];
-    console.log('Updated all schools cache:', newData);
-    return newData;
+  queryClient.setQueryData(schoolKeys.all, (oldData) => {
+  
+    console.log(oldData);
+     const existingSchools =  Array.isArray(oldData)? oldData : oldData?.schools || [] ;
+     console.log(existingSchools);
+     
+      const updatedSchools = [...existingSchools, newSchool];
+    // const newData = oldData?.schools ? [...oldData, newSchool] : [newSchool];
+    console.log('Updated all schools cache:', updatedSchools);
+    return { schools:updatedSchools}
+    
   });
   
   // 2. تحديث cache القسم المحدد إذا كان موجودًا
@@ -167,7 +176,7 @@ export const useDeleteSchool = () => {
   return useMutation({
     mutationFn: async (id) => await schoolsApi.delete(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: schoolKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: schoolKeys.all });
       //   alert("تم حذف المدرسة بنجاح");
     },
   });
@@ -250,10 +259,22 @@ export const useSchoolsBySpecial=(selectedSpecial)=>{
   });
 
 }
+export const useGetSchoolByType = (selectedType) => {
+  console.log(selectedType);
+  return useQuery({
+    queryKey: schoolKeys.byType(selectedType), // ✅ now starts with ['schools']
+    queryFn: async () => {
+      const response = await schoolsApi.getSchoolByType(selectedType);
+      console.log(response.data.data);
+      return response.data.data;
+    },
+    enabled: !!selectedType,
+  });
+};
 
 export const useStudentInClasses=(filters)=>{
    return useQuery({
-    queryKey: schoolKeys.studentInClass(filters),
+    queryKey: studentKeys.inClass(filters),
     queryFn: async () => {
       console.log(filters,"assss");
 
@@ -262,5 +283,6 @@ export const useStudentInClasses=(filters)=>{
       return response.data.data;
     },
     enabled: !!filters.school && !!filters.intake && !!filters.special && !!filters.stage && !!filters.className,
+   
   });
 }

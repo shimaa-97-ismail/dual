@@ -37,6 +37,8 @@ export const createUser = async (req, res) => {
   }
 };
 export const updateUser = async (req, res) => {
+  // console.log(req.params,req.body);
+  
   const { id } = req.params;
   const  { username, email, role }  = req.body;
   try {
@@ -47,11 +49,18 @@ export const updateUser = async (req, res) => {
       if (username) user.username = username;
     if (email) user.email = email;
      if (role && req.user.role === 'admin') user.role = role;
+  //  console.log(user);
    
     const updatedUser = await user.save();
+    console.log(updatedUser);
+    
     const { password: _, ...userWithoutPassword } = updatedUser.toObject();
+    console.log(userWithoutPassword);
+    
     res.status(200).json({ success: true, data: userWithoutPassword });
   } catch (error) {
+    console.log(error);
+    
     res.status(409).json({ success: false, message: error.message });
   }
 };

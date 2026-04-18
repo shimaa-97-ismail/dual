@@ -18,14 +18,14 @@ const IsActive = (path) => {
 };
 export function AppSidebar() {
   const menuItems = [
-    { label: " الصفحه الرئسية", path: "/dashboard" },
-    { label: "الإدارات", path: "/department" },
+    { label: " الصفحه الرئيسية", path: "/dashboard" },
+    { label: "الإدارات التعليميه", path: "/department" },
     { label: "المدارس", path: "/schools" },
     { label: "أنواع المدارس", path: "/type-of-school" },
     { label: " التخصصات المتاحة", path: "/special" },
-    { label: "المنشأت التدربيه", path: "/trainning-place" },
+    { label: "المنشأت التدريبيه", path: "/trainning-place" },
     // { label: " الطلاب", path: "/student" },
-     { label: " التقارير", path: "/reports" },
+     { label: " النماذج والتقارير", path: "/reports" },
      { label: " المستخدمين", path: "/users" },
 
   ];

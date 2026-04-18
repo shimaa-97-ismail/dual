@@ -78,7 +78,7 @@ export const Department = () => {
           setViewMode={setViewMode}
           viewMode={viewMode}
           setShowAddModal={setShowAddModal}
-          title="الادارات"
+          title="الإدارات التعليميه"
           description="جميع الادارات في محافظة قنا تحت نظام التعليم الفنى المزدوج"
         />
 

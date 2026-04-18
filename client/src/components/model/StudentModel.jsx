@@ -57,27 +57,27 @@ export function StudentModel({ open, onOpenChange, mode, initialData, onSubmit, 
     } else {
       setFormData(defaultFormState);
     }
-    setErrors({});
+    // setErrors({});
   }, [mode, initialData, open]);
 
   const getNestedValue = (obj, path) => {
     return path.split('.').reduce((o, key) => (o && o[key] !== undefined ? o[key] : undefined), obj);
   };
 
-  const validateField = (field, value, fullFormData) => {
-    const validator = studentValidators[field];
-    if (validator) {
-      let result;
-      if (field === 'fatherJobDetails' || field === 'motherJobDetails') {
-        result = validator(value, fullFormData);
-      } else {
-        result = validator(value);
-      }
-      setErrors(prev => ({ ...prev, [field]: result.isValid ? null : result.error }));
-      return result.isValid;
-    }
-    return true;
-  };
+  // const validateField = (field, value, fullFormData) => {
+  //   const validator = studentValidators[field];
+  //   if (validator) {
+  //     let result;
+  //     if (field === 'fatherJobDetails' || field === 'motherJobDetails') {
+  //       result = validator(value, fullFormData);
+  //     } else {
+  //       result = validator(value);
+  //     }
+  //     setErrors(prev => ({ ...prev, [field]: result.isValid ? null : result.error }));
+  //     return result.isValid;
+  //   }
+  //   return true;
+  // };
 
   const validateForm = () => {
     const newErrors = {};

@@ -8,7 +8,7 @@ import { useUpdateStudent,useDeleteStudent } from "@/hooks/useStudent"; // adjus
 import "./table.css";
 import { useNavigate } from "react-router-dom";
 
-export function StudentTable({ data, showCheckbox, refetch }) {
+export function StudentTable({ data, showCheckbox }) {
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -55,7 +55,7 @@ export function StudentTable({ data, showCheckbox, refetch }) {
         onSuccess: () => {
           toast.success("تم تحديث بيانات الطالب بنجاح");
           setModalOpen(false);
-          if (refetch) refetch(); // refresh table data
+         
         },
         onError: (error) => {
           toast.error("فشل في التحديث: " + error.message);
@@ -68,12 +68,9 @@ export function StudentTable({ data, showCheckbox, refetch }) {
     if (window.confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
       deleteMutation.mutate(id, {
         onSuccess: () => {
-          toast.success('تم حذف الطالب بنجاح');
-          if (refetch) refetch(); // refresh table data
-        },
-        onError: (error) => {
-          toast.error('فشل في حذف الطالب: ' + error.message);
-        },
+          // toast.success('تم حذف الطالب بنجاح');
+         setSelectedStudents(prev => prev.filter(sid => sid !== id));          
+        }
       });
     }
   };
@@ -88,13 +85,15 @@ export function StudentTable({ data, showCheckbox, refetch }) {
                 <TableHead className="w-[50px] text-center"></TableHead>
               )}
               <TableHead className="w-[100px] text-center">اسم الطالب</TableHead>
-              <TableHead className="text-center">الرقم القومي</TableHead>
-              <TableHead className="text-center">رقم التليفون</TableHead>
-              <TableHead className="text-center">العنوان</TableHead>
+              {/* <TableHead className="text-center">الرقم القومي</TableHead> */}
+              {/* <TableHead className="text-center">رقم التليفون</TableHead>
+              <TableHead className="text-center">العنوان</TableHead> */}
               <TableHead className="text-center">حاله الطالب</TableHead>
               <TableHead className="text-center">الصف</TableHead>
               <TableHead className="text-center">الدفعه</TableHead>
-              <TableHead className="text-center">مكان التدريب</TableHead>
+              <TableHead className="text-center">المنشأه التدريبيه</TableHead>
+              <TableHead className="text-center"> اجمالى  المبلغ المسدد</TableHead>
+              <TableHead className="text-center"> اجمالى الشهور المسدده</TableHead>
               <TableHead className="text-center hide-on-print">تعديل</TableHead>
               <TableHead className="text-center hide-on-print">حذف</TableHead>
             </TableRow>
@@ -116,13 +115,22 @@ export function StudentTable({ data, showCheckbox, refetch }) {
                 <TableCell className="font-medium text-center cursor-pointer" onClick={() => navigate(`/student/${stud._id}`)}>
                   {stud.stdName}
                 </TableCell>
-                <TableCell className="font-medium text-center">{stud.studID}</TableCell>
-                <TableCell className="font-medium text-center">{stud.phone}</TableCell>
-                <TableCell className="font-medium text-center">{stud.stdAddress}</TableCell>
+                {/* <TableCell className="font-medium text-center">{stud.studID}</TableCell>
+                  <TableCell className="font-medium text-center">
+                                    {stud.phones?.map((phone, index) => (
+                                      <React.Fragment key={index}>
+                                        {phone.number}
+                                        {index < stud.phones.length - 1 && <br />}
+                                      </React.Fragment>
+                                    ))}
+                                  </TableCell>
+                <TableCell className="font-medium text-center">{stud.stdAddress}</TableCell> */}
                 <TableCell className="font-medium text-center">{stud.studStatus}</TableCell>
                 <TableCell className="font-medium text-center">{stud.current_stage?.stage_name}</TableCell>
                 <TableCell className="font-medium text-center">{stud.intake}</TableCell>
                 <TableCell className="font-medium text-center">{stud.stdTrainningPlace?.name}</TableCell>
+                            <TableCell className="font-medium text-center">{stud.totalAmountPaid}</TableCell>
+                <TableCell className="font-medium text-center">{stud.paymentsCount}</TableCell>
                 <TableCell className="hide-on-print">
                   <div className="flex justify-center">
                     <button onClick={() => handleEdit(stud)}>

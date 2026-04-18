@@ -25,13 +25,18 @@ import {
   updateStudent,
   absence_Percentage
 } from "../controllers/student.js";
+import { protect } from "../middleware/auth.js";
+import { upload } from "../middleware/upload.js";
+
 
 const router = express.Router();
+router.use(protect);
+
 
 // ---------- Static / specific routes (no parameters) ----------
 router.get("/search", searchStudents);                  // must come before /:id
-router.get("/bulk-update", bulkUpdateStudents);        // GET? usually POST/PATCH, but keep as is
-router.post("/bulk-update", bulkUpdateStudents);       // maybe intended as POST/PATCH
+// router.get("/bulk-update", bulkUpdateStudents);        // GET? usually POST/PATCH, but keep as is
+router.patch("/bulk-update", bulkUpdateStudents);       // maybe intended as POST/PATCH
 
 // ---------- Routes with fixed prefixes ----------
 router.get("/by-school/:schoolId", getStudentBySChool);
@@ -63,9 +68,15 @@ router.get("/:studentId/enrollments/:enrollmentId/payments/:paymentId", getPayme
 // ---------- Generic CRUD (parameter :id) ----------
 router.get('/overall-absence-percentage',absence_Percentage)
 router.get("/:id", getStudentById);     // must be LAST for GET with single param
-router.post("/", createStudent);
+router.post("/", upload.any(
+  // [
+  //   { name: 'studentImage', maxCount: 1 },
+  //   { name: 'fatherDeathCert', maxCount: 1 },
+  //   { name: 'motherDeathCert', maxCount: 1 }
+  // ]
+), createStudent);
 router.get("/", getAllStudents);
 router.delete("/:id", deleteStudent);
-router.patch("/:id",updateStudent)
+router.patch("/:id",upload.any(),updateStudent)
 
 export { router as studentRouter };

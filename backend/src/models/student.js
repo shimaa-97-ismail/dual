@@ -33,7 +33,7 @@ const studentSchema = new mongoose.Schema(
     },
     phones: [
       {
-        number: { type: String, required: true },
+        number: { type: String},
         type: {
           type: String,
           enum: ["primary", "alternate"],
@@ -41,6 +41,10 @@ const studentSchema = new mongoose.Schema(
         },
       },
     ],
+    studentImage: {
+  type: String,
+  default: null,
+},
     fatherName: {
       type: String,
       required: true,
@@ -80,13 +84,23 @@ const studentSchema = new mongoose.Schema(
       // required: true,
     },
 
-    code: { type: String, unique: true, sparse: true },
-    email: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
-    password: {
+   code: {
+  type: String,
+  unique: true,
+  sparse: true,
+  index: {
+    partialFilterExpression: { code: { $ne: "" } }
+  }
+},
+   email: {
+  type: String,
+  unique: true,
+  sparse: true,
+  index: {
+    partialFilterExpression: { email: { $ne: "" } }
+  }
+}
+    ,password: {
       type: String,
     },
     preparatorySchoolTotalScore: {

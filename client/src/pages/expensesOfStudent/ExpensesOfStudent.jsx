@@ -126,7 +126,8 @@ export function ExpensesOfStudent() {
           {
             month: formData.month,
             year: parseInt(formData.year),
-            amountDue: parseFloat(formData.amountDue),
+            amountDueReceipt1: parseFloat(formData.amountDueReceipt1),
+           amountDueReceipt2: parseFloat(formData.amountDueReceipt2),
             receipt1: formData.receipt1,
             receipt2: formData.receipt2,
             paymentDate: formData.paymentDate,
@@ -142,8 +143,9 @@ export function ExpensesOfStudent() {
           {
             month: formData.month,
             year: parseInt(formData.year),
-            amountDue: parseFloat(formData.amountDue),
+            amountDueReceipt1: parseFloat(formData.amountDueReceipt1),
             receipt1: formData.receipt1,
+            amountDueReceipt2: parseFloat(formData.amountDueReceipt2),
             receipt2: formData.receipt2,
             paymentDate: formData.paymentDate,
             academicyearForPayment: formData.academicyearForPayment,

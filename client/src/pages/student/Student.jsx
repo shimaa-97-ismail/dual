@@ -10,6 +10,7 @@ const normalizeStudentData = (data) => ({
   studID: data.studID || "",
   stdBOD: data.stdBOD ? data.stdBOD.split("T")[0] : "",
   stdGender: data.stdGender || "",
+  studentImage:data.studentImage||"",
   phones: data.phones || [{ number: "", type: "primary" }, { number: "", type: "alternate" }],
   stdAddress: data.stdAddress || "",
   fatherName: data.fatherName || "",
@@ -54,6 +55,7 @@ export function Student() {
     studID: "",
     stdBOD: "",
     stdGender: "",
+    studentImage:"",
     phones: [{ number: "", type: "primary" }, { number: "", type: "alternate" }],
     stdAddress: "",
     fatherName: "",
@@ -93,13 +95,14 @@ export function Student() {
   };
 
   const handleSubmit = () => {
+
     if (isEditMode) {
       updateMutation.mutate(
         { studentId, data: formData },
         {
           onSuccess: () => {
             toast.success("تم تحديث الطالب بنجاح");
-            navigate(`/student/${studentId}`);
+            navigate(-1);
           },
           onError: (error) => {
             toast.error("فشل في تحديث الطالب: " + error.message);
@@ -107,10 +110,12 @@ export function Student() {
         }
       );
     } else {
+      console.log(formData.studID);
       createMutation.mutate(formData, {
+        
         onSuccess: () => {
           toast.success("تم إضافة الطالب بنجاح");
-          navigate("/school/student");
+          navigate(-1);
         },
         onError: (error) => {
           toast.error("فشل في إضافة الطالب: " + error.message);

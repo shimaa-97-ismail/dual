@@ -75,10 +75,16 @@ export function StudentReregistrationTable({ isRegister, applicant, student }) {
         {/* /// */}
         {!isRegister && (
           <>
-            
             <TableRow>
               <TableHead className="textRight"> رقم الهاتف</TableHead>
-              <TableCell>{student?.phone}</TableCell>
+              <TableCell>
+                {student.phones?.map((phone, index) => (
+                  <React.Fragment key={index}>
+                    {phone.number}
+                    {index < student.phones.length - 1 && <br />}
+                  </React.Fragment>
+                ))}
+              </TableCell>
             </TableRow>
             <TableRow>
               <TableHead className="textRight">التخصص</TableHead>
@@ -96,35 +102,35 @@ export function StudentReregistrationTable({ isRegister, applicant, student }) {
         )}
         {isRegister && (
           <>
-           
+            <TableRow>
+              <TableHead className="textRight"> العام الدراسى</TableHead>
+              <TableCell>{student?.intake}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableHead className="textRight">الصف الدراسى</TableHead>
+              <TableCell>{student?.current_stage?.stage_name}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableHead className="textRight">القسم التخصصي</TableHead>
+              <TableCell>{student?.stdSpecial?.name}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableHead className="textRight"> المدرسه الملتحق بها</TableHead>
+              <TableCell>{student?.school?.name}</TableCell>
+            </TableRow>
 
-        <TableRow>
-          <TableHead className="textRight"> العام الدراسى</TableHead>
-          <TableCell>{student?.intake}</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableHead className="textRight">الصف الدراسى</TableHead>
-          <TableCell>{student?.current_stage?.stage_name}</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableHead className="textRight">القسم التخصصي</TableHead>
-          <TableCell>{student?.stdSpecial?.name}</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableHead className="textRight"> المدرسه الملتحق بها</TableHead>
-          <TableCell>{student?.school?.name}</TableCell>
-        </TableRow>
-
-        <TableRow>
-          <TableHead className="textRight"> رقم الهاتف</TableHead>
-          <TableCell>{student?.phone}</TableCell>
-        </TableRow>
-        <TableRow>
-          <TableHead className="textRight">سبب التقديم لاعادة القيد</TableHead>
-          <TableCell>{isRegister ? "الرغبه فى العودة للدراسة" : ""}</TableCell>
-        </TableRow>
-
-        
+            <TableRow>
+              <TableHead className="textRight"> رقم الهاتف</TableHead>
+              <TableCell>{student?.phones?.[0].number}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableHead className="textRight">
+                سبب التقديم لاعادة القيد
+              </TableHead>
+              <TableCell>
+                {isRegister ? "الرغبه فى العودة للدراسة" : ""}
+              </TableCell>
+            </TableRow>
           </>
         )}
         <TableRow className="bg-gray-100  h-9 p-3">

@@ -24,7 +24,7 @@ const navigate=useNavigate();
       <MainHeader
         setViewMode={setViewMode}
         viewMode={viewMode}
-        title="التقارير"
+        title="النماذج والتقارير"
         description="جميع التقارير تحت نظام التعليم الفنى المزدوج"
       />
       <div

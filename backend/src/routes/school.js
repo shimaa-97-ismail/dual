@@ -11,10 +11,16 @@ import {
   getClassesForAttendance,
   getStudentInClassesForAttendance,
   getSchoolBySpecial,
-  useStudentInClasses
+  useStudentInClasses,
+  getSchoolByType
 
 } from "../controllers/school.js";
+
+import { protect } from "../middleware/auth.js";
+
 const router = express.Router();
+
+router.use(protect);
 
 router.get("/", getSchools);
 router.get("/classes", getClassesForAttendance);
@@ -28,6 +34,8 @@ router.delete("/:id", deleteSchool);
 router.get("/by-department/:departmentId", getSchoolsByDepartment);
 router.get("/intakes/:id", getIntakesBySchool);
 router.get("/special/:id", getSpecialBySchool);
+router.get("/schools-by-type/:id",getSchoolByType);
+
 
 
 export { router as schoolRouter };

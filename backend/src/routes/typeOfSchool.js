@@ -1,6 +1,9 @@
 import express from "express";
 import {getAllTypesOfSchool, getTypeOfSchoolById, createTypeOfSchool, updateTypeOfSchool, deleteTypeOfSchool,getSchoolByType } from "../controllers/typeOfSchool.js";
+import { protect } from "../middleware/auth.js";
+
 const router = express.Router();    
+router.use(protect);
 
 router.get("/", getAllTypesOfSchool);
 router.get("/:id", getTypeOfSchoolById);

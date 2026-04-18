@@ -25,8 +25,6 @@ import { useSpecials } from "@/hooks/useSpecial";
 import { useStudents,useGetPercentAbsence } from "@/hooks/useStudent";
 import { useTrainningPlaces } from "@/hooks/useTrainngPlace";
 import { useStudentsBySchool } from "@/hooks/useStudentsBySchool";
-import { useRecentActivities } from "@/hooks/useRecentActivities";
-import { useAttendanceStats } from "@/hooks/useAttendanceStats";
 import {SearchStudent} from "@/components/model/SearchStudent"
 export function DashBoard() {
   const navigate = useNavigate();
@@ -61,40 +59,41 @@ console.log(percentAbsence);
 
   // Additional data
   const { data: studentsBySchool, isLoading: chartLoading } = useStudentsBySchool(selectedSchool);
-  const { data: recentActivities, isLoading: activitiesLoading } = useRecentActivities();
+
   
 
   const isLoadingMetrics =
-    schoolsLoading || deptsLoading || specialsLoading || studentsLoading || trainingLoading ||percentAbsenceLoading || chartLoading || activitiesLoading ;
+    schoolsLoading || deptsLoading || specialsLoading || studentsLoading || trainingLoading ||percentAbsenceLoading || chartLoading  ;
 
-  
+  if(isLoadingMetrics){
+    return <div className="text-center p-8">جاري تحميل بيانات ...</div>
+  }
 
   return (
     <>
     <div className="p-4 md:p-6 space-y-6">
       {/* First Row of Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <MetricCard title="الإدارات" value={departments?.length || 0} color="green" />
-        <MetricCard title="إجمالي المدارس" value={schools?.count || 0} color="blue" />
-        <MetricCard title="التخصصات المتاحة" value={specials?.length || 0} color="purple" />
-      </div>
-
-      {/* Second Row of Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <MetricCard title="إجمالي الطلاب" value={students?.count || 0} color="orange" />
-
-        <MetricCard
-          title={`  نسبة الغياب  ${percentAbsence?.[0]?.academicYear}`}
-          value={percentAbsence?.[0]?.absencePercentage + "%" || "0%"}
-          color="pink"
-        />
-        <MetricCard
-          title="إجمالي ورش التدريب"
-          value={trainingPlaces?.length || 0}
-          color="teal"
-        />
-
-      </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+  <MetricCard title="الإدارات التعليميه" value={departments?.length || 0} color="green" />
+  <MetricCard title="إجمالي المدارس" value={schools?.count || 0} color="blue" />
+  <MetricCard title="التخصصات المتاحة" value={specials?.length || 0} color="purple" />
+  <MetricCard title="إجمالي الطلاب" value={students?.count || 0} color="orange" />
+  <MetricCard
+    title={`نسبة الغياب ${percentAbsence?.[0]?.academicYear}`}
+    value={percentAbsence?.[0]?.absencePercentage + "%" || "0%"}
+    color="pink"
+  />
+  <MetricCard
+    title="إجمالي المنشأت التدريبيه"
+    value={trainingPlaces?.length || 0}
+    color="teal"
+  />
+  <MetricCard
+    title="إجمالي المصروفات"
+    value={trainingPlaces?.length || 0}
+    color="teal"
+  />
+</div>
 
       {/* Quick Actions */}
       <Card>
@@ -128,7 +127,7 @@ console.log(percentAbsence);
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">جميع المدارس</SelectItem>
-              {schools?.schools?.map((school) => (
+              {schools?.schoolsWithCount?.map((school) => (
                 <SelectItem key={school.id} value={school.id}>
                   {school.name}
                 </SelectItem>
@@ -153,40 +152,6 @@ console.log(percentAbsence);
         </CardContent>
       </Card>
 
-      {/* Recent Activity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>آخر النشاطات</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {activitiesLoading ? (
-            <div className="space-y-2">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {recentActivities?.map((activity) => (
-                <li
-                  key={activity.id}
-                  className="flex justify-between items-center border-b pb-2 last:border-0"
-                >
-                  <span>{activity.description}</span>
-                  <span className="text-sm text-gray-500">
-                    {new Date(activity.createdAt).toLocaleDateString("ar-EG")}
-                  </span>
-                </li>
-              ))}
-              {(!recentActivities || recentActivities.length === 0) && (
-                <li className="text-gray-500 text-center py-4">
-                  لا توجد نشاطات حديثة
-                </li>
-              )}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
     </div>
     <SearchStudent open={isModalOpen}
         onOpenChange={setIsModalOpen}

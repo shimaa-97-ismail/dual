@@ -88,9 +88,7 @@ export function Clearance() {
         </p>
         <p>مع فائق الاحترام والتقدير ،</p>
 
-        {/* <div>
-          <p> الاسم التوقيع التاريخ </p>
-        </div> */}
+      
         <div className="mt-4 flex flex-col justify-between">
           <h3 className="font-bold">
             {" "}

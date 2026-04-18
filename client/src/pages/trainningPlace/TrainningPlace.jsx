@@ -131,34 +131,26 @@ export const TrainningPlacesList = () => {
       {/* Header with search and filters */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">أماكن التدريب</h1>
+          <h1 className="text-3xl font-bold text-gray-900">المنشأت التدريبيه</h1>
           <p className="text-gray-600 mt-2">
-            جميع أماكن التدريب في محافظة قنا تحت نظام التعليم الفنى المزدوج
+            جميع المنشأت التدريبيه في محافظة قنا تحت نظام التعليم الفنى المزدوج
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
           <Button className="gap-2" onClick={handleAddNew}>
             <Plus className="h-4 w-4" />
-            إضافة مكان تدريب جديد
+            إضافة منشأه تدريبيه جديد
           </Button>
         </div>
       </div>
-      {/* <MainHeader
-              title={" أماكن التدريب"}
-              description={` جميع أماكن التدريب في محافظة قنا تحت نظام التعليم الفنى المزدوج `}
-              // setViewMode={setViewMode}
-              // viewMode={viewMode}
-              // setShowAddModal={setModalOpen}
-              btnTitle={"إضافة مكان تدريب جديد"}
-            /> */}
-
+  
       {/* Loading State */}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-            <p className="mt-4 text-gray-600">جاري تحميل أماكن التدريب...</p>
+            <p className="mt-4 text-gray-600">جاري تحميل المنشأت التدريبيه...</p>
           </div>
         </div>
       ) : (
@@ -166,10 +158,10 @@ export const TrainningPlacesList = () => {
           {/* Empty State */}
           {trainningPlaces.length === 0 ? (
             <EmptyState
-              title="لا توجد أماكن تدريب"
-              description={ "لم يتم إضافة أي أماكن تدريب بعد. ابدأ بإضافة أول مكان تدريب."
+              title="لا توجد منشأت تدريبيه"
+              description={ "لم يتم إضافة أي منشأت تدريبيه بعد. ابدأ بإضافة أول منشأه تدريبيه."
               }
-              actionText="إضافة مكان تدريب"
+              actionText="إضافة منشأه تدريبيه"
               onAction={handleAddNew}
             />
           ) : (
@@ -243,11 +235,7 @@ export const TrainningPlacesList = () => {
                               ) : null}
                             </a>
                           </div>
-                          {/* <Badge
-                        variant={place.supervisorName ? "default" : "secondary"}
-                      >
-                        {place.supervisorName ? "مشرف" : "غير مكتمل"}
-                      </Badge> */}
+                        
                         </div>
                       </CardHeader>
 
@@ -279,7 +267,7 @@ export const TrainningPlacesList = () => {
                               >
                                 {place.phone}
                               </a>
-                              {/* <p className="text-gray-600">{place.phone}</p> */}
+                             
                             </div>
                           </div>
                         )}
@@ -391,42 +379,7 @@ export const TrainningPlacesList = () => {
         </>
       )}
 
-      {/* Delete Confirmation Dialog */}
-      {/* <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
-            <AlertDialogDescription>
-              هل أنت متأكد من رغبتك في حذف مكان التدريب:
-              <br />
-              <span className="font-bold text-lg text-primary">
-                {selectedPlace?.name}
-              </span>
-              <br />
-              <span className="text-red-600 font-medium block mt-2">
-                هذا الإجراء لا يمكن التراجع عنه.
-              </span>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDelete}
-              disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                  جاري الحذف...
-                </>
-              ) : (
-                "نعم، قم بالحذف"
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog> */}
+    
 
       <ConfirmationModal
         open={deleteModalOpen}
@@ -446,7 +399,7 @@ export const TrainningPlacesList = () => {
           setIsModalOpen(false);
           setSelectedPlace(null);
         }}
-        title={selectedPlace ? "تعديل مكان التدريب" : "إضافة مكان تدريب جديد"}
+        title={selectedPlace ? "تعديل المنشأه التدريبيه" : "إضافة منشأه تدريبيه جديد"}
       >
         <TrainningPlaceForm
           onSubmit={handleSubmit}

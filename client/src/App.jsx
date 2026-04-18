@@ -38,10 +38,13 @@ function App() {
   return (
     <>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/forgot-password" element={<ForgetPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+
+        {/* Protected routes – any authenticated user */}
         <Route element={<ProtectedRoute />}>
           <Route element={<Home />}>
             <Route path="/dashboard" element={<DashBoard />} />
@@ -64,7 +67,6 @@ function App() {
             />
             <Route path="/student/:studentId" element={<StudentDetails />} />
             <Route path="/department" element={<Department />} />
-
             <Route
               path="/department/:departmentId/school"
               element={<DepartmentSchool />}
@@ -76,36 +78,36 @@ function App() {
             <Route path="/special" element={<Specials />} />
             <Route path="/special/schools" element={<SchoolByData />} />
             <Route path="/special/:specialId/school" element={<Specials />} />
-            {/* <Route
-              path="/students/:schoolName/:special"
-              element={<Student />}
-            /> */}
-            {/* <Route path="/student" element={<Student />} /> */}
-            <Route
-              path="/school/student/add"
-              element={<Student />}
-            />
+            <Route path="/school/student/add" element={<Student />} />
             <Route
               path="/school/student/edit/:studentId"
               element={<Student />}
             />
-          
-             <Route path="/student/expenses/:studentId" element={<ExpensesOfStudent/>}/>
-            <Route path="/reports" element={<Reports />} />
             <Route
-              path="/StudentRe_registration"
-              element={<StudentRe_registration />}
+              path="/student/expenses/:studentId"
+              element={<ExpensesOfStudent />}
             />
+            <Route path="/StudentRe_registration" element={<StudentRe_registration />} />
             <Route path="/clearance" element={<Clearance />} />
             <Route path="/weeklyAbsent" element={<WeeklyAbsent />} />
-            <Route path="/choose-class" element={<ChooseClass  />}  />
-            
+            <Route path="/choose-class" element={<ChooseClass />} />
             <Route path="/class" element={<SchoolDetails />} />
             <Route path="/student-class" element={<Class />} />
-
-
             <Route path="/search" element={<SearchDetails />} />
-           <Route path="/users" element={<Users/>}/>
+          </Route>
+        </Route>
+
+        {/* Admin-only routes */}
+        <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          <Route element={<Home />}>
+            <Route path="/users" element={<Users />} />
+          </Route>
+        </Route>
+
+        {/* Admin & Manager routes */}
+        <Route element={<ProtectedRoute allowedRoles={['admin', 'manager']} />}>
+          <Route element={<Home />}>
+            <Route path="/reports" element={<Reports />} />
           </Route>
         </Route>
       </Routes>

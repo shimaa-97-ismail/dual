@@ -1,6 +1,8 @@
 // validators.js
 export const validateNationalID = (value, options = { required: false }) => {
   // If not required and empty, consider valid
+  console.log(value);
+  
   if (!options.required && (!value || value.trim() === '')) {
     return { isValid: true, error: null };
   }

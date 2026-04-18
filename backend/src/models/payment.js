@@ -3,8 +3,9 @@ import mongoose from "mongoose";
 const paymentSchema = new mongoose.Schema({
   month: { type: String, required: true },
   year: { type: Number, required: true },
-  amountDue: { type: Number, required: true },
+  amountDueReceipt1: { type: Number, required: true },
   receipt1: { type: String, required: true },
+  amountDueReceipt2: { type: Number, required: true },
   receipt2: { type: String, required: true },
   paymentDate: { type: Date, required: true },
   academicyearForPayment:{type:String,required:true,   enum: ['first', 'second', 'third'] }

@@ -61,17 +61,19 @@ export const SchoolCard = memo(({ data }) => {
     setModalOpen(false);
   };
 
-  const handleDelete = async () => {
-    console.log(data._id);
-
-    (deleteMutation.mutate(data._id),
+  const handleDelete =  () => {
+    deleteMutation.mutate(data._id),
       {
         onSuccess: () => {
           toast.success("تم حذف المدرسه بنجاح");
           queryClient.invalidateQueries({ queryKey: schoolKeys.all });
           setDeleteModalOpen(false);
         },
-      });
+         onError: (err) => {
+    toast.error("فشل الحذف");
+    console.error(err);
+  }
+      };
   };
 
   return (

@@ -51,13 +51,7 @@ export function DepartmentModel({
       onSubmit(formData);
     // }
   };
-  //  const handleBlur = (field, value) => {
-  //   const validator = schema[field];
-  //   if (validator) {
-  //     const result = validator(value);
-  //     setErrors(prev => ({ ...prev, [field]: result.isValid ? null : result.error }));
-  //   }
-  // };;
+
   return (
     <BaseModel
       open={open}

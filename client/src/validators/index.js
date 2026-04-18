@@ -5,7 +5,8 @@ import {validateArray} from "./array";
 import { validateSelect } from "./select";
 import { validateUrl } from "./url";
 import { validateNationalID } from "./id";
+import { validatePassword } from "./password";
 
 // import { validateNumber } from "./number";
 
-export { validateText, validatePhone, validateEmail,validateArray, validateSelect,validateUrl,validateNationalID };
+export { validateText, validatePhone, validateEmail,validateArray, validateSelect,validateUrl,validateNationalID,validatePassword };

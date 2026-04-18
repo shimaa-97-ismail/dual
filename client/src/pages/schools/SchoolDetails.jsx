@@ -1,7 +1,7 @@
 import { SchoolCard } from "@/components/card/SchoolCard";
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { useDepartment } from "@/hooks/useDepartments";
+// import { useDepartment } from "@/hooks/useDepartments";
 import {
   useSchoolById,
   useSchoolByintake,
@@ -17,10 +17,12 @@ import { Class } from "./Class";
 export function SchoolDetails() {
   const navigate = useNavigate();
   const printRef = useRef();
-  const { schoolId, departmentId } = useParams();
-  const { data: department } = useDepartment(departmentId);
+  const { schoolId } = useParams();
+  // departmentId
+  // const { data: department } = useDepartment(departmentId);
   const { data: schools } = useSchools();
   const { data: school } = useSchoolById(schoolId);
+console.log(school);
 
   // const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState("");
@@ -83,7 +85,6 @@ export function SchoolDetails() {
 
   const {
     data,
-    refetch,
     isLoading,
     isError,
     error: stdError,
@@ -100,15 +101,7 @@ export function SchoolDetails() {
     },
   );
   console.log(data);
-  const printClass = () => {
-    const printContent = printRef.current;
-    const originalContents = document.body.innerHTML;
-
-    document.body.innerHTML = printContent.innerHTML;
-    window.print();
-    document.body.innerHTML = originalContents;
-    window.location.reload();
-  };
+  
 
   useEffect(() => {
     console.log(data);
@@ -137,7 +130,7 @@ export function SchoolDetails() {
               navigate(`/school/student/add`)
             }
             title={`${school?.name} `}
-            description={`اداره ${department?.name}`}
+            description={`اداره ${school?.departement?.name}`}
           />
         )}
         {/* شريط البحث والفلترة */}

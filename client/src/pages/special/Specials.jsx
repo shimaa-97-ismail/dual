@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSpecials, useCreateSpecial } from "@/hooks/useSpecial";
-import { useSchoolsBySpecial } from "@/hooks/useSchools";
+
 import EmptyState from "@/components/common/EmptyState";
 import { MainHeader } from "@/components";
 import { SpecialCard } from "@/components/card/SpecialCard";
@@ -10,25 +10,9 @@ import { toast } from "react-hot-toast";
 export function Specials() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [viewMode, setViewMode] = useState("grid");
-  const [specialId, setSpecialId] = useState(null);
+
   const navigate = useNavigate();
 
-  // Hook مرفوض إلا عندما يكون shouldFetchSchools = true
-  const { data: schools, refetch } = useSchoolsBySpecial(specialId);
-  console.log(schools);
-
-  //   , {
-  //   enabled: shouldFetch && specialId !== null,
-  //   onSuccess: (schools) => {
-  //     console.log("المدارس المستلمة:",schools);
-  //     // معالجة البيانات هنا
-  //      setShouldFetch(false);
-  //   },
-  //   onError: (error) => {
-  //     console.error("خطأ في جلب المدارس:", error);
-  //     setShouldFetch(false); // إعادة تعيين في حالة الخطأ
-  //   }
-  // });
   const { data: specials, isLoading } = useSpecials();
   const addMutation = useCreateSpecial();
   const handleAddSpecial = async (formData) => {
@@ -44,23 +28,10 @@ export function Specials() {
       console.error("Error adding school:", error);
     }
   };
-
   const handleSpecialClick = async (id, specialName) => {
-    console.log("تم النقر على المكون، specialId:", id);
-    setSpecialId(id);
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    try {
-      const result = await refetch();
-      navigate("/special/schools", {
-        state: {
-          id: id,
-          name: specialName,
-          schools: result.data,
-        },
-      });
-    } catch (error) {
-      console.error("خطأ في جلب المدارس:", error);
-    }
+    navigate("/special/schools", {
+      state: { id, name: specialName },
+    });
   };
 
   if (isLoading) {

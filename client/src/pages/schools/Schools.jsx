@@ -7,52 +7,14 @@ import EmptyState from "../../components/common/EmptyState";
 import { ErrorState } from "../../components";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import { schoolKeys } from "@/hooks/useSchools";
 export default function SchoolPage() {
-  // const dispatch = useDispatch();
+ const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [showAddModal, setShowAddModal] = useState(false);
   const [viewMode, setViewMode] = useState("grid"); // grid or list
-  // const [searchTerm, setSearchTerm] = useState("");
-
-  // const {
-  //   schools,
-  //   departments,
-  //   specials,
-  //   loading,
-  //   errors,
-  //   pagination,
-  //   filters
-  // } = useSelector((state) => state.schools);
-  // console.log(specials);
-
-  //  useEffect(() => {
-  //   dispatch(fetchSchools());
-  //   dispatch(fetchDepartments());
-  //   dispatch(fetchSpecials());
-  // }, []);
-  // // جلب البيانات الأولية
-  // useEffect(() => {
-  //   dispatch(fetchSchools());
-  //   dispatch(fetchDepartments());
-  //   dispatch(fetchSpecials());
-  // }, [dispatch]);
-
-  // البحث مع debounce
-  // const debouncedSearch = useCallback(
-  //   debounce((term) => {
-  //     dispatch(setFilters({ search: term }));
-  //     dispatch(fetchSchools({ search: term, ...filters }));
-  //   }, 500),
-  //   [dispatch, filters]
-  // );
-
-  // useEffect(() => {
-  //   if (searchTerm !== undefined) {
-  //     debouncedSearch(searchTerm);
-  //   }
-  //   return () => debouncedSearch.cancel();
-  // }, [searchTerm, debouncedSearch]);
-
+ 
   // معالجة إضافة مدرسة جديدة
 
   const { data, isLoading, isError } = useSchools();
@@ -67,6 +29,7 @@ export default function SchoolPage() {
         onSuccess: () => {
           toast.success("تم إضافة المدرسة بنجاح");
           setShowAddModal(false);
+          queryClient.invalidateQueries({ queryKey: schoolKeys.all });
         },
       });
     } catch (error) {
@@ -91,39 +54,7 @@ export default function SchoolPage() {
     // navigate(`/school/${schoolId}/special/${specialId}`);
   };
 
-  // تحديث الفلاتر
-  // const handleFilterChange = (key, value) => {
-  //   dispatch(setFilters({ [key]: value }));
-  //   dispatch(fetchSchools({ ...filters, [key]: value }));
-  // };
-
-  // تحديث الصفحة
-  // const handlePageChange = (newPage) => {
-  //   dispatch(setPage(newPage));
-  //   dispatch(fetchSchools({ ...filters, page: newPage }));
-  // };
-
-  // إعادة تحميل البيانات
-  // const handleRefresh = () => {
-  //   dispatch(fetchSchools());
-  //   dispatch(fetchDepartments());
-  //   // dispatch(fetchSpecials());
-  // };
-
-  // تصدير البيانات
-  // const handleExport = () => {
-  //   // كود التصدير
-  //   toast.success('تم تصدير البيانات بنجاح');
-  // };
-
-  // استيراد البيانات
-  // const handleImport = (event) => {
-  //   const file = event.target.files[0];
-  //   if (file) {
-  //     // كود الاستيراد
-  //     toast.success('تم استيراد البيانات بنجاح');
-  //   }
-  // };
+  
 
   // عرض حالة التحميل
   if (isLoading) {
@@ -151,73 +82,6 @@ export default function SchoolPage() {
         description="جميع المدارس في محافظة قنا تحت نظام التعليم الفنى المزدوج"
       />
 
-      {/* شريط البحث والفلاتر */}
-      {/* <Card className="p-4">
-        <div className="flex flex-col md:flex-row gap-4">
-         
-          //  بحث
-                    // <div className="flex-1">
-            <div className="relative">
-              <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="ابحث باسم المدرسة أو العنوان..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pr-10"
-              />
-            </div>
-          </div>
-
-          {/* فلاتر 
-                    <div className="flex flex-wrap gap-2">
-            <Select
-              value={filters.type}
-              onValueChange={(value) => handleFilterChange("type", value)}
-            >
-              <SelectTrigger className="w-[150px]">
-                <Filter className="w-4 h-4 ml-2" />
-                <SelectValue placeholder="نوع المدرسة" />
-              </SelectTrigger>
-              <SelectContent>
-                {/* <SelectItem value="">الكل</SelectItem>
-                <SelectItem value="government">حكومية</SelectItem>
-                <SelectItem value="private">خاصة</SelectItem> *
-              </SelectContent>
-            </Select>
-
-            <Select
-              value={filters.department}
-              onValueChange={(value) => handleFilterChange("department", value)}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الإدارة التابعة" />
-              </SelectTrigger>
-              <SelectContent>
-                {/* <SelectItem value="">الكل</SelectItem>
-                {departments.map((dept) => (
-                  <SelectItem key={dept._id} value={dept._id}>
-                    {dept.name}
-                  </SelectItem>
-                ))} 
-              </SelectContent>
-            </Select>
-
-            {filters.type || filters.department || filters.search ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  dispatch(resetFilters());
-                  setSearchTerm("");
-                  dispatch(fetchSchools());
-                }}
-              >
-                إعادة تعيين
-              </Button>
-            ) : null}
-          </div>
-        </div>
-      </Card> */}
 
       {/* قائمة المدارس */}
       {data?.length === 0 ? (
@@ -236,8 +100,9 @@ export default function SchoolPage() {
                 : "space-y-4"
             }
           >
+            
             {data &&
-              data.schools.map(
+              data.schoolsWithCount?.map(
                 (school) => (
                   console.log(school),
                   (

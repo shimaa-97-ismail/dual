@@ -25,7 +25,10 @@ export function StudentDetails() {
   return (
     <>
       <div className="flex justify-end gap-2">
-        <Button onClick={() => navigate(`/student/absent/${studentId}`)}> الغياب</Button>
+        <Button onClick={() => navigate(`/student/absent/${studentId}`)}>
+          {" "}
+          الغياب
+        </Button>
         <Button onClick={() => navigate(`/student/expenses/${studentId}`)}>
           استعلام عن المصروفات
         </Button>
@@ -46,19 +49,31 @@ export function StudentDetails() {
               </li>
               {/* <li><strong> العمر:</strong> {student.stdAge}</li> */}
               <li className="p-2">
-                <strong>رقم التليفون:</strong> {student?.phone}
+                <strong>رقم التليفون:</strong>
+                {student?.phones?.map((phone, index) => (
+                  <React.Fragment key={index}>
+                    {phone.number}
+                    {index < student?.phones.length - 1 && <br />}
+                  </React.Fragment>
+                ))}
               </li>
               <li className="p-2">
                 <strong>تاريح الميلاد :</strong> {formatted}
               </li>
               <li className="flex p-2">
                 <strong>العنوان : </strong>
-                <p > {student?.stdAddress}</p>
+                <p> {student?.stdAddress}</p>
               </li>
             </ul>
           </div>
           <div className="w-1/2 flex justify-center">
-            <div className="w-50 h-50 bg-gray-100"></div>
+            <div className="w-50 h-50 ">
+              <img
+                src={`${student?.studentImage}`}
+                alt="Student"
+                className="w-44 h-45 object-cover"
+              />
+            </div>
           </div>
         </div>
         <hr />
@@ -77,8 +92,29 @@ export function StudentDetails() {
                 <strong>رقم التليفون:</strong> {student?.fatherPhone}
               </li>
               <li className="p-2">
-                <strong>الوظيفه :</strong> {student?.fatherJobTitle}
+                <strong>الوظيفه :</strong>{" "}
+                {student?.fatherJobTitle || "غير محدد"}
               </li>
+              {student?.fatherJobTitle === "موظف" &&
+                student?.fatherJobTitle && (
+                  <li>
+                    <strong>تفاصيل الوظيفة :</strong> {student?.fatherJobTitle}
+                  </li>
+                )}
+              {student?.fatherJobTitle === "متوفى" &&
+                student?.fatherDeathCert && (
+                  <li>
+                    <strong>شهادة الوفاة :</strong>{" "}
+                    <a
+                      href={student?.fatherDeathCert}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      عرض المستند
+                    </a>
+                  </li>
+                )}
             </ul>
           </div>
           <div className="w-1/2">
@@ -95,9 +131,31 @@ export function StudentDetails() {
                 <strong>رقم التليفون:</strong>{" "}
                 {student?.motherPhone || "لايوجد"}
               </li>
-              <li className="p-2">
-                <strong>الوظيفه :</strong> {student?.motherJobTitle}
+              
+               <li className="p-2">
+                <strong>الوظيفه :</strong>{" "}
+                {student?.motherJobTitle || "غير محدد"}
               </li>
+              {student?.motherJobTitle === "موظف" &&
+                student?.motherJobDetails && (
+                  <li>
+                    <strong>تفاصيل الوظيفة :</strong> {student?.motherJobDetails}
+                  </li>
+                )}
+              {student?.motherJobTitle === "متوفى" &&
+                student?.motherDeathCert && (
+                  <li>
+                    <strong>شهادة الوفاة :</strong>{" "}
+                    <a
+                      href={student?.motherDeathCert}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      عرض المستند
+                    </a>
+                  </li>
+                )}
             </ul>
           </div>
         </div>
@@ -141,6 +199,9 @@ export function StudentDetails() {
               </li>
               <li className="p-2">
                 <strong> التخصص :</strong> {student?.stdSpecial?.name}
+              </li>
+              <li className="p-2">
+                <strong> الصف :</strong> {student?.current_stage?.stage_name}
               </li>
               <li className="p-2">
                 <strong> الدفعه :</strong> {student?.intake}

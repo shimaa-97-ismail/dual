@@ -1,10 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { axioInstance } from "@/api/config";
-
+import { toast } from "react-hot-toast";
 export const studentApi = {
   getAll: () => axioInstance.get("student"),
   getById: (id) => axioInstance.get(`student/${id}`),
-  create: (data) => axioInstance.post("student", data),
+  create: (data) => axioInstance.post("student", data,{
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
   addAttendance: (id, data) =>
     axioInstance.post(`student/${id}/attendance`, data),
   getAttendance: (studentId) =>
@@ -35,11 +37,12 @@ export const studentKeys = {
   bySchool: (schoolId) => [...studentKeys.all, schoolId],
   byTrainnigPlace: (trainningId) => [...studentKeys.all, trainningId],
   search: (query) => [...studentKeys.all, "search", query],
+  inClass: (filters) => [...studentKeys.all, 'inClass', filters], 
 };
 
 export const useStudents = () => {
   return useQuery({
-    queryKey: studentKeys.lists(),
+    queryKey: studentKeys.all,
     queryFn: async () => {
       try {
         let response = await studentApi.getAll();
@@ -85,12 +88,17 @@ export const useUpdateStudent = () => {
     mutationFn: async ({ studentId, data }) => {
       console.log(data);
 
-      const response = await axioInstance.patch(`/student/${studentId}`, data);
+      const response = await axioInstance.patch(`/student/${studentId}`, data,{
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
       return response.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: studentKeys.lists() });
-      alert("تم تحديث الطالب بنجاح"); // or relevant query keys
+      queryClient.invalidateQueries({ queryKey: studentKeys.all });
+        toast.success("تم تحديث الطالب بنجاح");
+    },
+     onError: (error) => {
+      toast.error("فشل التحديث: " + error.message);
     },
   });
 };
@@ -104,7 +112,11 @@ export const useDeleteStudent = () => {
     },
     onSuccess: () => {
       // Invalidate and refetch students list
-      queryClient.invalidateQueries({ queryKey: studentKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: studentKeys.all });
+      toast.success("تم حذف الطالب بنجاح");
+    },
+     onError: (error) => {
+      toast.error("فشل الحذف: " + error.message);
     },
   });
 };

@@ -21,31 +21,31 @@ export function StudentTrainning({ data }) {
     setDateModelOpen(true);
     setStudent(std);
   };
-const getSaturdayOfWeek = (date) => {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);               // midnight local time
-  const day = d.getDay();               // 0=Sunday, ..., 6=Saturday
-  const diff = day === 6 ? 0 : day + 1; // days to go back to Saturday
-  d.setDate(d.getDate() - diff);
+  const getSaturdayOfWeek = (date) => {
+    const d = new Date(date);
+    d.setHours(0, 0, 0, 0); // midnight local time
+    const day = d.getDay(); // 0=Sunday, ..., 6=Saturday
+    const diff = day === 6 ? 0 : day + 1; // days to go back to Saturday
+    d.setDate(d.getDate() - diff);
 
-  // Build YYYY-MM-DD from local date components (no UTC conversion)
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const dayNum = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${dayNum}`;
-};
+    // Build YYYY-MM-DD from local date components (no UTC conversion)
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const dayNum = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${dayNum}`;
+  };
 
   const handleSubmit = async (date) => {
-  const saturday = getSaturdayOfWeek(date);
-  setDateModelOpen(false);
-  navigate(`/trainning-place/${trainningId}/absent/${student._id}`, {
-    state: {
-      startDate: saturday,
-      student: student,
-      trainningId: trainningId
-    }
-  });
-};
+    const saturday = getSaturdayOfWeek(date);
+    setDateModelOpen(false);
+    navigate(`/trainning-place/${trainningId}/absent/${student._id}`, {
+      state: {
+        startDate: saturday,
+        student: student,
+        trainningId: trainningId,
+      },
+    });
+  };
   const studDetails = (id) => {
     navigate(`/student/${id}`);
   };
@@ -81,7 +81,7 @@ const getSaturdayOfWeek = (date) => {
               (
                 <TableRow>
                   <TableCell
-                    className="font-medium text-center"
+                    className="font-medium text-center cursor-pointer"
                     onClick={() => studDetails(stud._id)}
                   >
                     {stud.stdName}
@@ -93,14 +93,19 @@ const getSaturdayOfWeek = (date) => {
                     {stud.intake}
                   </TableCell>
                   <TableCell className="font-medium text-center">
-                    {stud.phone}
+                    {stud.phones?.map((phone, index) => (
+                      <React.Fragment key={index}>
+                        {phone.number}
+                        {index < stud.phones.length - 1 && <br />}
+                      </React.Fragment>
+                    ))}
                   </TableCell>
                   <TableCell className="font-medium text-center">
                     {stud.studStatus}
                   </TableCell>
 
                   <TableCell className="font-medium text-center">
-                    {stud.stdSpecial?._id}
+                    {stud.stdSpecial?.name}
                   </TableCell>
                   <TableCell className="font-medium text-center">
                     {stud.current_stage.stage_name}

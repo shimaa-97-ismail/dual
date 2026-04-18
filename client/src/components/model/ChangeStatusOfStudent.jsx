@@ -35,6 +35,15 @@ export function ChangeStatusOfStudentModel({
       });
     }
   }, [open]);
+  useEffect(() => {
+    if (formData.studStatus === "متخرج") {
+      setFormData((prev) => ({
+        ...prev,
+        stage_name: "",
+        current_class: "",
+      }));
+    }
+  }, [formData.studStatus]);
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -49,8 +58,11 @@ export function ChangeStatusOfStudentModel({
     // Prepare updates object
     const updates = {};
     if (formData.studStatus) updates.studStatus = formData.studStatus;
-    if (formData.stage_name) updates.stage_name = formData.stage_name;
-    if (formData.current_class) updates.current_class = formData.current_class;
+
+    if (formData.studStatus !== "متخرج") {
+      if (formData.stage_name) updates.stage_name = formData.stage_name;
+      if (formData.current_class) updates.current_class = formData.current_class;
+    }
 
     if (Object.keys(updates).length === 0) {
       toast.error("يرجى اختيار بيانات للتحديث");
@@ -74,7 +86,8 @@ export function ChangeStatusOfStudentModel({
     );
   };
 
-  const studentStatus = ["مستجد", "محول", "باقى(راسب)", "ناجح منقول"];
+  const studentStatus = ["مستجد", "محول", "باقى(راسب)", "ناجح منقول"," متخرج"];
+  const isGraduated = formData.studStatus === "متخرج";
 
   return (
     <BaseModel
@@ -108,8 +121,42 @@ export function ChangeStatusOfStudentModel({
             </SelectContent>
           </Select>
         </div>
-
-        <div className="flex items-center ">
+        {!isGraduated && (
+          <div className="flex items-center">
+            <div className="m-3 mt-6">
+              <LabelForm htmlFor="stage_name" title="المرحله الدراسيه" required={true} />
+            </div>
+            <Select
+              value={formData.stage_name}
+              onValueChange={(value) => handleChange("stage_name", value)}
+            >
+              <SelectTrigger className="w-[150px] text-black!">
+                <SelectValue placeholder="اختر المرحله" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="الصف الأول">الصف الأول</SelectItem>
+                <SelectItem value="الصف الثاني">الصف الثاني</SelectItem>
+                <SelectItem value="الصف الثالث">الصف الثالث</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+{!isGraduated && (
+          <div className="flex items-center">
+            <div className="m-3 mt-3">
+              <LabelForm htmlFor="current_class" title="الفصل" required={true} />
+            </div>
+            <Input
+              id="current_class"
+              type="text"
+              className="w-[100px] text-black!"
+              value={formData.current_class}
+              onChange={(e) => handleChange("current_class", e.target.value)}
+              placeholder="1/2"
+            />
+          </div>
+        )}
+        {/* <div className="flex items-center ">
           <div className="m-3 mt-6">
           <LabelForm htmlFor="stage_name" title="المرحله الدراسيه" required={true} />
 
@@ -143,7 +190,7 @@ export function ChangeStatusOfStudentModel({
             placeholder="1/2"
             required
           />
-        </div>
+        </div> */}
       </div>
     </BaseModel>
   );

@@ -15,8 +15,9 @@ export function PaymentModel({
       return {
         month: initialData.month,
         year: initialData.year,
-        amountDue: initialData.amountDue,
+        amountDueReceipt1: initialData.amountDueReceipt1,
         receipt1: initialData.receipt1,
+        amountDueReceipt2: initialData.amountDueReceipt2,
         receipt2: initialData.receipt2,
         paymentDate: initialData.paymentDate ? initialData.paymentDate.split("T")[0] : "",
         academicyearForPayment: initialData.academicyearForPayment,
@@ -25,7 +26,8 @@ export function PaymentModel({
       return {
         year: "",
         month: "",
-        amountDue: "",
+        amountDueReceipt1: "",
+        amountDueReceipt2:"",
         paymentDate: "",
         receipt1: "",
         receipt2: "",
@@ -46,7 +48,8 @@ export function PaymentModel({
     const newErrors = {};
     if (!formData.month) newErrors.month = "الشهر مطلوب";
     if (!formData.year) newErrors.year = "السنة مطلوبة";
-    if (!formData.amountDue) newErrors.amountDue = "القيمة مطلوبة";
+    if (!formData.amountDueReceipt1) newErrors.amountDueReceipt1 = "القيمة مطلوبة";
+    if (!formData.amountDueReceipt2) newErrors.amountDueReceipt2 = "القيمة مطلوبة";
     if (!formData.receipt1) newErrors.receipt1 = "رقم الإيصال الأول مطلوب";
     if (!formData.paymentDate) newErrors.paymentDate = "التاريخ مطلوب"
     else if(formData.year.toString().length !== 4) newErrors.year="السنة يجب ان تكون 4 أرقام  (مثال: 2024) "
@@ -62,7 +65,8 @@ export function PaymentModel({
         setFormData({
           year: "",
           month: "",
-          amountDue: "",
+          amountDueReceipt1: "",
+          amountDueReceipt2:"",
           paymentDate: "",
           receipt1: "",
           receipt2: "",
@@ -94,7 +98,8 @@ export function PaymentModel({
       setFormData({
         month: initialData.month,
         year: initialData.year,
-        amountDue: initialData.amountDue,
+        amountDueReceipt1: initialData.amountDueReceipt1,
+        amountDueReceipt2: initialData.amountDueReceipt2,
         receipt1: initialData.receipt1,
         receipt2: initialData.receipt2,
         paymentDate: initialData.paymentDate ? initialData.paymentDate.split("T")[0] : "",
@@ -104,7 +109,8 @@ export function PaymentModel({
       setFormData({
         year: "",
         month: "",
-        amountDue: "",
+        amountDueReceipt1: "",
+        amountDueReceipt2:"",
         paymentDate: "",
         receipt1: "",
         receipt2: "",
