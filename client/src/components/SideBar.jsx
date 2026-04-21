@@ -10,7 +10,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Link, useMatch, useResolvedPath } from "react-router-dom";
-
+import "./index.css";
 const IsActive = (path) => {
   const resolved = useResolvedPath(path);
   const match = useMatch({ path: resolved.pathname, end: true });
@@ -31,17 +31,16 @@ export function AppSidebar() {
   ];
 
   return (
-    <Sidebar side="right">
+    <Sidebar side="right" >
       <SidebarHeader>
         <div className="flex ">
-          <SidebarTrigger className="" />
-
-          <div className="flex flex-col items-center justify-center ">
+               <div className="flex flex-col items-center justify-center ">
             {/* <h2 className="font-bold text-base text-start mb-1 mt-2">مديريه التضامن الاجتماعى بقنا</h2> */}
-            <h2 className="font-bold text-base text-start mt-2">جمعية رؤى للتنمية بالمشاركة</h2>
+            <h2 className="font-bold text-base text-start mt-2 mr-2">جمعية رؤى للتنمية بالمشاركة</h2>
             {/* <h2 className="font-bold text-sm text-start mb-2 ">المشهورة برقم 949 لسنة2005</h2> */}
           </div>
         </div>
+        
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>

@@ -19,6 +19,9 @@ const navigate=useNavigate();
   navigate("/choose-class", { state: { mode: "other" } });
 
   }
+  const navigateToTotalExpenses=()=>{
+    navigate("/total-expenses")
+  }
   return (
     <>
       <MainHeader
@@ -49,6 +52,8 @@ const navigate=useNavigate();
         } 
       >
          <ReportCard title={" طلاب الفصل"} onSubmit={navigateToChooseClass}/>
+         <ReportCard title={" اجمالى المسدادات"} onSubmit={navigateToTotalExpenses}/>
+
       </div>
     </>
   );

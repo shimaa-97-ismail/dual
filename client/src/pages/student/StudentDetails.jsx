@@ -48,13 +48,13 @@ export function StudentDetails() {
                 <strong>الرقم القومى:</strong> {student?.studID}
               </li>
               {/* <li><strong> العمر:</strong> {student.stdAge}</li> */}
-              <li className="p-2">
+              <li className="p-2 flex ">
                 <strong>رقم التليفون:</strong>
                 {student?.phones?.map((phone, index) => (
-                  <React.Fragment key={index}>
+                  <div key={index} className="mr-6">
                     {phone.number}
-                    {index < student?.phones.length - 1 && <br />}
-                  </React.Fragment>
+                    {index < student?.phones.length - 1 &&  <br />}
+                  </div>
                 ))}
               </li>
               <li className="p-2">
@@ -98,7 +98,7 @@ export function StudentDetails() {
               {student?.fatherJobTitle === "موظف" &&
                 student?.fatherJobTitle && (
                   <li>
-                    <strong>تفاصيل الوظيفة :</strong> {student?.fatherJobTitle}
+                    <strong>تفاصيل الوظيفة :</strong> {student?.fatherJobDetails}
                   </li>
                 )}
               {student?.fatherJobTitle === "متوفى" &&
@@ -167,10 +167,10 @@ export function StudentDetails() {
               </h1>
               <ul className="pr-4">
                 <li className="p-2">
-                  <strong> الكود:</strong> {student?.code}
+                  <strong> الكود:</strong> {student?.code || "غير محدد"}
                 </li>
                 <li className="p-2">
-                  <strong>البريد الالكترونى:</strong> {student?.email}
+                  <strong>البريد الالكترونى:</strong> {student?.email || "غير محدد"}
                 </li>
               </ul>
             </div>
@@ -182,12 +182,13 @@ export function StudentDetails() {
                 </li>
                 <li className="p-2">
                   <strong>الرقم السرى:</strong>
-                  <input
+                  {student?.password || "غير محدد"}
+                  {/* <input
                     className="border-0"
                     readOnly
                     type="password"
-                    value={student?.password}
-                  />
+                    value={student?.password || "غير محدد"}
+                  /> */}
                 </li>
               </ul>
             </div>
@@ -208,7 +209,7 @@ export function StudentDetails() {
               </li>
               <li className="p-2">
                 <strong> ورشه التدربيه :</strong>{" "}
-                {student?.stdTrainningPlace?.name}
+                {student?.stdTrainningPlace?.name || "غير محدد"}
               </li>
             </ul>
           </div>

@@ -9,6 +9,8 @@ import "./table.css";
 import { useNavigate } from "react-router-dom";
 
 export function StudentTable({ data, showCheckbox }) {
+  console.log(data);
+  
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -50,7 +52,7 @@ export function StudentTable({ data, showCheckbox }) {
     });
 
     updateMutation.mutate(
-      { id: selectedStudent._id, data: formDataToSend },
+      { studentId: selectedStudent._id, data: formDataToSend },
       {
         onSuccess: () => {
           toast.success("تم تحديث بيانات الطالب بنجاح");
@@ -99,7 +101,7 @@ export function StudentTable({ data, showCheckbox }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.map((stud) => (
+            {data?.students?.map((stud) => (
               <TableRow key={stud._id}>
                 {showCheckbox && (
                   <TableCell className="w-[50px] text-center">
@@ -174,6 +176,8 @@ export function StudentTable({ data, showCheckbox }) {
         open={showAddModal}
         onOpenChange={setShowAddModal}
         selectedStudentIds={selectedStudents}
+          currentStage={data?.stage}          
+  currentAcademicYear={data?.intake} 
       />
     </>
   );

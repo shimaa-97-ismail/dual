@@ -16,8 +16,7 @@ import {departementRouter} from "./src/routes/depatement.js";
 import {typeOfSchoolRouter} from "./src/routes/typeOfSchool.js";
 import {intakeRouter} from "./src/routes/intake.js";
 import { intakeModel } from "./src/models/intake.js";
-
-
+import {paymentRouter} from "./src/routes/payment.js";
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
@@ -29,6 +28,7 @@ app.use("/trainning-place", trainningPlaceRouter);
 app.use("/departement",departementRouter);
 app.use("/typeOfSchool",typeOfSchoolRouter);
 app.use("/intake",intakeRouter);
+app.use("/payments",paymentRouter)
 
 
 

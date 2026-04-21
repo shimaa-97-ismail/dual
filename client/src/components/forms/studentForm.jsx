@@ -14,14 +14,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useSchoolById, useSchools } from "@/hooks/useSchools";
 import { useTrainningPlaces } from "@/hooks/useTrainngPlace";
 import { Button } from "@/components/ui/button";
-
-export const StudentForm = ({ value, onChange, errors = {},onSubmit }) => {
+import {useParams} from "react-router-dom";
+export const StudentForm = ({ value, onChange, errors = {}, onSubmit }) => {
   console.log(value);
-
+const { id } = useParams();
   const { data: allSchool } = useSchools();
-  const { data: school, isLoading, isError, error, refetch } = useSchoolById(value?.school );
+  const { data: school, isLoading, isError, error, refetch } = useSchoolById(value?.school);
   const { data: trainningPlaces } = useTrainningPlaces();
-console.log(school);
 
   const DEFAULT_PHONES = [
     { number: "", type: "primary" },
@@ -70,21 +69,20 @@ console.log(school);
     onChange(`${parent}JobDetails`, details);
   };
 
- 
-
   const handleFileChange = (field, file) => {
     console.log(field);
-    
-  onChange(field, file);
-};
+    onChange(field, file);
+  };
+
   const changeSchool = (selectedId) => {
     onChange("school", selectedId);
     onChange("stdSpecial", "");
-    onchange("intake","")
+    onChange("intake", ""); // fixed typo: was onchange
   };
-  const handleSubmit=()=>{
-onSubmit(value)
-  }
+
+  const handleSubmit = () => {
+    onSubmit(value);
+  };
 
   if (isLoading) return <div>بيانات المدارس بتتحمل...</div>;
   if (isError)
@@ -96,51 +94,51 @@ onSubmit(value)
     );
 
   return (
-    <div className="m-2">
+    <div className="m-2 md:m-4">
       {/* Personal Info */}
-      <section className="mb-8 p-4 border rounded">
+      <section className="mb-8 p-4 border rounded bg-white">
         <h2 className="text-xl font-bold mb-4">المعلومات الشخصية</h2>
-        <div className="space-y-2 m-2 w-1/2">
-          <LabelForm htmlFor="name" title="اسم الطالب" required />
-          <Input
-            id="name"
-            value={value?.stdName || ""}
-            onChange={(e) => onChange("stdName", e.target.value)}
-            placeholder="أدخل اسم الطالب"
-            className={errors?.stdName ? 'border-red-500' : ''}
-            required
-          />
-          {errors?.stdName && <p className="text-red-500 text-sm mt-1">{errors.stdName}</p>}
-        </div>
-        <div className="space-y-2 w-1/2 m-2">
-          <LabelForm htmlFor="studID" title="رقم القومى" required />
-          <Input
-            id="studID"
-            value={value?.studID || ""}
-            onChange={(e) => onChange("studID", e.target.value)}
-            placeholder="أدخل رقم القومى"
-            className={errors?.studID ? 'border-red-500' : ''}
-            required
-          />
-          {errors?.studID && <p className="text-red-500 text-sm mt-1">{errors?.studID}</p>}
-        </div>
-        <div className="flex w-full justify-between items-center flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 w-1/2 m-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <LabelForm htmlFor="name" title="اسم الطالب" required />
+            <Input
+              id="name"
+              value={value?.stdName || ""}
+              onChange={(e) => onChange("stdName", e.target.value)}
+              placeholder="أدخل اسم الطالب"
+              className={errors?.stdName ? "border-red-500" : ""}
+              required
+            />
+            {errors?.stdName && <p className="text-red-500 text-sm">{errors.stdName}</p>}
+          </div>
+          <div className="space-y-2">
+            <LabelForm htmlFor="studID" title="رقم القومى" required />
+            <Input
+              id="studID"
+              value={value?.studID || ""}
+              onChange={(e) => onChange("studID", e.target.value)}
+              placeholder="أدخل رقم القومى"
+              className={errors?.studID ? "border-red-500" : ""}
+              required
+            />
+            {errors?.studID && <p className="text-red-500 text-sm">{errors.studID}</p>}
+          </div>
+          <div className="space-y-2">
             <LabelForm htmlFor="stdBOD" title="تاريخ الميلاد" required />
             <Input
               id="stdBOD"
               type="date"
               value={formatDateForInput(value?.stdBOD)}
               onChange={(e) => onChange("stdBOD", e.target.value)}
-              className={errors?.stdBOD ? 'border-red-500' : ''}
+              className={errors?.stdBOD ? "border-red-500" : ""}
               required
             />
-            {errors?.stdBOD && <p className="text-red-500 text-sm mt-1">{errors.stdBOD}</p>}
+            {errors?.stdBOD && <p className="text-red-500 text-sm">{errors.stdBOD}</p>}
           </div>
-          <div className="space-y-2 w-1/2 mb-2">
+          <div className="">
             <LabelForm htmlFor="stdGender" title="الجنس" required />
             <RadioGroup
-              className="flex"
+              className="flex gap-4"
               dir="rtl"
               value={value?.stdGender || ""}
               onValueChange={(val) => onChange("stdGender", val)}
@@ -154,11 +152,9 @@ onSubmit(value)
                 <Label htmlFor="option-two">أنثى</Label>
               </div>
             </RadioGroup>
-            {errors?.stdGender && <p className="text-red-500 text-sm mt-1">{errors.stdGender}</p>}
+            {errors?.stdGender && <p className="text-red-500 text-sm">{errors.stdGender}</p>}
           </div>
-        </div>
-        <div className="flex w-full justify-between items-center flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 w-1/2 m-3">
+          <div className="space-y-2 ">
             <LabelForm htmlFor="primaryPhone" title="رقم التليفون" required />
             <Input
               id="primaryPhone"
@@ -166,12 +162,12 @@ onSubmit(value)
               value={value?.phones?.[0]?.number || ""}
               onChange={(e) => handlePhoneChange(0, e.target.value)}
               placeholder="أدخل رقم التليفون"
-              className={errors?.phones ? 'border-red-500' : ''}
+              className={errors?.phones ? "border-red-500" : ""}
               required
             />
-            {errors?.phones && <p className="text-red-500 text-sm mt-1">{errors.phones}</p>}
+            {errors?.phones && <p className="text-red-500 text-sm">{errors.phones}</p>}
           </div>
-          <div className="space-y-2 w-1/2 mt-6 m-3">
+          <div className="space-y-2 mt-3">
             <LabelForm htmlFor="alternatePhone" title="رقم تليفون اخر" />
             <Input
               id="alternatePhone"
@@ -181,66 +177,61 @@ onSubmit(value)
               placeholder="أدخل رقم تليفون بديل"
             />
           </div>
+          <div className="space-y-2 md:col-span-2 lg:col-span-3">
+            <LabelForm htmlFor="stdAddress" title="العنوان" required />
+            <textarea
+              name="stdAddress"
+              value={value?.stdAddress || ""}
+              onChange={(e) => onChange("stdAddress", e.target.value)}
+              className={`w-full border rounded-md p-2 ${errors?.stdAddress ? "border-red-500" : "border-gray-300"}`}
+              rows="3"
+            />
+            {errors?.stdAddress && <p className="text-red-500 text-sm">{errors.stdAddress}</p>}
+          </div>
+          <div className="space-y-2">
+            <LabelForm htmlFor="studentImage" title="صورة الطالب" />
+            <Input
+              id="studentImage"
+              type="file"
+              accept="image/*"
+              onChange={(e) => onChange("studentImage", e.target.files[0])}
+            />
+            {value?.studentImage && typeof value.studentImage === "string" && (
+              <img src={`http://localhost:5000/${value.studentImage}`} alt="Student" className="w-24 h-24 object-cover mt-2" />
+            )}
+          </div>
         </div>
-        <div className="space-y-2 mb-3">
-          <LabelForm htmlFor="stdAddress" title="العنوان" required />
-          <textarea
-            name="stdAddress"
-            value={value?.stdAddress || ""}
-            onChange={(e) => onChange("stdAddress", e.target.value)}
-            className={`border ${errors?.stdAddress ? 'border-red-500' : ''}`}
-            rows="4"
-            cols="100"
-          />
-          {errors?.stdAddress && <p className="text-red-500 text-sm mt-1">{errors.stdAddress}</p>}
-        </div>
-<div className="space-y-2 m-2 w-1/2">
-  <LabelForm htmlFor="studentImage" title="صورة الطالب" />
-  <Input
-    id="studentImage"
-    type="file"
-    accept="image/*"
-    onChange={(e) => onChange("studentImage", e.target.files[0])}
-  />
-  {value?.studentImage && typeof value.studentImage === 'string' && (
-    <img src={`http://localhost:5000/${value.studentImage}`} alt="Student" className="w-24 h-24 object-cover mt-2" />
-  )}
-</div>
-
       </section>
 
       {/* Father Info */}
-      <section className="mb-8 p-4 border rounded">
+      <section className="mb-8 p-4 border rounded bg-white">
         <h2 className="text-xl font-bold mb-4">المعلومات الاب</h2>
-        <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 m-2 w-1/2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
             <LabelForm htmlFor="fatherName" title="اسم الاب" required />
             <Input
               id="fatherName"
               value={value?.fatherName || ""}
               onChange={(e) => onChange("fatherName", e.target.value)}
               placeholder="أدخل اسم الاب"
-              className={errors?.fatherName ? 'border-red-500' : ''}
+              className={errors?.fatherName ? "border-red-500" : ""}
               required
             />
-            {errors?.fatherName && <p className="text-red-500 text-sm mt-1">{errors.fatherName}</p>}
+            {errors?.fatherName && <p className="text-red-500 text-sm">{errors.fatherName}</p>}
           </div>
-          <div className="space-y-2 w-1/2 m-2">
+          <div className="space-y-2">
             <LabelForm htmlFor="fatherID" title="رقم القومى" required />
             <Input
               id="fatherID"
               value={value?.fatherID || ""}
               onChange={(e) => onChange("fatherID", e.target.value)}
               placeholder="أدخل رقم القومى"
-              className={errors?.fatherID ? 'border-red-500' : ''}
+              className={errors?.fatherID ? "border-red-500" : ""}
               required
             />
-            {errors?.fatherID && <p className="text-red-500 text-sm mt-1">{errors.fatherID}</p>}
+            {errors?.fatherID && <p className="text-red-500 text-sm">{errors.fatherID}</p>}
           </div>
-        </div>
-        <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-        
-          <div className="space-y-2 w-1/2 m-3">
+          <div className="space-y-2 md:col-span-2">
             <LabelForm htmlFor="fatherJobTitle" title="وظيفه الاب" required />
             <JobField
               label="بيانات الأب"
@@ -249,59 +240,56 @@ onSubmit(value)
               detailsValue={value?.fatherJobDetails}
               onDetailsChange={(val) => handleJobDetailsChange("father", val)}
               onFileChange={(file) => handleFileChange("fatherDeathCert", file)}
-              fileValue={value?.fatherDeathCert} 
+              fileValue={value?.fatherDeathCert}
               errors={errors?.fatherJobTitle || errors?.fatherJobDetails}
             />
-            {errors?.fatherJobTitle && <p className="text-red-500 text-sm mt-1">{errors.fatherJobTitle}</p>}
-            {errors?.fatherJobDetails && <p className="text-red-500 text-sm mt-1">{errors.fatherJobDetails}</p>}
+            {errors?.fatherJobTitle && <p className="text-red-500 text-sm">{errors.fatherJobTitle}</p>}
+            {errors?.fatherJobDetails && <p className="text-red-500 text-sm">{errors.fatherJobDetails}</p>}
           </div>
-            <div className="space-y-2 w-1/2 m-3">
+          <div className="space-y-2">
             <LabelForm htmlFor="fatherPhone" title="رقم التليفون" required />
             <Input
               id="fatherPhone"
               value={value?.fatherPhone || ""}
               onChange={(e) => onChange("fatherPhone", e.target.value)}
               placeholder="أدخل رقم التليفون"
-              className={errors?.fatherPhone ? 'border-red-500' : ''}
+              className={errors?.fatherPhone ? "border-red-500" : ""}
               required
             />
-            {errors?.fatherPhone && <p className="text-red-500 text-sm mt-1">{errors.fatherPhone}</p>}
+            {errors?.fatherPhone && <p className="text-red-500 text-sm">{errors.fatherPhone}</p>}
           </div>
         </div>
       </section>
 
-      {/* Mother Info (similar to father) */}
-      <section className="mb-8 p-4 border rounded">
+      {/* Mother Info */}
+      <section className="mb-8 p-4 border rounded bg-white">
         <h2 className="text-xl font-bold mb-4">المعلومات الام</h2>
-        <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 m-2 w-1/2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
             <LabelForm htmlFor="motherName" title="اسم الام" required />
             <Input
               id="motherName"
               value={value?.motherName || ""}
               onChange={(e) => onChange("motherName", e.target.value)}
               placeholder="أدخل اسم الام"
-              className={errors?.motherName ? 'border-red-500' : ''}
+              className={errors?.motherName ? "border-red-500" : ""}
               required
             />
-            {errors?.motherName && <p className="text-red-500 text-sm mt-1">{errors.motherName}</p>}
+            {errors?.motherName && <p className="text-red-500 text-sm">{errors.motherName}</p>}
           </div>
-          <div className="space-y-2 w-1/2 m-2">
+          <div className="space-y-2">
             <LabelForm htmlFor="motherID" title="رقم القومى" required />
             <Input
               id="motherID"
               value={value?.motherID || ""}
               onChange={(e) => onChange("motherID", e.target.value)}
               placeholder="أدخل رقم القومى"
-              className={errors?.motherID ? 'border-red-500' : ''}
+              className={errors?.motherID ? "border-red-500" : ""}
               required
             />
-            {errors?.motherID && <p className="text-red-500 text-sm mt-1">{errors.motherID}</p>}
+            {errors?.motherID && <p className="text-red-500 text-sm">{errors.motherID}</p>}
           </div>
-        </div>
-        <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-         
-          <div className="space-y-2 w-1/2 m-3">
+          <div className="space-y-2 md:col-span-2">
             <LabelForm htmlFor="motherJobTitle" title="وظيفه الام" required />
             <JobField
               label="بيانات الأم"
@@ -313,10 +301,10 @@ onSubmit(value)
               fileValue={value?.motherDeathCert}
               errors={errors?.motherJobTitle || errors?.motherJobDetails}
             />
-            {errors?.motherJobTitle && <p className="text-red-500 text-sm mt-1">{errors.motherJobTitle}</p>}
-            {errors?.motherJobDetails && <p className="text-red-500 text-sm mt-1">{errors.motherJobDetails}</p>}
+            {errors?.motherJobTitle && <p className="text-red-500 text-sm">{errors.motherJobTitle}</p>}
+            {errors?.motherJobDetails && <p className="text-red-500 text-sm">{errors.motherJobDetails}</p>}
           </div>
-           <div className="space-y-2 w-1/2 m-3">
+          <div className="space-y-2">
             <LabelForm htmlFor="motherPhone" title="رقم التليفون" />
             <Input
               id="motherPhone"
@@ -329,10 +317,10 @@ onSubmit(value)
       </section>
 
       {/* Additional Info */}
-      <section className="mb-8 p-4 border rounded">
+      <section className="mb-8 p-4 border rounded bg-white">
         <h2 className="text-xl font-bold mb-4">معلومات إضافية</h2>
-        <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 m-2 w-1/2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
             <LabelForm htmlFor="email" title="البريد الالكترونى" />
             <Input
               id="email"
@@ -340,11 +328,11 @@ onSubmit(value)
               value={value?.email || ""}
               onChange={(e) => onChange("email", e.target.value)}
               placeholder="أدخل البريد الالكترونى"
-              className={errors?.email ? 'border-red-500' : ''}
+              className={errors?.email ? "border-red-500" : ""}
             />
-            {errors?.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
+            {errors?.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
-          <div className="space-y-2 w-1/2 m-2">
+          <div className="space-y-2">
             <LabelForm htmlFor="password" title="رقم السرى" />
             <Input
               id="password"
@@ -354,9 +342,7 @@ onSubmit(value)
               placeholder="أدخل رقم السرى"
             />
           </div>
-        </div>
-        <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 w-1/2 m-3 ">
+          <div className="space-y-2">
             <LabelForm htmlFor="preparatorySchoolTotalScore" title="مجموع الاعدادى" required />
             <Input
               id="preparatorySchoolTotalScore"
@@ -364,12 +350,12 @@ onSubmit(value)
               value={value?.preparatorySchoolTotalScore || ""}
               onChange={(e) => onChange("preparatorySchoolTotalScore", e.target.value)}
               placeholder="أدخل المجموع"
-              className={errors?.preparatorySchoolTotalScore ? 'border-red-500' : ''}
+              className={errors?.preparatorySchoolTotalScore ? "border-red-500" : ""}
               required
             />
-            {errors?.preparatorySchoolTotalScore && <p className="text-red-500 text-sm mt-1">{errors.preparatorySchoolTotalScore}</p>}
+            {errors?.preparatorySchoolTotalScore && <p className="text-red-500 text-sm">{errors.preparatorySchoolTotalScore}</p>}
           </div>
-          <div className="space-y-2 m-3 w-1/2">
+          <div className="space-y-2 mt-3">
             <LabelForm htmlFor="code" title="الكود" />
             <Input
               id="code"
@@ -377,20 +363,19 @@ onSubmit(value)
               onChange={(e) => onChange("code", e.target.value)}
               placeholder="أدخل الكود"
             />
-            {errors?.code && <p className="text-red-500 text-sm mt-1">{errors.code}</p>}
-
+            {errors?.code && <p className="text-red-500 text-sm">{errors.code}</p>}
           </div>
         </div>
       </section>
 
       {/* Academic Info */}
-      <section className="mb-8 p-4 border rounded">
+      <section className="mb-8 p-4 border rounded bg-white">
         <h2 className="text-xl font-bold mb-4">المعلومات الدراسيه</h2>
-        <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 m-2 w-1/2">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-2">
             <LabelForm htmlFor="school" title="المدرسه" required />
             <Select value={value?.school} onValueChange={changeSchool}>
-              <SelectTrigger className={`text-black! ${errors?.school ? 'border-red-500' : ''}`}>
+              <SelectTrigger className={errors?.school ? "border-red-500 text-black!" : "text-black!"}>
                 <SelectValue placeholder="اختر المدرسه" />
               </SelectTrigger>
               <SelectContent>
@@ -399,15 +384,15 @@ onSubmit(value)
                 ))}
               </SelectContent>
             </Select>
-            {errors?.school && <p className="text-red-500 text-sm mt-1">{errors.school}</p>}
+            {errors?.school && <p className="text-red-500 text-sm">{errors.school}</p>}
           </div>
-          <div className="space-y-2 m-2 w-1/2">
+          <div className="space-y-2">
             <LabelForm htmlFor="studStatus" title="حاله الطالب" required />
             <Select
               value={value?.studStatus || ""}
               onValueChange={(val) => onChange("studStatus", val)}
             >
-              <SelectTrigger className={errors?.studStatus ? 'border-red-500 text-black!' : 'text-black!'}>
+              <SelectTrigger className={errors?.studStatus ? "border-red-500 text-black!" : "text-black!"}>
                 <SelectValue placeholder="اختر الحاله" />
               </SelectTrigger>
               <SelectContent>
@@ -416,15 +401,15 @@ onSubmit(value)
                 ))}
               </SelectContent>
             </Select>
-            {errors?.studStatus && <p className="text-red-500 text-sm mt-1">{errors.studStatus}</p>}
+            {errors?.studStatus && <p className="text-red-500 text-sm">{errors.studStatus}</p>}
           </div>
-          <div className="space-y-2 m-2 w-1/2">
+          <div className="space-y-2">
             <LabelForm htmlFor="stage_name" title="المرحله الدراسيه" required />
             <Select
               value={value?.current_stage?.stage_name || ""}
               onValueChange={(val) => handleFieldChange("current_stage.stage_name", val)}
             >
-              <SelectTrigger className={errors?.current_stage ? 'text-black! border-red-500' : 'text-black!'}>
+              <SelectTrigger className={errors?.current_stage ? "border-red-500 text-black!" : "text-black!"}>
                 <SelectValue placeholder="اختر النوع" />
               </SelectTrigger>
               <SelectContent>
@@ -433,16 +418,16 @@ onSubmit(value)
                 <SelectItem value="الصف الثالث">الصف الثالث</SelectItem>
               </SelectContent>
             </Select>
-            {errors?.current_stage && <p className="text-red-500 text-sm mt-1">{errors.current_stage}</p>}
+            {errors?.current_stage && <p className="text-red-500 text-sm">{errors.current_stage}</p>}
           </div>
-          <div className="space-y-2 w-1/2 m-2">
+          <div className="space-y-2">
             <LabelForm htmlFor="stdSpecial" title="التخصص" required />
             <Select
               value={value?.stdSpecial || ""}
               onValueChange={(val) => onChange("stdSpecial", val)}
               disabled={!value?.school}
             >
-              <SelectTrigger className={errors?.stdSpecial ? 'text-black! border-red-500' : 'text-black!'}>
+              <SelectTrigger className={errors?.stdSpecial ? "border-red-500 text-black!" : "text-black!"}>
                 <SelectValue placeholder="اختر التخصص" />
               </SelectTrigger>
               <SelectContent>
@@ -451,11 +436,9 @@ onSubmit(value)
                 ))}
               </SelectContent>
             </Select>
-            {errors?.stdSpecial && <p className="text-red-500 text-sm mt-1">{errors.stdSpecial}</p>}
+            {errors?.stdSpecial && <p className="text-red-500 text-sm">{errors.stdSpecial}</p>}
           </div>
-        </div>
-        <div className="flex w-full justify-between flex-wrap lg:flex-nowrap">
-          <div className="space-y-2 w-1/2 m-3">
+          <div className="space-y-2">
             <LabelForm htmlFor="stdTrainningPlace" title="ورشه التدريب" />
             <Select
               value={value?.stdTrainningPlace || ""}
@@ -471,14 +454,14 @@ onSubmit(value)
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-2 w-1/2 m-3">
+          <div className="space-y-2">
             <LabelForm htmlFor="intake" title="الدفعه" />
-             <Select
+            <Select
               value={value?.intake || ""}
               onValueChange={(val) => onChange("intake", val)}
               disabled={!value?.school}
             >
-              <SelectTrigger className={errors?.intake ? 'text-black! border-red-500' : 'text-black!'}>
+              <SelectTrigger className={errors?.intake ? "border-red-500 text-black!" : "text-black!"}>
                 <SelectValue placeholder="اختر الدفعه" />
               </SelectTrigger>
               <SelectContent>
@@ -487,9 +470,8 @@ onSubmit(value)
                 ))}
               </SelectContent>
             </Select>
-          
           </div>
-          <div className="space-y-2 w-1/2 m-3">
+        {id && <div className="space-y-2">
             <LabelForm htmlFor="graduationYear" title="سنة التخرج" />
             <Input
               id="graduationYear"
@@ -497,8 +479,9 @@ onSubmit(value)
               onChange={(e) => onChange("graduationYear", e.target.value)}
               placeholder="2026"
             />
-          </div>
-          <div className="space-y-2 w-1/2 m-3">
+          </div> } 
+         
+          <div className="space-y-2">
             <LabelForm htmlFor="current_class" title="الفصل" />
             <Input
               id="current_class"
@@ -509,17 +492,11 @@ onSubmit(value)
           </div>
         </div>
       </section>
-      <section className="flex justify-end">
-         {/* <Button variant="outline" className=" bg-[#831e2e] hover:bg-[#a42338]" onClick={handleCancel} type="button">
-            الغاء
-          </Button> */}
-          <Button
-            onClick={handleSubmit}
-            // disabled={disabled || isLoading}
-            type="button"
-          >
-            حفظ
-          </Button>
+
+      <section className="flex justify-end mt-6">
+        <Button onClick={handleSubmit} type="button">
+          حفظ
+        </Button>
       </section>
     </div>
   );

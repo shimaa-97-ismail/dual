@@ -4,14 +4,16 @@ import {
   useSchoolByintake,
   useClassesForAttendance,
   useStudentInClasses,
+  fetchStudents
 } from "../../hooks/useSchools";
 import "./absent.css";
 import { useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+import { useQueryClient } from "@tanstack/react-query";
 export const ChooseClass = () => {
   const location = useLocation();
   const mode = location.state?.mode;
+  const queryClient = useQueryClient(); 
   const [step, setStep] = useState(1);
   const [selectedSchool, setSelectedSchool] = useState("");
   const [selectedBatch, setSelectedBatch] = useState("");
@@ -86,7 +88,7 @@ export const ChooseClass = () => {
     setSelectedStage(stage);
     setStep(5);
   };
-  const { data: student, refetch } = useStudentInClasses(
+  const { data: student } = useStudentInClasses(
     {
       school: selectedSchool,
       intake: selectedBatch,
@@ -95,7 +97,7 @@ export const ChooseClass = () => {
       className: selectedClass,
     },
     {
-      enabled: false,
+      enabled: !!selectedClass,
     },
   );
   console.log(student);
@@ -103,28 +105,20 @@ export const ChooseClass = () => {
   const handleClassSelection = async (Class) => {
     setSelectedClass(Class);
     if (mode === "other") {
-      const result = await refetch({
-        school: selectedSchool,
-        intake: selectedBatch,
-        special: selectedMajorId,
-        stage: selectedStage,
-        className: Class,
-      });
-console.log(result);
+      const newParams = {
+      school: selectedSchool,
+      intake: selectedBatch,
+      special: selectedMajorId,
+      stage: selectedStage,
+      className: Class,
+    };
+       const data = await queryClient.fetchQuery({
+      queryKey: ["studentsInClass", newParams],
+      queryFn: () => fetchStudents(newParams),
+    });
 
-      const studentsData = result?.data;
-      navigate("/student-class", {
-        state: {
-          students: studentsData, // pass the students data
-          params: {
-            school: selectedSchool,
-            intake: selectedBatch,
-            special: selectedMajorId,
-            stage: selectedStage,
-            className: Class,
-          },
-        },
-      });
+  navigate("/student-class", { state: { students: data, params: newParams } });
+      
     } else {
       setStep(6);
     }

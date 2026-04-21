@@ -750,46 +750,39 @@ export const useStudentInClasses = async (req, res) => {
   },
       // Lookup enrollments
       {
-        $lookup: {
-          from: "enrollments",
-          let: { studentId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$studentId", "$$studentId"] },
-                    // { $eq: ["$academicYear", intake] },
-                    // { $eq: ["$stage_name", stage] },
+     $lookup: {
+      from: "enrollments",
+      let: { studentId: "$_id" },
+      pipeline: [
+        { $match: { $expr: { $eq: ["$studentId", "$$studentId"] } } },
+        {
+          $project: {
+            paymentsCount: { $size: "$payments" },
+            totalAmount: {
+              $reduce: {
+                input: "$payments",
+                initialValue: 0,
+                in: {
+                  $add: [
+                    "$$value",
+                    { $add: ["$$this.amountDueReceipt1", "$$this.amountDueReceipt2"] },
                   ],
                 },
               },
             },
-            { $unwind: { path: "$payments", preserveNullAndEmptyArrays: true } },
-            {
-              $group: {
-                _id: "$studentId",
-                paymentsCount: { $sum: 1 },
-                // Sum the total of both receipt amounts for each payment
-                totalAmount: {
-                  $sum: {
-                    $add: ["$payments.amountDueReceipt1", "$payments.amountDueReceipt2"],
-                  },
-                },
-              },
-            },
-          ],
-          as: "paymentSummary",
+          },
         },
-      },
-      // Extract fields or set defaults
-      {
-        $addFields: {
-          paymentsCount: { $ifNull: [{ $arrayElemAt: ["$paymentSummary.paymentsCount", 0] }, 0] },
-          totalAmountPaid: { $ifNull: [{ $arrayElemAt: ["$paymentSummary.totalAmount", 0] }, 0] },
-        },
-      },
-      { $project: { paymentSummary: 0 } },
+      ],
+      as: "paymentSummary",
+    },
+  },
+  {
+    $addFields: {
+      paymentsCount: { $sum: "$paymentSummary.paymentsCount" },
+      totalAmountPaid: { $sum: "$paymentSummary.totalAmount" },
+    },
+  },
+  { $project: { paymentSummary: 0 } },
       // Populate training place, special, school (optional, but kept)
       {
         $lookup: {

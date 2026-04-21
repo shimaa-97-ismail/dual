@@ -6,17 +6,17 @@ export function Class({ showCheckbox }) {
   const location = useLocation();
   const printRef = useRef();
   // Get data from location state if not passed via props
-  const students = location.state?.students;
-  console.log(students);
+  const data = location.state?.students;
+  console.log(data);
 
   const params = location.state?.params;
 
   // Use params to display school, stage, etc.
-  const schoolName = students?.school;
-  const className = params?.className || students?.className;
-  const stage = params?.stage || students?.stage;
+  const schoolName = data?.data?.school;
+  const className = params?.className || data?.data?.className;
+  const stage = params?.stage || data?.data?.stage;
   const specialName =
-    students?.[0]?.stdSpecial?.name || students?.students[0]?.stdSpecial?.name;
+    data?.data?.students[0]?.stdSpecial?.name || data?.data?.students[0]?.stdSpecial?.name;
   const printClass = () => {
     const printContent = printRef.current;
     const originalContents = document.body.innerHTML;
@@ -53,7 +53,7 @@ export function Class({ showCheckbox }) {
           </div>
         </header>
         <div className="overflow-x-auto w-full">
-          <StudentTable data={students?.students} showCheckbox={showCheckbox} />
+          <StudentTable data={data?.data} showCheckbox={showCheckbox} stage={stage}  />
         </div>
       </div>
     </>

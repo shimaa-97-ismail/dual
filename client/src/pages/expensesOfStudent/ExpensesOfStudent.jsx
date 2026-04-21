@@ -6,8 +6,9 @@ import { useStudentById } from "@/hooks/useStudent";
 import { ExpensesTable } from "@/components/table/ExpensesTable";
 import "./expenses.css";
 import EmptyState from "@/components/common/EmptyState";
-
+import { useQueryClient } from "@tanstack/react-query";
 export function ExpensesOfStudent() {
+   const queryClient = useQueryClient();
   const { studentId } = useParams();
   const [showExpModal, setShowExpModal] = useState(false);
   const [modalMode, setModalMode] = useState(null);
@@ -23,6 +24,7 @@ export function ExpensesOfStudent() {
   const fetchEnrollments = async (studentId) => {
     const res = await axioInstance.get(`/student/${studentId}/enrollments`);
     setEnrollments(res.data);
+    queryClient.invalidateQueries({ queryKey: ['studentsInClass'] });
   };
 
   useEffect(() => {
@@ -55,17 +57,17 @@ export function ExpensesOfStudent() {
     }
   };
   // Create a repeat enrollment for an existing stage
-  const createRepeatStage = async (stage_name) => {
-    try {
-      await axioInstance.post(`/student/${studentId}/repeat-stage`, {
-        stage_name,
-      });
-      await fetchEnrollments(studentId);
-    } catch (error) {
-      console.error(error);
-      alert("حدث خطأ أثناء إنشاء السنة المكررة");
-    }
-  };
+  // const createRepeatStage = async (stage_name) => {
+  //   try {
+  //     await axioInstance.post(`/student/${studentId}/repeat-stage`, {
+  //       stage_name,
+  //     });
+  //     await fetchEnrollments(studentId);
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert("حدث خطأ أثناء إنشاء السنة المكررة");
+  //   }
+  // };
 
   // Add a new payment to a specific enrollment
   const handleAdd = (enrollmentId) => {
@@ -94,6 +96,7 @@ export function ExpensesOfStudent() {
       `/student/${studentId}/enrollments/${enrollmentId}/payments/${paymentId}`,
     );
     setSelectedPayment(res.data);
+    queryClient.invalidateQueries({ queryKey: ['studentsInClass'] });
   };
 
   // Delete a payment
@@ -109,6 +112,7 @@ export function ExpensesOfStudent() {
       );
       if (res.status === 200) {
         await fetchEnrollments(studentId);
+        queryClient.invalidateQueries({ queryKey: ['studentsInClass'] });
       }
     } catch (error) {
       console.error("Delete error:", error);
@@ -175,23 +179,23 @@ export function ExpensesOfStudent() {
     setSelectedPayment(null);
     setModalMode(null);
   };
-  const promoteStage = async (stage_name, academicYear) => {
-    if (!window.confirm(`هل أنت متأكد من انتقال الطالب إلى المرحلة التالية؟`))
-      return;
-    try {
-      await axioInstance.post(`/student/${studentId}/promote`, {
-        stage_name,
-        academicYear,
-      });
-      await fetchEnrollments(studentId);
-    } catch (error) {
-      console.error("Promote error:", error);
-      alert(
-        error.response?.data?.message ||
-          "حدث خطأ أثناء الانتقال للمرحلة التالية",
-      );
-    }
-  };
+  // const promoteStage = async (stage_name, academicYear) => {
+  //   if (!window.confirm(`هل أنت متأكد من انتقال الطالب إلى المرحلة التالية؟`))
+  //     return;
+  //   try {
+  //     await axioInstance.post(`/student/${studentId}/promote`, {
+  //       stage_name,
+  //       academicYear,
+  //     });
+  //     await fetchEnrollments(studentId);
+  //   } catch (error) {
+  //     console.error("Promote error:", error);
+  //     alert(
+  //       error.response?.data?.message ||
+  //         "حدث خطأ أثناء الانتقال للمرحلة التالية",
+  //     );
+  //   }
+  // };
   // Helper: months per stage
   const stageMonths = {
     "الصف الأول": [
@@ -286,7 +290,7 @@ export function ExpensesOfStudent() {
       <div className="m-10">
         {enrollments.length > 0 ? (
           enrollments.map((enrollment) => {
-             const canRepeat = !isGraduated && stageEnrollmentCount[enrollment.stage_name] < 2;
+            //  const canRepeat = !isGraduated && stageEnrollmentCount[enrollment.stage_name] < 2;
             return (
             
             <div key={enrollment._id} className="m-auto mb-10">
@@ -301,7 +305,7 @@ export function ExpensesOfStudent() {
                 >
                   تسديد مصروفات لهذه السنة
                 </button>
-                <div className="space-x-2 flex justify-between items-center">
+                {/* <div className="space-x-2 flex justify-between items-center">
                   <div>
                      {!isGraduated && enrollment.stage_name !== "الصف الثالث" && (
                       <button
@@ -320,7 +324,7 @@ export function ExpensesOfStudent() {
                       </button>
                     )}
                   </div>
-                </div>
+                </div> */}
               </div>
               <ExpensesTable
                 data={enrollment.payments}

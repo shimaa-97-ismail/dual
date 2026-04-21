@@ -272,17 +272,31 @@ export const useGetSchoolByType = (selectedType) => {
   });
 };
 
-export const useStudentInClasses=(filters)=>{
-   return useQuery({
-    queryKey: studentKeys.inClass(filters),
-    queryFn: async () => {
-      console.log(filters,"assss");
+// export const useStudentInClasses=(filters)=>{
+//    return useQuery({
+//     queryKey: studentKeys.inClass(filters),
+//     queryFn: async () => {
+//       console.log(filters,"assss");
 
-      const response = await schoolsApi.getStudentInClasses(filters);
-      console.log(response.data.data);
-      return response.data.data;
-    },
-    enabled: !!filters.school && !!filters.intake && !!filters.special && !!filters.stage && !!filters.className,
+//       const response = await schoolsApi.getStudentInClasses(filters);
+//       console.log(response.data.data);
+//       return response.data.data;
+//     },
+//     enabled: !!filters.school && !!filters.intake && !!filters.special && !!filters.stage && !!filters.className,
    
+//   });
+// }
+
+
+export const fetchStudents = async ({ school, intake, special, stage, className }) => {
+  const params = new URLSearchParams({ school, intake, special, stage, className });
+  const response = await axioInstance.get(`/school/student-in-class?${params}`);
+  return response.data;
+};
+export function useStudentInClasses(params, options = {}) {
+  return useQuery({
+    queryKey:  studentKeys.inClass(params),
+    queryFn: () => fetchStudents(params),
+    ...options,
   });
 }

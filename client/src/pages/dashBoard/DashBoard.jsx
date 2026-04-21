@@ -88,11 +88,7 @@ console.log(percentAbsence);
     value={trainingPlaces?.length || 0}
     color="teal"
   />
-  <MetricCard
-    title="إجمالي المصروفات"
-    value={trainingPlaces?.length || 0}
-    color="teal"
-  />
+  
 </div>
 
       {/* Quick Actions */}
@@ -121,7 +117,7 @@ console.log(percentAbsence);
       <Card>
         <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
           <CardTitle>توزيع الطلاب حسب المدرسة</CardTitle>
-          <Select value={selectedSchool} onValueChange={setSelectedSchool}>
+          {/* <Select value={selectedSchool} onValueChange={setSelectedSchool}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="اختر المدرسة" />
             </SelectTrigger>
@@ -133,7 +129,7 @@ console.log(percentAbsence);
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
+          </Select> */}
         </CardHeader>
         <CardContent>
           {chartLoading ? (

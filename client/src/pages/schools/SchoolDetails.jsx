@@ -32,13 +32,10 @@ console.log(school);
   const [selectedClass, setSelectedClass] = useState("");
   const [viewMode, setViewMode] = useState("grid");
   const [studentInClass, setStudentInClass] = useState(null);
-  // const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const {
     data: batches = [],
-    // isLoading: batchesLoading,
-    // error: batchesError,
   } = useSchoolByintake(schoolId || selectedSchool);
   console.log(selectedSchool);
   const [showCheckbox, setShowCheckbox] = useState(false);
@@ -52,8 +49,6 @@ console.log(school);
     (selectedSchool && selectedIntake && selectedSpeacial && selectedStage);
   const {
     data: classes,
-    // isLoading: classesLoading,
-    // isError: classesError,
   } = useClassesForAttendance(
     {
       school: schoolId || selectedSchool,
@@ -97,7 +92,7 @@ console.log(school);
       className: selectedClass,
     },
     {
-      enabled: false,
+     enabled: !!selectedClass,
     },
   );
   console.log(data);
@@ -235,7 +230,7 @@ console.log(school);
           </div>
         </div>
       </div>
-      {data?.students.length !== undefined && (
+      {data?.data?.students.length !== undefined && (
         <>
           <div className="flex gap-4 p-4  justify-end">
             <button
@@ -253,12 +248,12 @@ console.log(school);
               <h2>الوحده الاقليمية للتعليم الفنى المزدوج</h2>
             </div>
             <div className="">
-              <h2>اسم المدرسه/ {data?.school} </h2>
+              <h2>اسم المدرسه/ {data?.data?.school} </h2>
 
-              <h2> القسم / {data?.students[0]?.stdSpecial?.name}</h2>
+              <h2> القسم / {data?.data?.students[0]?.stdSpecial?.name}</h2>
               <div className="flex gap-4 justify-between">
-                <h2> الفصل /{data?.className}</h2>
-                <h2> {data?.stage}</h2>
+                <h2> الفصل /{data?.data?.className}</h2>
+                <h2> {data?.data?.stage}</h2>
               </div>
             </div>
           </header>
@@ -270,7 +265,7 @@ console.log(school);
 
           <StudentTable
             ref={printRef}
-            data={data?.students}
+            data={data?.data}
             showCheckbox={showCheckbox}
           />
         </>

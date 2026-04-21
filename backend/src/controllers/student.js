@@ -31,7 +31,6 @@ export const createStudent = async (req, res) => {
     console.log("create student body:", req.body);
     console.log("req.files:", req.files); // array of all uploaded files
 
-   
     // Extract files by field name
     let studentImageUrl, fatherDeathCertUrl, motherDeathCertUrl;
     if (req.files && req.files.length) {
@@ -57,7 +56,7 @@ export const createStudent = async (req, res) => {
     if (studentImageUrl) studentData.studentImage = studentImageUrl;
     if (fatherDeathCertUrl) studentData.fatherDeathCert = fatherDeathCertUrl;
     if (motherDeathCertUrl) studentData.motherDeathCert = motherDeathCertUrl;
-  
+
     // Check duplicate studID
     const existingStudent = await studentModel.findOne({
       studID: studentData.studID,
@@ -74,6 +73,15 @@ export const createStudent = async (req, res) => {
     if (req.body.code === "") req.body.code = null;
     const newStudent = new studentModel(studentData);
     await newStudent.save();
+
+    const initialEnrollment = new enrollmentModel({
+      studentId: newStudent._id,
+      stage_name: newStudent.current_stage.stage_name, // e.g., "الصف الأول"
+      academicYear: newStudent.intake, // e.g., "2025/2026"
+      isRepeat: false,
+      payments: [],
+    });
+    await initialEnrollment.save();
 
     res.status(201).json({
       success: true,
@@ -586,12 +594,10 @@ export const updateStudent = async (req, res) => {
           _id: { $ne: id },
         });
         if (existingStudent) {
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "البريد الإلكتروني مسجل مسبقاً لطالب آخر",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "البريد الإلكتروني مسجل مسبقاً لطالب آخر",
+          });
         }
       }
     }
@@ -620,12 +626,10 @@ export const updateStudent = async (req, res) => {
         _id: { $ne: id },
       });
       if (existingStudent) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "الرقم القومي مسجل مسبقاً لطالب آخر",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "الرقم القومي مسجل مسبقاً لطالب آخر",
+        });
       }
     }
 
@@ -807,21 +811,20 @@ export const searchStudents = async (req, res) => {
 };
 
 // controllers/studentController.js
-
 export const bulkUpdateStudents = async (req, res) => {
   try {
-    console.log(req.body);
+    console.log(req.body, "qazwsx");
 
     const { studentIds, updates } = req.body;
 
     if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "يرجى توفير قائمة بمعرفات الطلاب",
+        message: "يرجى توفير قائمة الطلاب",
       });
     }
 
-    // Validate updates - only allowed fields
+    // Allowed fields for direct student update
     const allowedFields = ["studStatus", "stage_name", "current_class"];
     const updateData = {};
     for (const field of allowedFields) {
@@ -830,47 +833,143 @@ export const bulkUpdateStudents = async (req, res) => {
       }
     }
 
-    if (Object.keys(updateData).length === 0) {
+    if (Object.keys(updateData).length === 0 && !updates.academicYear) {
       return res.status(400).json({
         success: false,
         message: "لا توجد بيانات محدثة",
       });
     }
 
-    // If updating stage_name, we need to update the nested object (if using current_stage.stage_name)
-    // Adjust based on your schema. If you have current_stage as an object, we need to set it correctly.
-    // Let's assume you have current_stage.stage_name.
+    // --- Field transformation (adjust based on your schema) ---
+    // If your student schema uses a flat `stage_name`, remove this block.
+    // If it uses nested `current_stage.stage_name`, keep it.
     if (updateData.stage_name) {
       updateData["current_stage.stage_name"] = updateData.stage_name;
-      delete updateData.stage_name; // remove top-level field
+      delete updateData.stage_name;
     }
 
-    const result = await studentModel.updateMany(
-      { _id: { $in: studentIds } },
-      { $set: updateData },
-      { runValidators: true },
-    );
+    // Update student documents (if any fields to update)
+    if (Object.keys(updateData).length > 0) {
+      const result = await studentModel.updateMany(
+        { _id: { $in: studentIds } },
+        { $set: updateData },
+        { runValidators: true },
+      );
 
-    if (result.matchedCount === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "لم يتم العثور على أي طلاب",
-      });
+      if (result.matchedCount === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "لم يتم العثور على أي طلاب",
+        });
+      }
+    }
+
+    // --- Handle promotion / repetition (enrollment creation) ---
+    const newStatus = updates.studStatus;
+    // For promotion, the frontend sends the TARGET stage (e.g., "الصف الثاني")
+    // For repetition, the frontend sends the SAME stage (e.g., "الصف الأول")
+    const targetStage = updates.stage_name; // this is what frontend sends
+    const academicYear = updates.academicYear;
+
+    if (newStatus === "ناجح منقول" || newStatus === "باقى لأعاده (راسب)") {
+      if (!targetStage) {
+        console.warn(
+          "No stage_name provided for status change, skipping enrollment creation",
+        );
+      } else if (!academicYear) {
+        console.warn(
+          "No academicYear provided for status change, skipping enrollment creation",
+        );
+      } else if (newStatus === "ناجح منقول") {
+        // Promotion: create enrollment for the TARGET stage with next academic year
+        const [start, end] = academicYear.split("/");
+        const nextStart = parseInt(start) + 1;
+        const nextEnd = parseInt(end) + 1;
+        const nextAcademicYear = `${nextStart}/${nextEnd}`;
+
+        for (const studentId of studentIds) {
+          // Check if enrollment already exists for the target stage and next year
+          const existing = await enrollmentModel.findOne({
+            studentId,
+            stage_name: targetStage,
+            academicYear: nextAcademicYear,
+          });
+          if (!existing) {
+            const newEnrollment = new enrollmentModel({
+              studentId,
+              stage_name: targetStage,
+              academicYear: nextAcademicYear,
+              isRepeat: false,
+              payments: [],
+            });
+            await newEnrollment.save();
+            console.log(
+              `Created promotion enrollment for student ${studentId} to ${targetStage} ${nextAcademicYear}`,
+            );
+
+            // Update the student's current stage to the target stage
+            await studentModel.updateOne(
+              { _id: studentId },
+              { $set: { "current_stage.stage_name": targetStage } }, // use "stage_name" if flat
+            );
+          } else {
+            console.log(
+              `Enrollment already exists for student ${studentId} in ${targetStage} ${nextAcademicYear}`,
+            );
+          }
+        }
+      } else if (newStatus === "باقى لأعاده (راسب)") {
+        const [start, end] = academicYear.split("/");
+  const nextStart = parseInt(start) + 1;
+  const nextEnd = parseInt(end) + 1;
+  const nextAcademicYear = `${nextStart}/${nextEnd}`;
+        
+        for (const studentId of studentIds) {
+          const existingRepeat = await enrollmentModel.findOne({
+            studentId,
+            stage_name: targetStage,
+            academicYear: nextAcademicYear,
+            isRepeat: true,
+          });
+          if (!existingRepeat) {
+            const repeatEnrollment = new enrollmentModel({
+              studentId,
+              stage_name: targetStage,
+              academicYear: nextAcademicYear,
+              isRepeat: true,
+              payments: [],
+            });
+            await repeatEnrollment.save();
+            console.log(
+              `Created repeat enrollment for student ${studentId} in ${targetStage} ${academicYear}`,
+            );
+          } else {
+            console.log(
+              `Repeat enrollment already exists for student ${studentId} in ${targetStage} ${academicYear}`,
+            );
+          }
+        }
+        // Do NOT update the student's stage – it stays the same
+      }
+    }
+
+    // Run graduation check for all affected students
+    for (const studentId of studentIds) {
+      await checkAndUpdateGraduation(studentId);
     }
 
     res.status(200).json({
       success: true,
-      message: `تم تحديث ${result.modifiedCount} طالب بنجاح`,
-      data: result,
+      message: `تم تحديث الطلاب بنجاح`,
     });
   } catch (error) {
+    console.error("Bulk update error:", error);
     res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
 export const addPaymentToEnrollment = async (req, res) => {
   const { studentId, enrollmentId } = req.params;
   const paymentsData = req.body; // البيانات كما هي
@@ -926,7 +1025,6 @@ export const getAllPaymentByStudent = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 export const updatePayment = async (req, res) => {
   const { studentId, enrollmentId, paymentId } = req.params;
@@ -1114,54 +1212,103 @@ export const getPaymentById = async (req, res) => {
 };
 
 // controllers/student.js
+// export const repeatStage = async (req, res) => {
+//   const { studentId } = req.params;
+//   const { stage_name, academicYear: providedAcademicYear } = req.body;
+
+//   try {
+//     const student = await studentModel.findById(studentId);
+//     if (student && student.status === "متخرج") {
+//       return res
+//         .status(400)
+//         .json({ message: "الطالب متخرج، لا يمكن إعادة السنة" });
+//     }
+
+//     const stageEnrollments = await enrollmentModel.find({
+//       studentId,
+//       stage_name,
+//     });
+//     if (stageEnrollments.length >= 2) {
+//       return res.status(400).json({
+//         message: "لا يمكن إعادة السنة أكثر من مرة واحدة لهذه المرحلة",
+//       });
+//     }
+//     let targetAcademicYear = providedAcademicYear;
+
+//     if (!targetAcademicYear) {
+//       // No academicYear provided; try to derive from previous enrollment
+//       const lastEnrollment = await enrollmentModel
+//         .findOne({ studentId, stage_name })
+//         .sort({ academicYear: -1 });
+//       if (!lastEnrollment) {
+//         return res.status(400).json({
+//           message: "لم يتم العثور على تسجيل سابق، يجب تحديد العام الدراسي",
+//         });
+//       }
+//       const [start, end] = lastEnrollment.academicYear.split("/");
+//       const newStart = parseInt(start) + 1;
+//       const newEnd = parseInt(end) + 1;
+//       targetAcademicYear = `${newStart}/${newEnd}`;
+//     }
+
+//     const newEnrollment = new enrollmentModel({
+//       studentId,
+//       academicYear: targetAcademicYear,
+//       stage_name,
+//       isRepeat: true,
+//       payments: [],
+//     });
+//     await newEnrollment.save();
+//     res.status(201).json(newEnrollment);
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "خطأ في الخادم" });
+//   }
+// };
+
 export const repeatStage = async (req, res) => {
   const { studentId } = req.params;
-  const { stage_name, academicYear: providedAcademicYear } = req.body;
+  const { stage_name } = req.body;   // remove academicYear from body (or ignore it)
 
   try {
     const student = await studentModel.findById(studentId);
     if (student && student.status === "متخرج") {
-      return res
-        .status(400)
-        .json({ message: "الطالب متخرج، لا يمكن إعادة السنة" });
+      return res.status(400).json({ message: "الطالب متخرج، لا يمكن إعادة السنة" });
     }
 
-    const stageEnrollments = await enrollmentModel.find({
-      studentId,
-      stage_name,
-    });
+    if (!stage_name) {
+      return res.status(400).json({ message: "يجب تحديد المرحلة" });
+    }
+
+    // Limit repeats to once per stage
+    const stageEnrollments = await enrollmentModel.find({ studentId, stage_name });
     if (stageEnrollments.length >= 2) {
-      return res.status(400).json({
-        message: "لا يمكن إعادة السنة أكثر من مرة واحدة لهذه المرحلة",
-      });
-    }
-    let targetAcademicYear = providedAcademicYear;
-
-    if (!targetAcademicYear) {
-      // No academicYear provided; try to derive from previous enrollment
-      const lastEnrollment = await enrollmentModel
-        .findOne({ studentId, stage_name })
-        .sort({ academicYear: -1 });
-      if (!lastEnrollment) {
-        return res.status(400).json({
-          message: "لم يتم العثور على تسجيل سابق، يجب تحديد العام الدراسي",
-        });
-      }
-      const [start, end] = lastEnrollment.academicYear.split("/");
-      const newStart = parseInt(start) + 1;
-      const newEnd = parseInt(end) + 1;
-      targetAcademicYear = `${newStart}/${newEnd}`;
+      return res.status(400).json({ message: "لا يمكن إعادة السنة أكثر من مرة واحدة لهذه المرحلة" });
     }
 
-    const newEnrollment = new enrollmentModel({
+    // Find the most recent enrollment for this stage (to get the academic year)
+    const lastEnrollment = await enrollmentModel
+      .findOne({ studentId, stage_name })
+      .sort({ academicYear: -1 });
+    if (!lastEnrollment) {
+      return res.status(400).json({ message: "لم يتم العثور على تسجيل سابق لهذه المرحلة" });
+    }
+
+    // Increment academic year
+    const [start, end] = lastEnrollment.academicYear.split("/");
+    const nextStart = parseInt(start) + 1;
+    const nextEnd = parseInt(end) + 1;
+    const nextAcademicYear = `${nextStart}/${nextEnd}`;
+
+    const repeatEnrollment = new enrollmentModel({
       studentId,
-      academicYear: targetAcademicYear,
       stage_name,
+      academicYear: nextAcademicYear,   // always incremented
       isRepeat: true,
       payments: [],
     });
-    await newEnrollment.save();
-    res.status(201).json(newEnrollment);
+    await repeatEnrollment.save();
+    res.status(201).json(repeatEnrollment);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "خطأ في الخادم" });
@@ -1171,7 +1318,13 @@ export const repeatStage = async (req, res) => {
 export const createEnrollment = async (req, res) => {
   const { studentId } = req.params;
   const { stage_name, academicYear } = req.body;
-  console.log("createEnrollment called", req.body, studentId, stage_name, academicYear);
+  console.log(
+    "createEnrollment called",
+    req.body,
+    studentId,
+    stage_name,
+    academicYear,
+  );
   try {
     const existingEnrollment = await enrollmentModel.findOne({
       studentId,

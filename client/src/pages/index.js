@@ -22,6 +22,7 @@ import { SearchDetails } from "./searchDetails/SearchDetails.jsx";
 import {ExpensesOfStudent} from "./expensesOfStudent/ExpensesOfStudent.jsx";
 import { Class } from "./schools/Class.jsx";
 import { Users } from "./users/Users.jsx";
+import {TotalExpenses} from "./totalExpenses/TotalExpenses.jsx"
 export {
   Login,
   Home,
@@ -46,5 +47,6 @@ export {
   SearchDetails,
   ExpensesOfStudent,
   Class,
-  Users
+  Users,
+  TotalExpenses
 };

@@ -23,7 +23,8 @@ import {
   SearchDetails,
   ExpensesOfStudent,
   Class,
-  Users
+  Users,
+  TotalExpenses
 } from "../src/pages";
 import { StudentAttendanceList } from "@/components/table/StudentAttendanceList";
 import { SetAbsencesTable } from "@/components/table/SetAbsencesTable";
@@ -87,6 +88,7 @@ function App() {
               path="/student/expenses/:studentId"
               element={<ExpensesOfStudent />}
             />
+            <Route path="/total-expenses" element={<TotalExpenses/>}/>
             <Route path="/StudentRe_registration" element={<StudentRe_registration />} />
             <Route path="/clearance" element={<Clearance />} />
             <Route path="/weeklyAbsent" element={<WeeklyAbsent />} />
