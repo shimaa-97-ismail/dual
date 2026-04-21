@@ -12,7 +12,13 @@ import {
 import { MainHeader } from "@/components";
 import { StudentTable } from "@/components/table/StudentTable";
 import { useNavigate } from "react-router-dom";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Class } from "./Class";
 export function SchoolDetails() {
   const navigate = useNavigate();
@@ -134,6 +140,7 @@ console.log(school);
             {!schoolId && (
               <select
                 className="border p-2 rounded w-1/4"
+                
                 value={selectedSchool}
                 onChange={handleSchoolChange}
               >
@@ -155,7 +162,8 @@ console.log(school);
               </select>
             )}
             <select
-              className="border p-2 rounded w-1/4"
+              // className="border p-2 rounded w-1/4"
+              className="border border-gray-300 rounded-xl px-4 py-2.5 bg-gray-50 focus:bg-white focus:border-blue-400 w-full md:w-1/4"
               value={selectedSpeacial}
               onChange={handleSpecialChange}
             >
@@ -183,7 +191,7 @@ console.log(school);
             </select>
 
             <select
-              className="border p-2 rounded w-1/4"
+            className="border border-gray-300 rounded-xl px-4 py-2.5 bg-gray-50 focus:bg-white focus:border-blue-400 w-full md:w-1/4"
               value={selectedIntake}
               onChange={handleIntakeChange}
             >
@@ -200,7 +208,7 @@ console.log(school);
             </select>
 
             <select
-              className="border p-2 rounded w-1/4"
+             className="border border-gray-300 rounded-xl px-4 py-2.5 bg-gray-50 focus:bg-white focus:border-blue-400 w-full md:w-1/4"
               value={selectedStage}
               onChange={handleStageChange}
             >
@@ -212,7 +220,7 @@ console.log(school);
               <option value="الصف الثالث">الصف الثالث </option>
             </select>
             <select
-              className="border p-2 rounded w-1/4"
+            className="border border-gray-300 rounded-xl px-4 py-2.5 bg-gray-50 focus:bg-white focus:border-blue-400 w-full md:w-1/4"
               value={selectedClass}
               onChange={handleClassChange}
             >
@@ -227,6 +235,7 @@ console.log(school);
                   </option>
                 ))}
             </select>
+            
           </div>
         </div>
       </div>
