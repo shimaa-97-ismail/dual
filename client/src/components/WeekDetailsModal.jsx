@@ -17,7 +17,7 @@ export const WeekDetailsModal = ({ open, onClose, weekData }) => {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-lg font-bold">
+          <DialogTitle className="text-lg font-bold text-right">
             تفاصيل الأسبوع: {weekData.week_start_date} إلى {weekData.week_end_date}
           </DialogTitle>
         </DialogHeader>
@@ -28,6 +28,7 @@ export const WeekDetailsModal = ({ open, onClose, weekData }) => {
                 <th className="border p-2">اليوم</th>
                 <th className="border p-2">التاريخ</th>
                 <th className="border p-2">الحالة</th>
+                <th className="border p-2">سبب الغياب</th>
               </tr>
             </thead>
             <tbody>
@@ -36,6 +37,7 @@ export const WeekDetailsModal = ({ open, onClose, weekData }) => {
                   <td className="border p-2">{day.day_name_ar}</td>
                   <td className="border p-2">{day.date.split('T')[0]}</td>
                   <td className="border p-2">{day.status}</td>
+                  <td className="border p-2">{day.notes || '-'}</td>
                 </tr>
               ))}
             </tbody>

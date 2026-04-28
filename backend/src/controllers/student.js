@@ -71,7 +71,9 @@ export const createStudent = async (req, res) => {
       studentData.email = null;
     }
     if (req.body.code === "") req.body.code = null;
+
     const newStudent = new studentModel(studentData);
+    newStudent.academicYear = req.body.intake;
     await newStudent.save();
 
     const initialEnrollment = new enrollmentModel({
@@ -183,45 +185,40 @@ function getWeekOfMonth(saturdayDate) {
   );
   return diffWeeks + 1;
 }
-
 function convertToWeeklyAttendance(weekStart, attendanceData) {
-  // Parse weekStart as local date (e.g., "2026-02-28")
+  // Parse weekStart as local date (e.g., "2026-04-28")
   const [year, month, day] = weekStart.split("-").map(Number);
-  const startLocal = new Date(year, month - 1, day);
-  startLocal.setHours(0, 0, 0, 0);
+  const startLocal = new Date(year, month - 1, day); // local midnight
 
-  // Generate the 7 days of the week
   const days = [];
   for (let i = 0; i < 7; i++) {
-    const currentDate = new Date(startLocal);
-    currentDate.setDate(startLocal.getDate() + i);
+// const startUTC = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+    const currentDate = new Date(Date.UTC(year, month - 1, day + i,0,0,0));
+    console.log(currentDate);
+    
     const dateStr = formatLocalDate(currentDate);
+    console.log(dateStr);
+    
 
-    // Get attendance entry (default to "حاضر" with empty note)
     const entry = attendanceData[dateStr] || { status: "حاضر", reason: "" };
-    const status = entry.status;
-    const notes = entry.reason || ""; // reason from frontend goes to notes
-
     days.push({
-      day_number: i + 1, // 1=Saturday, 2=Sunday, ..., 7=Friday
+      day_number: i + 1,
       day_name_ar: getArabicDayName(i + 1),
       date: currentDate,
-      status,
-      notes, // ← now stores the reason
+      status: entry.status,
+      notes: entry.reason || "",
     });
   }
 
-  // Summary statistics (unchanged)
+  // Week summary
   const total_days = days.length;
   const present_days = days.filter((d) => d.status === "حاضر").length;
   const absent_days = days.filter((d) => d.status === "غائب").length;
   const excused_absences = days.filter((d) => d.status === "اجازه").length;
-  const attendance_rate =
-    total_days > 0 ? (present_days / total_days) * 100 : 0;
+  const attendance_rate = total_days > 0 ? (present_days / total_days) * 100 : 0;
 
   const weekStartStr = formatLocalDate(startLocal);
-  const endDate = new Date(startLocal);
-  endDate.setDate(startLocal.getDate() + 6);
+  const endDate = new Date(year, month - 1, day + 6);
   const weekEndStr = formatLocalDate(endDate);
   const week_number = getWeekOfMonth(startLocal);
 
@@ -245,12 +242,12 @@ function convertToWeeklyAttendance(weekStart, attendanceData) {
     },
   ];
 }
-
 //add absent per student per week
 export const addStudentAbsent = async (req, res) => {
   try {
     const studentId = req.params.studentId || req.body.studentId;
     const { startDate, attendanceData } = req.body;
+console.log("hamada",attendanceData,startDate);
 
     if (!startDate) {
       return res
@@ -279,6 +276,7 @@ export const addStudentAbsent = async (req, res) => {
       startDate,
       attendanceData,
     );
+console.log("weeklyAttendance",weeklyAttendance);
 
     const updatedStudent = await studentModel
       .findByIdAndUpdate(
@@ -816,6 +814,7 @@ export const bulkUpdateStudents = async (req, res) => {
     console.log(req.body, "qazwsx");
 
     const { studentIds, updates } = req.body;
+    console.log(updates);
 
     if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
       return res.status(400).json({
@@ -825,7 +824,12 @@ export const bulkUpdateStudents = async (req, res) => {
     }
 
     // Allowed fields for direct student update
-    const allowedFields = ["studStatus", "stage_name", "current_class"];
+    const allowedFields = [
+      "studStatus",
+      "stage_name",
+      "current_class",
+      "academicYear",
+    ];
     const updateData = {};
     for (const field of allowedFields) {
       if (updates[field] !== undefined) {
@@ -840,21 +844,23 @@ export const bulkUpdateStudents = async (req, res) => {
       });
     }
 
-    // --- Field transformation (adjust based on your schema) ---
-    // If your student schema uses a flat `stage_name`, remove this block.
-    // If it uses nested `current_stage.stage_name`, keep it.
     if (updateData.stage_name) {
       updateData["current_stage.stage_name"] = updateData.stage_name;
       delete updateData.stage_name;
     }
 
+    console.log("updateData",updateData);
+    
     // Update student documents (if any fields to update)
     if (Object.keys(updateData).length > 0) {
-      const result = await studentModel.updateMany(
-        { _id: { $in: studentIds } },
-        { $set: updateData },
-        { runValidators: true },
-      );
+      // const result = await studentModel.updateMany(
+      //   { _id: { $in: studentIds } },
+      //   { $set: updateData },
+      //   { runValidators: true },
+      // );
+      const result=await studentModel.find({ _id: { $in: studentIds } })
+      console.log(result);
+      
 
       if (result.matchedCount === 0) {
         return res.status(404).json({
@@ -869,7 +875,7 @@ export const bulkUpdateStudents = async (req, res) => {
     // For promotion, the frontend sends the TARGET stage (e.g., "الصف الثاني")
     // For repetition, the frontend sends the SAME stage (e.g., "الصف الأول")
     const targetStage = updates.stage_name; // this is what frontend sends
-    const academicYear = updates.academicYear;
+    let academicYear = updates.academicYear;
 
     if (newStatus === "ناجح منقول" || newStatus === "باقى لأعاده (راسب)") {
       if (!targetStage) {
@@ -882,70 +888,88 @@ export const bulkUpdateStudents = async (req, res) => {
         );
       } else if (newStatus === "ناجح منقول") {
         // Promotion: create enrollment for the TARGET stage with next academic year
-        const [start, end] = academicYear.split("/");
+        const [start, end] = updates?.academicYear.split("/");
         const nextStart = parseInt(start) + 1;
         const nextEnd = parseInt(end) + 1;
-        const nextAcademicYear = `${nextStart}/${nextEnd}`;
+        const academicYear = `${nextStart}/${nextEnd}`;
 
         for (const studentId of studentIds) {
           // Check if enrollment already exists for the target stage and next year
           const existing = await enrollmentModel.findOne({
             studentId,
             stage_name: targetStage,
-            academicYear: nextAcademicYear,
+            academicYear: academicYear, //academicYear
           });
           if (!existing) {
             const newEnrollment = new enrollmentModel({
               studentId,
               stage_name: targetStage,
-              academicYear: nextAcademicYear,
+              academicYear: academicYear, //academicYear
               isRepeat: false,
               payments: [],
             });
             await newEnrollment.save();
             console.log(
-              `Created promotion enrollment for student ${studentId} to ${targetStage} ${nextAcademicYear}`,
+              `Created promotion enrollment for student ${studentId} to ${targetStage} ${academicYear}`,
             );
 
             // Update the student's current stage to the target stage
             await studentModel.updateOne(
               { _id: studentId },
-              { $set: { "current_stage.stage_name": targetStage } }, // use "stage_name" if flat
+              {
+                $set: {
+                  "current_stage.stage_name": targetStage,
+                  "academicYear": academicYear,
+                  "studStatus":newStatus,
+                  "current_class":updateData.current_class
+                },
+              }, // use "stage_name" if flat
             );
           } else {
             console.log(
-              `Enrollment already exists for student ${studentId} in ${targetStage} ${nextAcademicYear}`,
+              `Enrollment already exists for student ${studentId} in ${targetStage} ${academicYear}`,
             );
           }
         }
       } else if (newStatus === "باقى لأعاده (راسب)") {
-        const [start, end] = academicYear.split("/");
-  const nextStart = parseInt(start) + 1;
-  const nextEnd = parseInt(end) + 1;
-  const nextAcademicYear = `${nextStart}/${nextEnd}`;
-        
+        const [start, end] = updates?.academicYear.split("/");
+        const nextStart = parseInt(start) + 1;
+        const nextEnd = parseInt(end) + 1;
+        const nextAcademicYear = `${nextStart}/${nextEnd}`;
+
         for (const studentId of studentIds) {
           const existingRepeat = await enrollmentModel.findOne({
             studentId,
             stage_name: targetStage,
-            academicYear: nextAcademicYear,
+            academicYear: nextAcademicYear, //nextAcademicYear
             isRepeat: true,
           });
           if (!existingRepeat) {
             const repeatEnrollment = new enrollmentModel({
               studentId,
               stage_name: targetStage,
-              academicYear: nextAcademicYear,
+              academicYear: nextAcademicYear, //academicYear
               isRepeat: true,
               payments: [],
             });
             await repeatEnrollment.save();
+              await studentModel.updateOne(
+              { _id: studentId },
+              {
+                $set: {
+                  "current_stage.stage_name": targetStage,
+                  "academicYear": nextAcademicYear,
+                  "studStatus":newStatus,
+                   "current_class":updateData.current_class
+                },
+              }, // use "stage_name" if flat
+            );
             console.log(
-              `Created repeat enrollment for student ${studentId} in ${targetStage} ${academicYear}`,
+              `Created repeat enrollment for student ${studentId} in ${targetStage} ${nextAcademicYear}`,
             );
           } else {
             console.log(
-              `Repeat enrollment already exists for student ${studentId} in ${targetStage} ${academicYear}`,
+              `Repeat enrollment already exists for student ${studentId} in ${targetStage} ${nextAcademicYear}`,
             );
           }
         }
@@ -1268,12 +1292,14 @@ export const getPaymentById = async (req, res) => {
 
 export const repeatStage = async (req, res) => {
   const { studentId } = req.params;
-  const { stage_name } = req.body;   // remove academicYear from body (or ignore it)
+  const { stage_name } = req.body; // remove academicYear from body (or ignore it)
 
   try {
     const student = await studentModel.findById(studentId);
     if (student && student.status === "متخرج") {
-      return res.status(400).json({ message: "الطالب متخرج، لا يمكن إعادة السنة" });
+      return res
+        .status(400)
+        .json({ message: "الطالب متخرج، لا يمكن إعادة السنة" });
     }
 
     if (!stage_name) {
@@ -1281,9 +1307,16 @@ export const repeatStage = async (req, res) => {
     }
 
     // Limit repeats to once per stage
-    const stageEnrollments = await enrollmentModel.find({ studentId, stage_name });
+    const stageEnrollments = await enrollmentModel.find({
+      studentId,
+      stage_name,
+    });
     if (stageEnrollments.length >= 2) {
-      return res.status(400).json({ message: "لا يمكن إعادة السنة أكثر من مرة واحدة لهذه المرحلة" });
+      return res
+        .status(400)
+        .json({
+          message: "لا يمكن إعادة السنة أكثر من مرة واحدة لهذه المرحلة",
+        });
     }
 
     // Find the most recent enrollment for this stage (to get the academic year)
@@ -1291,7 +1324,9 @@ export const repeatStage = async (req, res) => {
       .findOne({ studentId, stage_name })
       .sort({ academicYear: -1 });
     if (!lastEnrollment) {
-      return res.status(400).json({ message: "لم يتم العثور على تسجيل سابق لهذه المرحلة" });
+      return res
+        .status(400)
+        .json({ message: "لم يتم العثور على تسجيل سابق لهذه المرحلة" });
     }
 
     // Increment academic year
@@ -1303,7 +1338,7 @@ export const repeatStage = async (req, res) => {
     const repeatEnrollment = new enrollmentModel({
       studentId,
       stage_name,
-      academicYear: nextAcademicYear,   // always incremented
+      academicYear: nextAcademicYear, // always incremented
       isRepeat: true,
       payments: [],
     });

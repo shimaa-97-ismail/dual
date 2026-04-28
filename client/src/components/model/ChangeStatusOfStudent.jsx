@@ -21,12 +21,15 @@ export function ChangeStatusOfStudentModel({
   currentStage ,          
   currentAcademicYear
 }) {
+  console.log("currentAcademicYear", currentAcademicYear);
+  
   const mutation = useChangeStatusOfStudents();
 const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     studStatus: "",
     stage_name: "",
     current_class: "",
+    academicYear:"",
   });
 
   // Reset form when modal opens (optional)
@@ -36,6 +39,8 @@ const queryClient = useQueryClient();
         studStatus: "",
         stage_name: "",
         current_class: "",
+        academicYear:"",
+        
       });
     }
   }, [open]);
@@ -62,11 +67,17 @@ const getNextStage = (currentStage) => {
   return idx !== -1 && idx + 1 < stageOrder.length ? stageOrder[idx + 1] : null;
 };
 
-// Helper to get next academic year (e.g., "2024/2025" -> "2025/2026")
-const getNextAcademicYear = (currentAcademicYear) => {
-  const [start, end] = currentAcademicYear.split("/");
-  return `${parseInt(start) + 1}/${parseInt(end) + 1}`;
-};
+// // Helper to get next academic year (e.g., "2024/2025" -> "2025/2026")
+// const getNextAcademicYear = (currentAcademicYear) => {
+//   console.log("currentAcademicYear",currentAcademicYear);
+  
+//   const [start, end] = currentAcademicYear.split("/");
+//   console.log(start);
+  
+//   console.log(`${parseInt(end) }/${parseInt(end) + 1}`);
+  
+//   return `${parseInt(end)}/${parseInt(end) + 1}`;
+// };
 
 const handleSubmit = () => {
   if (selectedStudentIds.length === 0) {
@@ -87,7 +98,7 @@ const handleSubmit = () => {
       return;
     }
     updates.stage_name = nextStage;                 // send NEW stage
-    updates.academicYear = getNextAcademicYear(currentAcademicYear); // next year
+    updates.academicYear =currentAcademicYear; // next year
     updates.current_class = formData.current_class;                    // reset class for new stage
   } 
   else if (formData.studStatus === "باقى لأعاده (راسب)") {
@@ -120,7 +131,7 @@ const handleSubmit = () => {
         queryClient.invalidateQueries({ queryKey: studentKeys.all });
           setTimeout(() => {
         window.location.reload();
-      }, 500);
+      }, 100);
       },
       onError: (error) => {
         toast.error("فشل التحديث: " + error.message);

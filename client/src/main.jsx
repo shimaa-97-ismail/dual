@@ -29,7 +29,7 @@ createRoot(document.getElementById("root")).render(
             <Toaster position="top-center" />
             <QueryClientProvider client={queryClient}>
               <App />
-              <ReactQueryDevtools initialIsOpen={false} />
+              {/* <ReactQueryDevtools initialIsOpen={false} /> */}
             </QueryClientProvider>
           </PersistGate>
         </Provider>

@@ -234,22 +234,27 @@ export const useDeleteWeekAttendance = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ studentId, weekStart }) =>
-      studentApi.deleteWeekAttendance(studentId, weekStart),
+    mutationFn: ({ studentId, weekDelete }) =>{
+ console.log( studentId, weekDelete);
+      
+     return studentApi.deleteWeekAttendance(studentId, weekDelete);
+    },
     onSuccess: (_, variables) => {
       // تحديث ذاكرة التخزين المؤقت للاستعلامات المتأثرة
       queryClient.invalidateQueries({
         queryKey: ["student-attendance", variables.studentId],
       });
       queryClient.invalidateQueries({
-        queryKey: ["week-attendance", variables.studentId, variables.weekStart],
+        queryKey: ["week-attendance", variables.studentId, variables.weekDelete],
       });
-      alert("تم حذف الأسبوع بنجاح");
+      // alert("تم حذف الأسبوع بنجاح");
     },
-    onError: (error) => {
-      console.error("Delete error:", error);
-      alert(`فشل الحذف: ${error.response?.data?.message || error.message}`);
-    },
+    // onError: (error) => {
+    //   console.error("Delete error:", error);
+    //   // alert(`فشل الحذف: ${error.response?.data?.message || error.message}`);
+    // },
+    
+     
   });
 };
 

@@ -7,6 +7,6 @@ import { validateUrl } from "./url";
 import { validateNationalID } from "./id";
 import { validatePassword } from "./password";
 
-// import { validateNumber } from "./number";
+import { validateNumber } from "./number";
 
-export { validateText, validatePhone, validateEmail,validateArray, validateSelect,validateUrl,validateNationalID,validatePassword };
+export { validateText, validatePhone, validateEmail,validateArray, validateSelect,validateUrl,validateNationalID,validatePassword,validateNumber };

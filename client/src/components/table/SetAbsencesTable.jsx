@@ -48,6 +48,8 @@ export function SetAbsencesTable() {
       currentDay.setDate(startDateObj.getDate() + i);
       days.push(currentDay);
     }
+    console.log(days);
+    
     return days;
   };
 

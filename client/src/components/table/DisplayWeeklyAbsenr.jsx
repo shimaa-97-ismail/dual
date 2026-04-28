@@ -13,7 +13,7 @@ export function DisplayWeeklyAbsenr({
   startWeek,
   attendance_summary,
 }) {
-  console.log("Students data:", students);
+  console.log("Students data:", startWeek);
 
   // حساب الإحصائيات لكل طالب
   const calculateStudentStats = (days) => {
@@ -35,33 +35,45 @@ export function DisplayWeeklyAbsenr({
   };
 
   // عرض حالة اليوم مع تنسيق
-  const renderDayStatus = (day) => {
-    if (!day || !day.status) return "";
+  // const renderDayStatus = (day) => {
+  //   if (!day || !day.status) return "";
 
-    const colorClass = "text-gray-600";
+  //   const colorClass = "text-gray-600";
 
-    return (
-      <div className="flex flex-col items-center">
-        {/* <span className={`font-bold ${colorClass}`}>{icon}</span> */}
-        <span className={`text-base ${colorClass}`}>
-          {day.short_date || new Date(day.date).getDate()}
-        </span>
-      </div>
-    );
-  };
+  //   return (
+  //     <div className="flex flex-col items-center">
+  //       {/* <span className={`font-bold ${colorClass}`}>{icon}</span> */}
+  //       <span className={`text-base ${colorClass}`}>
+  //         {day.short_date || new Date(day.date).getDate()}
+  //       </span>
+  //     </div>
+  //   );
+  // };
 
-  // عرض تفاصيل اليوم (عند hover)
-  const renderDayTooltip = (day) => {
-    if (!day) return "";
+  // // عرض تفاصيل اليوم (عند hover)
+  // const renderDayTooltip = (day) => {
+  //   if (!day) return "";
 
-    return `
-      اليوم: ${day.day_name_ar}
-      التاريخ: ${day.display_date}
-      الحالة: ${day.status}
-      ${day.notes ? `ملاحظات: ${day.notes}` : ""}
-    `;
-  };
-
+  //   return `
+  //     اليوم: ${day.day_name_ar}
+  //     التاريخ: ${day.display_date}
+  //     الحالة: ${day.status}
+  //     ${day.notes ? `ملاحظات: ${day.notes}` : ""}
+  //   `;
+  // };
+  function getWeekDates(startDate) {
+  const dates = [];
+  const [year, month, day] = startDate.split("-").map(Number);
+  for (let i = 0; i < 7; i++) {
+    const currentDate = new Date(year, month - 1, day + i);
+    const y = currentDate.getFullYear();
+    const m = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const d = String(currentDate.getDate()).padStart(2, "0");
+    dates.push(`${y}-${m}-${d}`);
+  }
+  return dates;
+}
+const weekDates =startWeek?getWeekDates(startWeek):[];
   return (
     <div className="overflow-x-auto">
       <Table className="min-w-full">
@@ -112,27 +124,27 @@ export function DisplayWeeklyAbsenr({
           <TableRow>
             {/* Second row: dates for weekdays */}
 
-            {students &&
-            Array.isArray(students[0]?.days) &&
-            students[0]?.days.length > 0
-              ? // ترتيب الأيام حسب day_number لضمان الترتيب الصحيح
-                [...students[0].days]
-                  .sort((a, b) => a.day_number - b.day_number)
-                  .map((day, dayIndex) => (
-                    <TableHead
-                      key={day._id || dayIndex}
-                      className="text-center p-0  [writing-mode:vertical-rl] "
-                      title={renderDayTooltip(day)}
-                    >
-                      {renderDayStatus(day)}
-                    </TableHead>
-                  ))
-              : // إذا لم يكن هناك أيام
-                Array.from({ length: 7 }).map((_, i) => (
-                  <TableHead key={i} className="text-center p-2 text-gray-300">
-                    -
-                  </TableHead>
-                ))}
+            
+            {weekDates.length > 0 ? (
+    weekDates.map((date, idx) => (
+      <TableHead key={idx} className="text-center p-2 text-gray-600  [writing-mode:vertical-rl]">
+        {new Date(date).toLocaleDateString("ar-EG", {
+          day: "numeric",
+          month: "numeric",
+          year: "numeric",
+        })}
+      </TableHead>
+    ))
+  ) : (
+    // Fallback: 7 empty columns
+    Array.from({ length: 7 }).map((_, i) => (
+      <TableHead key={i} className="text-center p-2 text-gray-300">
+        -
+      </TableHead>
+    ))
+  )}
+           
+             
             <TableHead className="text-center p-0 text-gray-600">
               <div
                 className="flex items-center justify-center text-base"

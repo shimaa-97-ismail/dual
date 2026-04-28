@@ -1,4 +1,4 @@
-import React from "react";
+import React,{useState} from "react";
 import { LabelForm } from "@/components/label/Label";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,9 +15,12 @@ import { useSchoolById, useSchools } from "@/hooks/useSchools";
 import { useTrainningPlaces } from "@/hooks/useTrainngPlace";
 import { Button } from "@/components/ui/button";
 import {useParams} from "react-router-dom";
-export const StudentForm = ({ value, onChange, errors = {}, onSubmit }) => {
+import { studentValidators } from '../../schemas/studentSchemas';
+import { toast } from 'react-hot-toast';
+export const StudentForm = ({ value, onChange,  onSubmit }) => {
   console.log(value);
 const { id } = useParams();
+  const [errors, setErrors] = useState({});
   const { data: allSchool } = useSchools();
   const { data: school, isLoading, isError, error, refetch } = useSchoolById(value?.school);
   const { data: trainningPlaces } = useTrainningPlaces();
@@ -45,6 +48,7 @@ const { id } = useParams();
       onChange(field, fieldValue);
     }
   };
+
 
   const handlePhoneChange = (index, number) => {
     const currentPhones = Array.isArray(value.phones) ? value.phones : DEFAULT_PHONES;
@@ -79,9 +83,44 @@ const { id } = useParams();
     onChange("stdSpecial", "");
     onChange("intake", ""); // fixed typo: was onchange
   };
+    const getNestedValue = (obj, path) => {
+    return path.split('.').reduce((o, key) => (o && o[key] !== undefined ? o[key] : undefined), obj);
+  };
+    const validateForm = () => {
+    const newErrors = {};
+    let isValid = true;
+
+    for (const [field, validator] of Object.entries(studentValidators)) {
+      let x;
+      if (field.includes('.')) {
+        x = getNestedValue(value, field);
+      } else {
+        x = value[field];
+      }
+      let result;
+      if (field === 'fatherJobDetails' || field === 'motherJobDetails') {
+        result = validator(x  , value);
+      } else {
+        result = validator( x);
+      }
+      console.log(result);
+      
+      if (!result?.isValid) {
+        newErrors[field] = result.error;
+        isValid = false;
+      }
+    }
+    setErrors(newErrors);
+    return isValid;
+  };
+
 
   const handleSubmit = () => {
-    onSubmit(value);
+   if (validateForm()){
+onSubmit(value);
+   } else{
+    toast.error('يرجى تصحيح الأخطاء في النموذج');
+   }
   };
 
   if (isLoading) return <div>بيانات المدارس بتتحمل...</div>;
@@ -213,6 +252,10 @@ const { id } = useParams();
               id="fatherName"
               value={value?.fatherName || ""}
               onChange={(e) => onChange("fatherName", e.target.value)}
+               onBlur={() => {
+    const fieldError = studentValidators.stdName(value?.stdName)?.error;
+    setErrors(prev => ({ ...prev, stdName: fieldError }));
+  }}
               placeholder="أدخل اسم الاب"
               className={errors?.fatherName ? "border-red-500" : ""}
               required
@@ -336,11 +379,13 @@ const { id } = useParams();
             <LabelForm htmlFor="password" title="رقم السرى" />
             <Input
               id="password"
-              type="password"
+              type="text"
               value={value?.password || ""}
               onChange={(e) => onChange("password", e.target.value)}
               placeholder="أدخل رقم السرى"
             />
+            {errors?.password && <p className="text-red-500 text-sm">{errors.password}</p>}
+
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="preparatorySchoolTotalScore" title="مجموع الاعدادى" required />
@@ -455,7 +500,7 @@ const { id } = useParams();
             </Select>
           </div>
           <div className="space-y-2">
-            <LabelForm htmlFor="intake" title="الدفعه" />
+            <LabelForm htmlFor="intake" title="الدفعه" required/>
             <Select
               value={value?.intake || ""}
               onValueChange={(val) => onChange("intake", val)}
@@ -470,6 +515,8 @@ const { id } = useParams();
                 ))}
               </SelectContent>
             </Select>
+            {errors?.intake && <p className="text-red-500 text-sm">{errors.intake}</p>}
+
           </div>
         {id && <div className="space-y-2">
             <LabelForm htmlFor="graduationYear" title="سنة التخرج" />
@@ -479,6 +526,8 @@ const { id } = useParams();
               onChange={(e) => onChange("graduationYear", e.target.value)}
               placeholder="2026"
             />
+            {errors?.graduationYear && <p className="text-red-500 text-sm">{errors.graduationYear}</p>}
+
           </div> } 
          
           <div className="space-y-2">
@@ -489,6 +538,8 @@ const { id } = useParams();
               onChange={(e) => onChange("current_class", e.target.value)}
               placeholder="1/2"
             />
+            {errors?.current_class && <p className="text-red-500 text-sm">{errors.current_class}</p>}
+
           </div>
         </div>
       </section>

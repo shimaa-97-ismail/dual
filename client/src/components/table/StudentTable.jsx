@@ -177,7 +177,7 @@ export function StudentTable({ data, showCheckbox }) {
         onOpenChange={setShowAddModal}
         selectedStudentIds={selectedStudents}
           currentStage={data?.stage}          
-  currentAcademicYear={data?.intake} 
+  currentAcademicYear={data?.students?.[0]?.academicYear} 
       />
     </>
   );
