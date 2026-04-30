@@ -30,11 +30,10 @@ const roleMapping = {
     setShowAddModal(false);
   };
   useEffect(() => {
-    console.log("editingUser changed:", editingUser);
+ 
   }, [editingUser]);
 
   const handleUpdateUser = async (formData) => {
-    console.log(formData);
 
     await updateUserMutation.mutateAsync({ id: editingUser._id, ...formData });
     closeEditModal();
@@ -72,7 +71,6 @@ const roleMapping = {
           <tbody>
             {users?.map(
               (user) => (
-                console.log("Rendering user:", user),
                 (
                   <tr key={user._id}>
                     <td>{user.username}</td>

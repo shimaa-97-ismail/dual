@@ -8,7 +8,6 @@ export function SearchDetails() {
   const searchValue = searchParams.get("search");
 
   const { data, refetch,isLoading } = useStudentSearch(searchValue, { enabled: false });
-console.log(data);
 
   useEffect(() => {
     if (searchValue && searchValue.length >= 2) {

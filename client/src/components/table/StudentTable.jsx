@@ -1,20 +1,29 @@
 import React, { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { SquarePen, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { StudentModel } from "../model/StudentModel";
 import { ChangeStatusOfStudentModel } from "../model/ChangeStatusOfStudent";
-import { useUpdateStudent,useDeleteStudent } from "@/hooks/useStudent"; // adjust import path
+import { useUpdateStudent, useDeleteStudent } from "@/hooks/useStudent"; // adjust import path
 import "./table.css";
 import { useNavigate } from "react-router-dom";
-
+import ConfirmationModal from "../common/ConfirmationModel";
+import { useQueryClient } from "@tanstack/react-query";
+import { studentKeys } from "@/hooks/useStudent";
 export function StudentTable({ data, showCheckbox }) {
-  console.log(data);
-  
+ const queryClient = useQueryClient();
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   const navigate = useNavigate();
   const updateMutation = useUpdateStudent();
@@ -30,8 +39,8 @@ export function StudentTable({ data, showCheckbox }) {
   // Edit: open modal with selected student data
   const handleEdit = (studentData) => {
     setSelectedStudent(studentData);
-     navigate(`/school/student/edit/${studentData._id}`);
-            
+    navigate(`/school/student/edit/${studentData._id}`);
+
     // setModalOpen(true);
   };
 
@@ -40,14 +49,17 @@ export function StudentTable({ data, showCheckbox }) {
     // Convert to FormData for file uploads
     const formDataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (key === 'fatherDeathCert' || key === 'motherDeathCert') {
+      if (key === "fatherDeathCert" || key === "motherDeathCert") {
         if (formData[key] instanceof File) {
           formDataToSend.append(key, formData[key]);
         }
-      } else if (key === 'phones' || key === 'current_stage') {
+      } else if (key === "phones" || key === "current_stage") {
         formDataToSend.append(key, JSON.stringify(formData[key]));
       } else {
-        formDataToSend.append(key, formData[key] !== undefined ? formData[key] : '');
+        formDataToSend.append(
+          key,
+          formData[key] !== undefined ? formData[key] : "",
+        );
       }
     });
 
@@ -57,24 +69,26 @@ export function StudentTable({ data, showCheckbox }) {
         onSuccess: () => {
           toast.success("تم تحديث بيانات الطالب بنجاح");
           setModalOpen(false);
-         
         },
         onError: (error) => {
           toast.error("فشل في التحديث: " + error.message);
         },
-      }
+      },
     );
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('هل أنت متأكد من حذف هذا الطالب؟')) {
-      deleteMutation.mutate(id, {
+  const handleDelete = async () => {
+    // if (window.confirm("هل أنت متأكد من حذف هذا الطالب؟")) {
+    console.log(selectedStudent._id);
+    
+      deleteMutation.mutate(selectedStudent._id, {
         onSuccess: () => {
           // toast.success('تم حذف الطالب بنجاح');
-         setSelectedStudents(prev => prev.filter(sid => sid !== id));          
-        }
+          setDeleteModalOpen(false);
+             queryClient.invalidateQueries({ queryKey: studentKeys.all });
+        },
       });
-    }
+    // }
   };
 
   return (
@@ -86,7 +100,9 @@ export function StudentTable({ data, showCheckbox }) {
               {showCheckbox && (
                 <TableHead className="w-[50px] text-center"></TableHead>
               )}
-              <TableHead className="w-[100px] text-center">اسم الطالب</TableHead>
+              <TableHead className="w-[100px] text-center">
+                اسم الطالب
+              </TableHead>
               {/* <TableHead className="text-center">الرقم القومي</TableHead> */}
               {/* <TableHead className="text-center">رقم التليفون</TableHead>
               <TableHead className="text-center">العنوان</TableHead> */}
@@ -94,8 +110,14 @@ export function StudentTable({ data, showCheckbox }) {
               <TableHead className="text-center">الصف</TableHead>
               <TableHead className="text-center">الدفعه</TableHead>
               <TableHead className="text-center">المنشأه التدريبيه</TableHead>
-              <TableHead className="text-center"> اجمالى  المبلغ المسدد</TableHead>
-              <TableHead className="text-center"> اجمالى الشهور المسدده</TableHead>
+              <TableHead className="text-center">
+                {" "}
+                اجمالى المبلغ المسدد
+              </TableHead>
+              <TableHead className="text-center">
+                {" "}
+                اجمالى الشهور المسدده
+              </TableHead>
               <TableHead className="text-center hide-on-print">تعديل</TableHead>
               <TableHead className="text-center hide-on-print">حذف</TableHead>
             </TableRow>
@@ -109,12 +131,17 @@ export function StudentTable({ data, showCheckbox }) {
                       type="checkbox"
                       value={stud._id}
                       checked={selectedStudents.includes(stud._id)}
-                      onChange={(e) => handleCheckboxChange(stud._id, e.target.checked)}
+                      onChange={(e) =>
+                        handleCheckboxChange(stud._id, e.target.checked)
+                      }
                       className="accent-primary"
                     />
                   </TableCell>
                 )}
-                <TableCell className="font-medium text-center cursor-pointer" onClick={() => navigate(`/student/${stud._id}`)}>
+                <TableCell
+                  className="font-medium text-center cursor-pointer text-primary hover:underline"
+                  onClick={() => navigate(`/student/${stud._id}`)}
+                >
                   {stud.stdName}
                 </TableCell>
                 {/* <TableCell className="font-medium text-center">{stud.studID}</TableCell>
@@ -127,12 +154,24 @@ export function StudentTable({ data, showCheckbox }) {
                                     ))}
                                   </TableCell>
                 <TableCell className="font-medium text-center">{stud.stdAddress}</TableCell> */}
-                <TableCell className="font-medium text-center">{stud.studStatus}</TableCell>
-                <TableCell className="font-medium text-center">{stud.current_stage?.stage_name}</TableCell>
-                <TableCell className="font-medium text-center">{stud.intake}</TableCell>
-                <TableCell className="font-medium text-center">{stud.stdTrainningPlace?.name}</TableCell>
-                            <TableCell className="font-medium text-center">{stud.totalAmountPaid}</TableCell>
-                <TableCell className="font-medium text-center">{stud.paymentsCount}</TableCell>
+                <TableCell className="font-medium text-center">
+                  {stud.studStatus}
+                </TableCell>
+                <TableCell className="font-medium text-center">
+                  {stud.current_stage?.stage_name}
+                </TableCell>
+                <TableCell className="font-medium text-center">
+                  {stud.intake}
+                </TableCell>
+                <TableCell className="font-medium text-center">
+                  {stud.stdTrainningPlace?.name}
+                </TableCell>
+                <TableCell className="font-medium text-center">
+                  {stud.totalAmountPaid}
+                </TableCell>
+                <TableCell className="font-medium text-center">
+                  {stud.paymentsCount}
+                </TableCell>
                 <TableCell className="hide-on-print">
                   <div className="flex justify-center">
                     <button onClick={() => handleEdit(stud)}>
@@ -142,7 +181,10 @@ export function StudentTable({ data, showCheckbox }) {
                 </TableCell>
                 <TableCell className="hide-on-print">
                   <div className="flex justify-center">
-                    <button onClick={() => handleDelete(stud._id)}>
+                    <button onClick={() =>{
+                        setSelectedStudent(stud);
+                        setDeleteModalOpen(true);
+                    }}>
                       <Trash2 size={20} color="#831e2e" />
                     </button>
                   </div>
@@ -171,13 +213,23 @@ export function StudentTable({ data, showCheckbox }) {
         onSubmit={handleUpdateSubmit}
         isLoading={updateMutation.isLoading}
       />
-
+      <ConfirmationModal
+        open={deleteModalOpen}
+        onOpenChange={setDeleteModalOpen}
+        title="تأكيد حذف الطالب"
+        description={`هل أنت متأكد من حذف الطالب ؟ هذا الإجراء لا يمكن التراجع عنه.`}
+        confirmText="نعم، احذف"
+        cancelText="إلغاء"
+        onConfirm={handleDelete}
+        variant="destructive"
+        // isLoading={isDeleting}
+      />
       <ChangeStatusOfStudentModel
         open={showAddModal}
         onOpenChange={setShowAddModal}
         selectedStudentIds={selectedStudents}
-          currentStage={data?.stage}          
-  currentAcademicYear={data?.students?.[0]?.academicYear} 
+        currentStage={data?.stage}
+        currentAcademicYear={data?.students?.[0]?.academicYear}
       />
     </>
   );

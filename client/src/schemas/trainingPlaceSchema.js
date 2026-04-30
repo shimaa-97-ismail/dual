@@ -1,7 +1,7 @@
 import { validateText, validatePhone,validateEmail } from '../validators';
 
 const nameOptions = { required: true, minLength: 3, maxLength: 100 };
-const addressOptions = { required: false, minLength: 5, maxLength: 200 };
+const addressOptions = { required: false, minLength: 5, maxLength: 200,  allowNumbers: true, };
 const supervisorNameOptions = { required: false, minLength: 3, maxLength: 50 };
 const ownerOptions = { required: false, minLength: 3, maxLength: 50 };
 
@@ -16,8 +16,7 @@ const fileOptions = {
   allowedTypes: ['image/jpeg', 'image/png', 'application/pdf'],
 };
 
-const maxParticipantsOptions = { required: false, min: 1, max: 10000 };
-const currentParticipantsOptions = { required: false, min: 0, max: 10000 };
+
 
 export const addTrainningPlaceSchema = {
   name: (value) => validateText(value, nameOptions),

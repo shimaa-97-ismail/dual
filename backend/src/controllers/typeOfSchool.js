@@ -1,19 +1,6 @@
 import { schoolModel } from "../models/school.js";
 import { typeOfSchoolModel } from "../models/typeOfSchool.js";
 
-// export const getAllTypesOfSchool = async (req, res) => {
-//   try {
-//     const types = await typeOfSchoolModel.find();
-//      const count = await schoolModel.countDocuments({ type: typeId });
-//     res.status(200).json({ success: true, data: types ,count});
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: `${error.message}  خطأ في جلب أنواع المدارس`,
-//     });
-//   }
-// };
-
 export const getAllTypesOfSchool = async (req, res) => {
     try {
         const result = await typeOfSchoolModel.aggregate([
@@ -124,7 +111,6 @@ export const deleteTypeOfSchool = async (req, res) => {
 export const getSchoolByType = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
     
     const typeExists = await typeOfSchoolModel.findById(id);
     if (!typeExists) {
@@ -137,15 +123,11 @@ export const getSchoolByType = async (req, res) => {
       .find({ type: id })
       .populate("type", "name ") // بيانات النوع
      
-console.log(schools);
-
     res.status(200).json({
       success: true,
       data: schools,
     });
   } catch (error) {
-    console.log(error);
-    
     res.status(500).json({
       success: false,
       message: "خطأ في جلب البيانات",

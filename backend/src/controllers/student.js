@@ -28,9 +28,7 @@ const stageMonths = {
 
 export const createStudent = async (req, res) => {
   try {
-    console.log("create student body:", req.body);
-    console.log("req.files:", req.files); // array of all uploaded files
-
+   
     // Extract files by field name
     let studentImageUrl, fatherDeathCertUrl, motherDeathCertUrl;
     if (req.files && req.files.length) {
@@ -192,13 +190,10 @@ function convertToWeeklyAttendance(weekStart, attendanceData) {
 
   const days = [];
   for (let i = 0; i < 7; i++) {
-// const startUTC = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
-    const currentDate = new Date(Date.UTC(year, month - 1, day + i,0,0,0));
-    console.log(currentDate);
-    
+    // const startUTC = new Date(Date.UTC(year, month - 1, day, 0, 0, 0));
+    const currentDate = new Date(Date.UTC(year, month - 1, day + i, 0, 0, 0));
+
     const dateStr = formatLocalDate(currentDate);
-    console.log(dateStr);
-    
 
     const entry = attendanceData[dateStr] || { status: "حاضر", reason: "" };
     days.push({
@@ -215,7 +210,8 @@ function convertToWeeklyAttendance(weekStart, attendanceData) {
   const present_days = days.filter((d) => d.status === "حاضر").length;
   const absent_days = days.filter((d) => d.status === "غائب").length;
   const excused_absences = days.filter((d) => d.status === "اجازه").length;
-  const attendance_rate = total_days > 0 ? (present_days / total_days) * 100 : 0;
+  const attendance_rate =
+    total_days > 0 ? (present_days / total_days) * 100 : 0;
 
   const weekStartStr = formatLocalDate(startLocal);
   const endDate = new Date(year, month - 1, day + 6);
@@ -247,7 +243,6 @@ export const addStudentAbsent = async (req, res) => {
   try {
     const studentId = req.params.studentId || req.body.studentId;
     const { startDate, attendanceData } = req.body;
-console.log("hamada",attendanceData,startDate);
 
     if (!startDate) {
       return res
@@ -276,7 +271,6 @@ console.log("hamada",attendanceData,startDate);
       startDate,
       attendanceData,
     );
-console.log("weeklyAttendance",weeklyAttendance);
 
     const updatedStudent = await studentModel
       .findByIdAndUpdate(
@@ -303,26 +297,40 @@ console.log("weeklyAttendance",weeklyAttendance);
 export const getStudentAttendance = async (req, res) => {
   try {
     const { studentId } = req.params;
-    console.log("her", req.params);
+    const { page = 1, limit = 10 } = req.query;
 
-    // جلب الطالب مع حقل weekly_attendance فقط (لتقليل البيانات)
+    // Fetch student with only weekly_attendance field
     const student = await studentModel
       .findById(studentId)
       .select("weekly_attendance");
+
     if (!student) {
       return res
         .status(404)
         .json({ success: false, message: "الطالب غير موجود" });
     }
-    console.log(student);
 
-    // إرجاع مصفوفة الغياب (مرتبة حسب تاريخ البداية تنازلياً – الأحدث أولاً)
-    const attendance = student.weekly_attendance.sort((a, b) =>
+    // Sort attendance (newest first) and store in variable
+    const sortedAttendance = student.weekly_attendance.sort((a, b) =>
       b.week_start_date.localeCompare(a.week_start_date),
     );
-    console.log(attendance);
 
-    res.status(200).json({ success: true, data: attendance });
+    // Paginate on the sorted array
+    const start = (page - 1) * limit;
+    const end = start + parseInt(limit);
+    const paginatedAttendance = sortedAttendance.slice(start, end);
+    const total = sortedAttendance.length;
+
+    res.status(200).json({
+      success: true,
+      data: paginatedAttendance,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching student attendance:", error);
     res.status(500).json({ success: false, message: error.message });
@@ -423,7 +431,7 @@ export const updateWeekAttendance = async (req, res) => {
 export const deleteWeekAttendance = async (req, res) => {
   try {
     const { studentId, weekStart } = req.params;
-    console.log("delete", studentId, weekStart);
+  
 
     // استخدام $pull لإزالة العنصر الذي week_start_date يساوي weekStart
     const updatedStudent = await studentModel.findByIdAndUpdate(
@@ -545,10 +553,8 @@ export const absence_Percentage = async (req, res) => {
 // controllers/studentController.js
 export const updateStudent = async (req, res) => {
   try {
-    console.log("update student");
     const { id } = req.params;
     let updateData = req.body;
-    console.log(updateData);
 
     // Parse JSON fields
     if (updateData.phones) {
@@ -652,7 +658,6 @@ export const updateStudent = async (req, res) => {
       data: updatedStudent,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -675,7 +680,6 @@ export const deleteStudent = async (req, res) => {
       if (filePath && fs.existsSync(filePath)) {
         try {
           fs.unlinkSync(filePath);
-          console.log(`Deleted file: ${filePath}`);
         } catch (err) {
           console.error(`Error deleting file ${filePath}:`, err.message);
         }
@@ -695,7 +699,6 @@ export const deleteStudent = async (req, res) => {
 export const getStudentByschoolAndSpeacial = async (req, res) => {
   try {
     const { schoolID, speacialID } = req.params;
-    console.log(schoolID, speacialID);
 
     const students = await studentModel
       .find({
@@ -703,7 +706,6 @@ export const getStudentByschoolAndSpeacial = async (req, res) => {
         stdSpecial: speacialID,
       })
       .populate("stdTrainningPlace", "name");
-    console.log(students);
     res
       .status(200)
       .json({ success: true, message: "تم حذف الطالب بنجاح", data: students });
@@ -742,18 +744,39 @@ export const getStudentByTrainningPlace = async (req, res) => {
   try {
     console.log("trainning");
     const { id } = req.params;
+    const { page = 1, limit = 10, search = "" } = req.query;
+    const query = { stdTrainningPlace: id };
+
+    if (search) {
+      // search in student name or other relevant fields
+      query.$or = [
+        { stdName: { $regex: search, $options: "i" } },
+        { studID: { $regex: search, $options: "i" } },
+      ];
+    }
+    console.log(query);
 
     const students = await studentModel
-      .find({ stdTrainningPlace: id })
+      .find(query)
       .populate("stdSpecial", "name")
       .populate("school", "name")
       .populate("stdTrainningPlace", "name address phone")
       .populate("intake", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit));
+
+    const total = await studentModel.countDocuments(query);
+
     res.status(200).json({
       success: true,
-      count: students.length,
       data: students,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalPages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.log(error);
@@ -811,10 +834,7 @@ export const searchStudents = async (req, res) => {
 // controllers/studentController.js
 export const bulkUpdateStudents = async (req, res) => {
   try {
-    console.log(req.body, "qazwsx");
-
     const { studentIds, updates } = req.body;
-    console.log(updates);
 
     if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
       return res.status(400).json({
@@ -849,8 +869,6 @@ export const bulkUpdateStudents = async (req, res) => {
       delete updateData.stage_name;
     }
 
-    console.log("updateData",updateData);
-    
     // Update student documents (if any fields to update)
     if (Object.keys(updateData).length > 0) {
       // const result = await studentModel.updateMany(
@@ -858,9 +876,7 @@ export const bulkUpdateStudents = async (req, res) => {
       //   { $set: updateData },
       //   { runValidators: true },
       // );
-      const result=await studentModel.find({ _id: { $in: studentIds } })
-      console.log(result);
-      
+      const result = await studentModel.find({ _id: { $in: studentIds } });
 
       if (result.matchedCount === 0) {
         return res.status(404).json({
@@ -909,9 +925,6 @@ export const bulkUpdateStudents = async (req, res) => {
               payments: [],
             });
             await newEnrollment.save();
-            console.log(
-              `Created promotion enrollment for student ${studentId} to ${targetStage} ${academicYear}`,
-            );
 
             // Update the student's current stage to the target stage
             await studentModel.updateOne(
@@ -919,9 +932,9 @@ export const bulkUpdateStudents = async (req, res) => {
               {
                 $set: {
                   "current_stage.stage_name": targetStage,
-                  "academicYear": academicYear,
-                  "studStatus":newStatus,
-                  "current_class":updateData.current_class
+                  academicYear: academicYear,
+                  studStatus: newStatus,
+                  current_class: updateData.current_class,
                 },
               }, // use "stage_name" if flat
             );
@@ -953,14 +966,14 @@ export const bulkUpdateStudents = async (req, res) => {
               payments: [],
             });
             await repeatEnrollment.save();
-              await studentModel.updateOne(
+            await studentModel.updateOne(
               { _id: studentId },
               {
                 $set: {
                   "current_stage.stage_name": targetStage,
-                  "academicYear": nextAcademicYear,
-                  "studStatus":newStatus,
-                   "current_class":updateData.current_class
+                  academicYear: nextAcademicYear,
+                  studStatus: newStatus,
+                  current_class: updateData.current_class,
                 },
               }, // use "stage_name" if flat
             );
@@ -1037,7 +1050,6 @@ export const addPaymentToEnrollment = async (req, res) => {
 };
 export const getAllPaymentByStudent = async (req, res) => {
   const { studentId } = req.params;
-  console.log("getAllPaymentByStudent", studentId);
 
   try {
     const enrollments = await enrollmentModel
@@ -1209,7 +1221,6 @@ export const deletePayment = async (req, res) => {
 export const getPaymentById = async (req, res) => {
   //** */
   const { studentId, paymentId } = req.params;
-  console.log(studentId, paymentId);
 
   try {
     const enrollment = await enrollmentModel.findOne({
@@ -1312,11 +1323,9 @@ export const repeatStage = async (req, res) => {
       stage_name,
     });
     if (stageEnrollments.length >= 2) {
-      return res
-        .status(400)
-        .json({
-          message: "لا يمكن إعادة السنة أكثر من مرة واحدة لهذه المرحلة",
-        });
+      return res.status(400).json({
+        message: "لا يمكن إعادة السنة أكثر من مرة واحدة لهذه المرحلة",
+      });
     }
 
     // Find the most recent enrollment for this stage (to get the academic year)
@@ -1353,13 +1362,7 @@ export const repeatStage = async (req, res) => {
 export const createEnrollment = async (req, res) => {
   const { studentId } = req.params;
   const { stage_name, academicYear } = req.body;
-  console.log(
-    "createEnrollment called",
-    req.body,
-    studentId,
-    stage_name,
-    academicYear,
-  );
+
   try {
     const existingEnrollment = await enrollmentModel.findOne({
       studentId,
@@ -1450,11 +1453,9 @@ export const checkAndUpdateGraduation = async (studentId) => {
       studentId,
       stage_name: "الصف الثالث",
     });
-    console.log(thirdStageEnrollments, "checkAndUpdateGraduation");
 
     // Collect all payments from these enrollments
     const allPayments = thirdStageEnrollments.flatMap((e) => e.payments);
-    console.log(allPayments);
 
     // Required months for third stage
     const requiredMonths = stageMonths["الصف الثالث"];
@@ -1463,7 +1464,6 @@ export const checkAndUpdateGraduation = async (studentId) => {
     const allMonthsPaid = requiredMonths.every((month) =>
       allPayments.some((p) => p.month === month),
     );
-    console.log(allMonthsPaid);
 
     // Determine the academic year to set as graduationYear (use the most recent third‑stage enrollment if exists)
     let graduationYear = null;
@@ -1479,14 +1479,11 @@ export const checkAndUpdateGraduation = async (studentId) => {
 
     // Update student
     if (allMonthsPaid) {
-      console.log("update");
-
       // Only update if status is not already "متخرج"
       const res = await studentModel.findOneAndUpdate(
         { _id: studentId },
         { studStatus: "متخرج", graduationYear },
       );
-      console.log(res);
     } else {
       // If not all months paid, revert status to something else (e.g., "ناجح منقول" if they have completed the stage but not all months? This is complex)
       // For simplicity, we'll set to "ناجح منقول" if they have completed at least some payments? But that's not accurate.

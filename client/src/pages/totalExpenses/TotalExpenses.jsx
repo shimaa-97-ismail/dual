@@ -16,8 +16,6 @@ const fetchPaymentSummary = async ({ monthStart, startYear, monthEnd, endYear })
   return response.data; // { period, totalAmountDueReceipt1, totalAmountDueReceipt2 }
 };
 const fetchPaymentsByIntake = async (intake) => {
-  console.log(intake);
-  
   const response = await axioInstance.get(`/payments/by-intake?intake=${intake}`);
   return response.data;
 };
@@ -43,16 +41,13 @@ const [intakeFilter, setIntakeFilter] = useState(null);
   });
 
     const getDataByPeriod = (data) => {
-    console.log(data); // {monthStart: 'يناير', startYear: '2025', monthEnd: 'ديسمبر', endYear: '2025'}
-    setPeriodFilter(data); // triggers the query because enabled becomes true
+    setPeriodFilter(data); 
     setShowModalByPeriod(false);
   };
 
   const getDataByIntake = (data) => {
-    console.log(data);
   const newIntake = data.intake;
   setIntakeFilter(newIntake);
-  // If the new intake is the same as current, manually trigger refetch
   if (newIntake === intakeFilter) {
     intakeQuery.refetch();
   }

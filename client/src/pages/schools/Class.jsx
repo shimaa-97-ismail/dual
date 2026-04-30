@@ -7,7 +7,7 @@ export function Class({ showCheckbox }) {
   const printRef = useRef();
   // Get data from location state if not passed via props
   const data = location.state?.students;
-  console.log(data);
+  
 
   const params = location.state?.params;
 

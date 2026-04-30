@@ -12,13 +12,7 @@ export function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
   const { logout, user } = useContext(AuthContext);
-  console.log(user);
 
-  // const handleSearch = async (search) => {
-  //   console.log(search);
-
-  //   //  navigate(`/search?search=${search}`)
-  // };
   const handleClick = () => {
     navigate(`/search?search=${searchTerm}`);
     setSearchTerm("");

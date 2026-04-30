@@ -3,8 +3,6 @@ import React, { useState } from 'react';
 // Validation: must be "YYYY/YYYY" where YYYY is a 4-digit year
 const isValidIntake = (value) => /^\d{4}\/\d{4}$/.test(value);
 export const IntakeInput = ({ value = [], onChange }) => {
-    console.log(value);
-    
   const [items, setItems] = useState(value);
   const [newIntake, setNewIntake] = useState('');
   const [editingIndex, setEditingIndex] = useState(null);

@@ -23,11 +23,8 @@ export const useSpecials = (filters) => {
         queryFn: async () => {
             try {
                 let response = await specialsApi.getAll();
-                console.log(response);
-                
                 return response.data;
             } catch (error) {
-                console.log(error);
                 throw new Error(error.response?.data?.message || error.message);
             }
         },
@@ -66,8 +63,6 @@ export const useUpdateSpecial = (id) => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: async (data) => {
-            console.log(data);
-            
             await specialsApi.update(data.id, data.updateData)
         },
         onSuccess: () => {

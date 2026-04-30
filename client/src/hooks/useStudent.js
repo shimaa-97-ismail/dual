@@ -9,8 +9,8 @@ export const studentApi = {
   }),
   addAttendance: (id, data) =>
     axioInstance.post(`student/${id}/attendance`, data),
-  getAttendance: (studentId) =>
-    axioInstance.get(`/student/${studentId}/attendance`),
+  getAttendance: (studentId, page = 1, limit = 10) =>
+    axioInstance.get(`/student/${studentId}/attendance`,{ params: { page, limit }}),
   getWeekAttendance: (studentId, weekStart) =>
     axioInstance.get(`/student/${studentId}/attendance/${weekStart}`),
   updateWeekAttendance: (studentId, weekStart, days) =>
@@ -21,8 +21,8 @@ export const studentApi = {
     axioInstance.get("student/overall-absence-percentage"),
   delete: (id) => axioInstance.delete(`student/${id}`),
   getBySchool: (id) => axioInstance.get(`student/by-school/${id}`),
-  getByTrainningPlace: (id) =>
-    axioInstance.get(`student/by-trainning-place/${id}`),
+  getByTrainningPlace: (id,page=1, limit=10, search ) =>
+    axioInstance.get(`student/by-trainning-place/${id}`,{params:{ page, limit, search }}),
   search: (searchTerm) =>
     axioInstance.get("student/search", { params: { query: searchTerm } }),
   changeStatus: (ids, updates) =>
@@ -35,7 +35,8 @@ export const studentKeys = {
   details: () => [...studentKeys.all, "detail"],
   detail: (id) => [...studentKeys.details(), id],
   bySchool: (schoolId) => [...studentKeys.all, schoolId],
-  byTrainnigPlace: (trainningId) => [...studentKeys.all, trainningId],
+ byTrainnigPlace: (trainningId, page, limit, search) => 
+    ['students', 'trainningPlace', trainningId, page, limit, search],
   search: (query) => [...studentKeys.all, "search", query],
   inClass: (filters) => [...studentKeys.all, 'inClass', filters], 
 };
@@ -46,11 +47,8 @@ export const useStudents = () => {
     queryFn: async () => {
       try {
         let response = await studentApi.getAll();
-        console.log(response);
-
         return response.data;
       } catch (error) {
-        console.log(error);
         throw new Error(error.response?.data?.message || error.message);
       }
     },
@@ -63,8 +61,6 @@ export const useCreateStudent = () => {
 
   return useMutation({
     mutationFn: async (data) => {
-      console.log(data);
-
       await studentApi.create(data);
     },
 
@@ -86,8 +82,6 @@ export const useUpdateStudent = () => {
 
   return useMutation({
     mutationFn: async ({ studentId, data }) => {
-      console.log(data);
-
       const response = await axioInstance.patch(`/student/${studentId}`, data,{
     headers: { 'Content-Type': 'multipart/form-data' },
   });
@@ -107,6 +101,7 @@ export const useDeleteStudent = () => {
 
   return useMutation({
     mutationFn: async (id) => {
+      
       const response = await axioInstance.delete(`/student/${id}`);
       return response.data;
     },
@@ -138,8 +133,6 @@ export const useChangeStatusOfStudents = () => {
   });
 };
 export const useStudentBySchool = (schoolId) => {
-  console.log(schoolId);
-
   return useQuery({
     queryKey: studentKeys.bySchool(schoolId),
     queryFn: () => studentApi.getBySchool(schoolId),
@@ -154,20 +147,17 @@ export const useStudentBySchool = (schoolId) => {
   });
 };
 
-export const useStudentByTrainningPlace = (trainningId) => {
-  console.log(trainningId);
-
+export const useStudentByTrainningPlace = (trainningId, page = 1, limit = 10, search = '') => {
   return useQuery({
-    queryKey: studentKeys.byTrainnigPlace(trainningId),
-    queryFn: () => studentApi.getByTrainningPlace(trainningId),
+    queryKey: studentKeys.byTrainnigPlace(trainningId, page, limit, search),
+    queryFn: () => studentApi.getByTrainningPlace(trainningId, page, limit, search),
     enabled: !!trainningId,
-    select: (data) => data.data,
-    onError: (error) => {
-      console.error("Error fetching students by department:", error);
-      alert(
-        `فشل في جلب الطلاب: ${error.response?.data?.message || error.message}`,
-      );
-    },
+    keepPreviousData: true, // prevents flickering on page change
+    select: (response) => response.data, // assuming response = { success, data, pagination }
+    // onError: (error) => {
+    //   console.error("Error fetching students by training place:", error);
+    //   alert(`فشل في جلب الطلاب: ${error.response?.data?.message || error.message}`);
+    // },
   });
 };
 //absent
@@ -188,12 +178,12 @@ export const useAddAttendanceStudent = () => {
     },
   });
 };
-export const useStudentAttendance = (studentId) => {
+export const useStudentAttendance = (studentId, page = 1, limit = 10) => {
   return useQuery({
-    queryKey: ["student-attendance", studentId],
-    queryFn: () => studentApi.getAttendance(studentId),
-    enabled: !!studentId, // لا يتم الجلب إلا إذا كان studentId موجوداً
-    select: (response) => response.data.data, // استخراج المصفوفة من الاستجابة
+    queryKey: ["student-attendance", studentId, page, limit],
+    queryFn: () => studentApi.getAttendance(studentId, page, limit),
+    enabled: !!studentId,
+    keepPreviousData: true, // prevents flashing on page change
   });
 };
 
@@ -235,8 +225,6 @@ export const useDeleteWeekAttendance = () => {
 
   return useMutation({
     mutationFn: ({ studentId, weekDelete }) =>{
- console.log( studentId, weekDelete);
-      
      return studentApi.deleteWeekAttendance(studentId, weekDelete);
     },
     onSuccess: (_, variables) => {
@@ -264,8 +252,6 @@ export const useGetPercentAbsence = () => {
     queryKey: ["overallAbsence"],
     queryFn: async () => {
       const response = await studentApi.getPercentAbcence();
-      console.log(response);
-      
       // Axios puts the actual data in response.data
       return response.data;
     },
@@ -279,8 +265,7 @@ export const useStudentById = (id) => {
     queryKey: studentKeys.detail(id),
     queryFn: async () => {
       const response = await studentApi.getById(id);
-      console.log(response);
-
+   
       return response.data.data;
     },
     enabled: !!id, // يعمل فقط إذا كان الـ ID موجودًا
@@ -288,17 +273,16 @@ export const useStudentById = (id) => {
 };
 
 export const useStudentSearch = (searchTerm, options = {}) => {
-  console.log(searchTerm);
+
   let term;
   if (typeof searchTerm === "object" && searchTerm.studentName) {
     term = searchTerm.studentName;
   } else if (typeof searchTerm === "string") {
     term = searchTerm;
-    console.log(term);
+
   } else {
     term = "";
   }
-  console.log(term);
 
   return useQuery({
     queryKey: studentKeys.search(term), // Now term is a string
@@ -308,27 +292,4 @@ export const useStudentSearch = (searchTerm, options = {}) => {
   });
 };
 
-// export const useChangeStatusOfStudents = () => {
-//   const queryClient = useQueryClient();
 
-//   return useMutation({
-//     mutationFn: (ids,updates) => studentApi.changeStatus(ids,updates), // data = { studentIds, updates }
-//     onSuccess: (response, variables) => {
-//       // response هو ما يعيده السيرفر (مثلاً { matchedCount, modifiedCount, ... })
-//       // variables هو البيانات التي أرسلتها { studentIds, updates }
-//       console.log('Update successful:', response, variables);
-
-//       // إبطال استعلامات الطلاب لإعادة جلب البيانات
-//       queryClient.invalidateQueries({ queryKey: studentKeys.all });
-
-//       // يمكنك أيضًا تحديث الكاش مباشرة إذا أردت (اختياري)
-//       // queryClient.setQueryData(studentKeys.lists(), (old) => ...)
-//     },
-//     onError: (error) => {
-//       console.error("Error updating students status:", error);
-//       alert(
-//         `فشل في التحديث: ${error.response?.data?.message || error.message}`,
-//       );
-//     },
-//   });
-// };

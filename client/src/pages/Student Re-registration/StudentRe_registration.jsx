@@ -14,11 +14,9 @@ export function StudentRe_registration() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data, refetch } = useStudentSearch(searchQuery, { enabled: false });
-  console.log(data);
 
   const handleApplicant = (applicantData) => {
     setApplicant(applicantData);
-    console.log(applicantData);
     setShowApplicantModel(false);
     setStudentModel(true);
   };
@@ -28,9 +26,7 @@ export function StudentRe_registration() {
     }
   }, [searchQuery, refetch]);
   const handleStudent = async (studentName) => {
-    console.log(studentName);
-
-    setSearchQuery(studentName.studentName);
+     setSearchQuery(studentName.studentName);
     setStudentModel(false); // This will set the query but the hook is enabled: false so it won't run automatically.
     // Then manually refetch
     // refetch();

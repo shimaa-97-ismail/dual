@@ -17,7 +17,7 @@ const generateToken = (user) => {
 
 export const getUser = async (req, res) => {
   try {
-    const users = await userModel.find().select('-password');
+    const users = await userModel.find().select("-password");
     res.status(200).json({ success: true, data: users });
   } catch (error) {
     res.status(404).json({ success: false, message: error.message });
@@ -26,8 +26,13 @@ export const getUser = async (req, res) => {
 
 export const createUser = async (req, res) => {
   const { username, password, role, email } = req.body;
-   const assignedRole = req.user.role === 'admin' ? role : 'supervisor';
-  const newUser = new userModel({ username, password, role:assignedRole, email });
+  const assignedRole = req.user.role === "admin" ? role : "supervisor";
+  const newUser = new userModel({
+    username,
+    password,
+    role: assignedRole,
+    email,
+  });
   try {
     await newUser.save();
     const { password: _, ...userWithoutPassword } = newUser.toObject();
@@ -37,30 +42,25 @@ export const createUser = async (req, res) => {
   }
 };
 export const updateUser = async (req, res) => {
-  // console.log(req.params,req.body);
-  
   const { id } = req.params;
-  const  { username, email, role }  = req.body;
+  const { username, email, role } = req.body;
   try {
-      const user = await userModel.findById(id);
+    const user = await userModel.findById(id);
     if (!user) {
-      return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+      return res
+        .status(404)
+        .json({ success: false, message: "المستخدم غير موجود" });
     }
-      if (username) user.username = username;
+    if (username) user.username = username;
     if (email) user.email = email;
-     if (role && req.user.role === 'admin') user.role = role;
-  //  console.log(user);
-   
+    if (role && req.user.role === "admin") user.role = role;
+
     const updatedUser = await user.save();
-    console.log(updatedUser);
-    
+
     const { password: _, ...userWithoutPassword } = updatedUser.toObject();
-    console.log(userWithoutPassword);
-    
+
     res.status(200).json({ success: true, data: userWithoutPassword });
   } catch (error) {
-    console.log(error);
-    
     res.status(409).json({ success: false, message: error.message });
   }
 };
@@ -68,9 +68,11 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
-     const deletedUser = await userModel.findByIdAndDelete(id);
+    const deletedUser = await userModel.findByIdAndDelete(id);
     if (!deletedUser) {
-      return res.status(404).json({ success: false, message: 'المستخدم غير موجود' });
+      return res
+        .status(404)
+        .json({ success: false, message: "المستخدم غير موجود" });
     }
     res.status(200).json({ success: true, data: id });
   } catch (error) {
@@ -82,19 +84,16 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body.data;
   try {
     const user = await userModel.findOne({ email });
-    if (!user) {   
+    if (!user) {
       return res.status(404).json({ message: "المستخدم غير موجود" });
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log(isPasswordValid);
-    
+
     if (!isPasswordValid) {
-      // console.log("invalid password");
       return res
         .status(401)
         .json({ message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
     }
-    // console.log("successful");
     const token = generateToken(user);
     res.status(200).json({ success: true, data: user, token: token });
   } catch (error) {
@@ -104,17 +103,6 @@ export const loginUser = async (req, res) => {
 
 export const getMe = async (req, res) => {
   res.json({ user: req.user });
-
-  // const userId = req.user.id;
-  // try {
-  //     const user = await userModel.findById(userId).select("-password");
-  //     if (!user) {
-  //         return res.status(404).json({ message: "User not found" });
-  //     }
-  //     res.status(200).json({ user });
-  // } catch (error) {
-  //     res.status(500).json({ message: error.message });
-  // }
 };
 
 export const logoutUser = async (req, res) => {
@@ -125,8 +113,7 @@ export const logoutUser = async (req, res) => {
 
 export const forgetPassword = async (req, res) => {
   const { email } = req.body;
-  
-  
+
   try {
     const user = await userModel.findOne({ email });
     if (!user) {
@@ -137,11 +124,12 @@ export const forgetPassword = async (req, res) => {
 
     const payload = {
       email: user.email,
-    //   iat: Math.floor(Date.now() / 1000), // تاريخ الإصدار بالمللي ثانية
+      //   iat: Math.floor(Date.now() / 1000), // تاريخ الإصدار بالمللي ثانية
     };
-     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '5m' });
-     console.log("Generated token:", token);
-     
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "5m",
+    });
+
     const resetLink = `${process.env.CLIENT_URL}reset-password?token=${token}`;
     await sendEmail(
       email,
@@ -161,12 +149,10 @@ export const forgetPassword = async (req, res) => {
 export const verifyResetToken = async (req, res) => {
   const { token } = req.body;
 
-  
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await userModel.findOne({ email: decoded.email });
-    console.log(user,decoded);
-    
+
     if (!user) {
       return res.status(404).json({ message: "المستخدم غير موجود" });
     }
@@ -182,34 +168,28 @@ export const verifyResetToken = async (req, res) => {
     }
     res.json({ valid: true, email: user.email });
   } catch (error) {
-    console.log(error);
-    
     if (error.name === "TokenExpiredError") {
       return res.status(400).json({ message: "انتهت صلاحية الرمز." });
     } else if (error.name === "JsonWebTokenError") {
-
       return res.status(400).json({ message: "الرمز غير صالح." });
     }
     res.status(500).json({ message: "خطأ في الخادم." });
   }
 };
 
-
 export const resetPassword = async (req, res) => {
-  const { token, password,confirmPassword } = req.body;
-  console.log(req.body);
-  
+  const { token, password, confirmPassword } = req.body;
 
-    if(password !== confirmPassword){
-        return res.status(400).json({ message: "كلمتا المرور غير متطابقتين." });
+  if (password !== confirmPassword) {
+    return res.status(400).json({ message: "كلمتا المرور غير متطابقتين." });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await userModel.findOne({ email: decoded.email });
+    if (!user) {
+      return res.status(404).json({ message: "المستخدم غير موجود" });
     }
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await userModel.findOne({ email: decoded.email });
-        if (!user) {
-            return res.status(404).json({ message: "المستخدم غير موجود" });
-        }
-         if (user.passwordChangedAt) {
+    if (user.passwordChangedAt) {
       const tokenIssuedAt = decoded.iat;
       const passwordChangedAt = user.passwordChangedAt.getTime();
       // if (tokenIssuedAt < passwordChangedAt) {
@@ -222,21 +202,21 @@ export const resetPassword = async (req, res) => {
     user.password = password;
     user.passwordChangedAt = new Date();
     await user.save();
-     await sendEmail(
+    await sendEmail(
       user.email,
-      'تم تغيير كلمة المرور',
-      'تم تغيير كلمة المرور لحسابك بنجاح. إذا لم تكن قمت بهذا الإجراء، تواصل مع الدعم فوراً.'
+      "تم تغيير كلمة المرور",
+      "تم تغيير كلمة المرور لحسابك بنجاح. إذا لم تكن قمت بهذا الإجراء، تواصل مع الدعم فوراً.",
     );
 
-    res.json({ message: 'تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.' });
+    res.json({
+      message: "تم تحديث كلمة المرور بنجاح. يمكنك تسجيل الدخول الآن.",
+    });
   } catch (error) {
-    console.log(error);
-    
-    if (error.name === 'TokenExpiredError') {
-      return res.status(400).json({ message: 'انتهت صلاحية الرمز.' });
-    } else if (error.name === 'JsonWebTokenError') {
-      return res.status(400).json({ message: 'الرمز غير صالح.' });
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({ message: "انتهت صلاحية الرمز." });
+    } else if (error.name === "JsonWebTokenError") {
+      return res.status(400).json({ message: "الرمز غير صالح." });
     }
-    res.status(500).json({ message: 'خطأ في الخادم.' });
+    res.status(500).json({ message: "خطأ في الخادم." });
   }
 };

@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { LabelForm } from "@/components/label/Label";
 import { Input } from "@/components/ui/input";
 import {
@@ -8,23 +8,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ChevronsUpDown, Check } from "lucide-react";
 import { JobField } from "../jobField/JobField";
+import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useSchoolById, useSchools } from "@/hooks/useSchools";
 import { useTrainningPlaces } from "@/hooks/useTrainngPlace";
 import { Button } from "@/components/ui/button";
-import {useParams} from "react-router-dom";
-import { studentValidators } from '../../schemas/studentSchemas';
-import { toast } from 'react-hot-toast';
-export const StudentForm = ({ value, onChange,  onSubmit }) => {
-  console.log(value);
-const { id } = useParams();
+import { useParams } from "react-router-dom";
+import { studentValidators } from "../../schemas/studentSchemas";
+import { toast } from "react-hot-toast";
+export const StudentForm = ({ value, onChange, onSubmit }) => {
+
+  const { id } = useParams();
   const [errors, setErrors] = useState({});
   const { data: allSchool } = useSchools();
-  const { data: school, isLoading, isError, error, refetch } = useSchoolById(value?.school);
-  const { data: trainningPlaces } = useTrainningPlaces();
+  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const {
+    data: school,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useSchoolById(value?.school);
+  const { data: trainningPlacesData } =
+    useTrainningPlaces({
+      page: 1,
+      limit: 200, // Adjust as needed – or fetch all without pagination
+      search: searchTerm, // pass search term to backend if you want server-side filtering
+    });
 
+
+  const trainningPlaces = trainningPlacesData || [];
+
+  const selectedPlace = trainningPlaces.find(
+    (p) => p._id === value.stdTrainningPlace,
+  );
   const DEFAULT_PHONES = [
     { number: "", type: "primary" },
     { number: "", type: "alternate" },
@@ -49,9 +83,10 @@ const { id } = useParams();
     }
   };
 
-
   const handlePhoneChange = (index, number) => {
-    const currentPhones = Array.isArray(value.phones) ? value.phones : DEFAULT_PHONES;
+    const currentPhones = Array.isArray(value.phones)
+      ? value.phones
+      : DEFAULT_PHONES;
     const updatedPhones = [...currentPhones];
     if (!updatedPhones[index]) {
       updatedPhones[index] = {
@@ -74,7 +109,6 @@ const { id } = useParams();
   };
 
   const handleFileChange = (field, file) => {
-    console.log(field);
     onChange(field, file);
   };
 
@@ -83,28 +117,31 @@ const { id } = useParams();
     onChange("stdSpecial", "");
     onChange("intake", ""); // fixed typo: was onchange
   };
-    const getNestedValue = (obj, path) => {
-    return path.split('.').reduce((o, key) => (o && o[key] !== undefined ? o[key] : undefined), obj);
+  const getNestedValue = (obj, path) => {
+    return path
+      .split(".")
+      .reduce(
+        (o, key) => (o && o[key] !== undefined ? o[key] : undefined),
+        obj,
+      );
   };
-    const validateForm = () => {
+  const validateForm = () => {
     const newErrors = {};
     let isValid = true;
 
     for (const [field, validator] of Object.entries(studentValidators)) {
       let x;
-      if (field.includes('.')) {
+      if (field.includes(".")) {
         x = getNestedValue(value, field);
       } else {
         x = value[field];
       }
       let result;
-      if (field === 'fatherJobDetails' || field === 'motherJobDetails') {
-        result = validator(x  , value);
+      if (field === "fatherJobDetails" || field === "motherJobDetails") {
+        result = validator(x, value);
       } else {
-        result = validator( x);
+        result = validator(x);
       }
-      console.log(result);
-      
       if (!result?.isValid) {
         newErrors[field] = result.error;
         isValid = false;
@@ -114,13 +151,12 @@ const { id } = useParams();
     return isValid;
   };
 
-
   const handleSubmit = () => {
-   if (validateForm()){
-onSubmit(value);
-   } else{
-    toast.error('يرجى تصحيح الأخطاء في النموذج');
-   }
+    if (validateForm()) {
+      onSubmit(value);
+    } else {
+      toast.error("يرجى تصحيح الأخطاء في النموذج");
+    }
   };
 
   if (isLoading) return <div>بيانات المدارس بتتحمل...</div>;
@@ -148,7 +184,9 @@ onSubmit(value);
               className={errors?.stdName ? "border-red-500" : ""}
               required
             />
-            {errors?.stdName && <p className="text-red-500 text-sm">{errors.stdName}</p>}
+            {errors?.stdName && (
+              <p className="text-red-500 text-sm">{errors.stdName}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="studID" title="رقم القومى" required />
@@ -160,7 +198,9 @@ onSubmit(value);
               className={errors?.studID ? "border-red-500" : ""}
               required
             />
-            {errors?.studID && <p className="text-red-500 text-sm">{errors.studID}</p>}
+            {errors?.studID && (
+              <p className="text-red-500 text-sm">{errors.studID}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="stdBOD" title="تاريخ الميلاد" required />
@@ -172,7 +212,9 @@ onSubmit(value);
               className={errors?.stdBOD ? "border-red-500" : ""}
               required
             />
-            {errors?.stdBOD && <p className="text-red-500 text-sm">{errors.stdBOD}</p>}
+            {errors?.stdBOD && (
+              <p className="text-red-500 text-sm">{errors.stdBOD}</p>
+            )}
           </div>
           <div className="">
             <LabelForm htmlFor="stdGender" title="الجنس" required />
@@ -191,7 +233,9 @@ onSubmit(value);
                 <Label htmlFor="option-two">أنثى</Label>
               </div>
             </RadioGroup>
-            {errors?.stdGender && <p className="text-red-500 text-sm">{errors.stdGender}</p>}
+            {errors?.stdGender && (
+              <p className="text-red-500 text-sm">{errors.stdGender}</p>
+            )}
           </div>
           <div className="space-y-2 ">
             <LabelForm htmlFor="primaryPhone" title="رقم التليفون" required />
@@ -204,7 +248,9 @@ onSubmit(value);
               className={errors?.phones ? "border-red-500" : ""}
               required
             />
-            {errors?.phones && <p className="text-red-500 text-sm">{errors.phones}</p>}
+            {errors?.phones && (
+              <p className="text-red-500 text-sm">{errors.phones}</p>
+            )}
           </div>
           <div className="space-y-2 mt-3">
             <LabelForm htmlFor="alternatePhone" title="رقم تليفون اخر" />
@@ -225,7 +271,9 @@ onSubmit(value);
               className={`w-full border rounded-md p-2 ${errors?.stdAddress ? "border-red-500" : "border-gray-300"}`}
               rows="3"
             />
-            {errors?.stdAddress && <p className="text-red-500 text-sm">{errors.stdAddress}</p>}
+            {errors?.stdAddress && (
+              <p className="text-red-500 text-sm">{errors.stdAddress}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="studentImage" title="صورة الطالب" />
@@ -236,7 +284,11 @@ onSubmit(value);
               onChange={(e) => onChange("studentImage", e.target.files[0])}
             />
             {value?.studentImage && typeof value.studentImage === "string" && (
-              <img src={`http://localhost:5000/${value.studentImage}`} alt="Student" className="w-24 h-24 object-cover mt-2" />
+              <img
+                src={`http://localhost:5000/${value.studentImage}`}
+                alt="Student"
+                className="w-24 h-24 object-cover mt-2"
+              />
             )}
           </div>
         </div>
@@ -252,15 +304,19 @@ onSubmit(value);
               id="fatherName"
               value={value?.fatherName || ""}
               onChange={(e) => onChange("fatherName", e.target.value)}
-               onBlur={() => {
-    const fieldError = studentValidators.stdName(value?.stdName)?.error;
-    setErrors(prev => ({ ...prev, stdName: fieldError }));
-  }}
+              onBlur={() => {
+                const fieldError = studentValidators.stdName(
+                  value?.stdName,
+                )?.error;
+                setErrors((prev) => ({ ...prev, stdName: fieldError }));
+              }}
               placeholder="أدخل اسم الاب"
               className={errors?.fatherName ? "border-red-500" : ""}
               required
             />
-            {errors?.fatherName && <p className="text-red-500 text-sm">{errors.fatherName}</p>}
+            {errors?.fatherName && (
+              <p className="text-red-500 text-sm">{errors.fatherName}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="fatherID" title="رقم القومى" required />
@@ -272,7 +328,9 @@ onSubmit(value);
               className={errors?.fatherID ? "border-red-500" : ""}
               required
             />
-            {errors?.fatherID && <p className="text-red-500 text-sm">{errors.fatherID}</p>}
+            {errors?.fatherID && (
+              <p className="text-red-500 text-sm">{errors.fatherID}</p>
+            )}
           </div>
           <div className="space-y-2 md:col-span-2">
             <LabelForm htmlFor="fatherJobTitle" title="وظيفه الاب" required />
@@ -286,8 +344,12 @@ onSubmit(value);
               fileValue={value?.fatherDeathCert}
               errors={errors?.fatherJobTitle || errors?.fatherJobDetails}
             />
-            {errors?.fatherJobTitle && <p className="text-red-500 text-sm">{errors.fatherJobTitle}</p>}
-            {errors?.fatherJobDetails && <p className="text-red-500 text-sm">{errors.fatherJobDetails}</p>}
+            {errors?.fatherJobTitle && (
+              <p className="text-red-500 text-sm">{errors.fatherJobTitle}</p>
+            )}
+            {errors?.fatherJobDetails && (
+              <p className="text-red-500 text-sm">{errors.fatherJobDetails}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="fatherPhone" title="رقم التليفون" required />
@@ -299,7 +361,9 @@ onSubmit(value);
               className={errors?.fatherPhone ? "border-red-500" : ""}
               required
             />
-            {errors?.fatherPhone && <p className="text-red-500 text-sm">{errors.fatherPhone}</p>}
+            {errors?.fatherPhone && (
+              <p className="text-red-500 text-sm">{errors.fatherPhone}</p>
+            )}
           </div>
         </div>
       </section>
@@ -318,7 +382,9 @@ onSubmit(value);
               className={errors?.motherName ? "border-red-500" : ""}
               required
             />
-            {errors?.motherName && <p className="text-red-500 text-sm">{errors.motherName}</p>}
+            {errors?.motherName && (
+              <p className="text-red-500 text-sm">{errors.motherName}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="motherID" title="رقم القومى" required />
@@ -330,7 +396,9 @@ onSubmit(value);
               className={errors?.motherID ? "border-red-500" : ""}
               required
             />
-            {errors?.motherID && <p className="text-red-500 text-sm">{errors.motherID}</p>}
+            {errors?.motherID && (
+              <p className="text-red-500 text-sm">{errors.motherID}</p>
+            )}
           </div>
           <div className="space-y-2 md:col-span-2">
             <LabelForm htmlFor="motherJobTitle" title="وظيفه الام" required />
@@ -344,8 +412,12 @@ onSubmit(value);
               fileValue={value?.motherDeathCert}
               errors={errors?.motherJobTitle || errors?.motherJobDetails}
             />
-            {errors?.motherJobTitle && <p className="text-red-500 text-sm">{errors.motherJobTitle}</p>}
-            {errors?.motherJobDetails && <p className="text-red-500 text-sm">{errors.motherJobDetails}</p>}
+            {errors?.motherJobTitle && (
+              <p className="text-red-500 text-sm">{errors.motherJobTitle}</p>
+            )}
+            {errors?.motherJobDetails && (
+              <p className="text-red-500 text-sm">{errors.motherJobDetails}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="motherPhone" title="رقم التليفون" />
@@ -373,7 +445,9 @@ onSubmit(value);
               placeholder="أدخل البريد الالكترونى"
               className={errors?.email ? "border-red-500" : ""}
             />
-            {errors?.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+            {errors?.email && (
+              <p className="text-red-500 text-sm">{errors.email}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="password" title="رقم السرى" />
@@ -384,21 +458,34 @@ onSubmit(value);
               onChange={(e) => onChange("password", e.target.value)}
               placeholder="أدخل رقم السرى"
             />
-            {errors?.password && <p className="text-red-500 text-sm">{errors.password}</p>}
-
+            {errors?.password && (
+              <p className="text-red-500 text-sm">{errors.password}</p>
+            )}
           </div>
           <div className="space-y-2">
-            <LabelForm htmlFor="preparatorySchoolTotalScore" title="مجموع الاعدادى" required />
+            <LabelForm
+              htmlFor="preparatorySchoolTotalScore"
+              title="مجموع الاعدادى"
+              required
+            />
             <Input
               id="preparatorySchoolTotalScore"
               type="number"
               value={value?.preparatorySchoolTotalScore || ""}
-              onChange={(e) => onChange("preparatorySchoolTotalScore", e.target.value)}
+              onChange={(e) =>
+                onChange("preparatorySchoolTotalScore", e.target.value)
+              }
               placeholder="أدخل المجموع"
-              className={errors?.preparatorySchoolTotalScore ? "border-red-500" : ""}
+              className={
+                errors?.preparatorySchoolTotalScore ? "border-red-500" : ""
+              }
               required
             />
-            {errors?.preparatorySchoolTotalScore && <p className="text-red-500 text-sm">{errors.preparatorySchoolTotalScore}</p>}
+            {errors?.preparatorySchoolTotalScore && (
+              <p className="text-red-500 text-sm">
+                {errors.preparatorySchoolTotalScore}
+              </p>
+            )}
           </div>
           <div className="space-y-2 mt-3">
             <LabelForm htmlFor="code" title="الكود" />
@@ -408,7 +495,9 @@ onSubmit(value);
               onChange={(e) => onChange("code", e.target.value)}
               placeholder="أدخل الكود"
             />
-            {errors?.code && <p className="text-red-500 text-sm">{errors.code}</p>}
+            {errors?.code && (
+              <p className="text-red-500 text-sm">{errors.code}</p>
+            )}
           </div>
         </div>
       </section>
@@ -420,16 +509,24 @@ onSubmit(value);
           <div className="space-y-2">
             <LabelForm htmlFor="school" title="المدرسه" required />
             <Select value={value?.school} onValueChange={changeSchool}>
-              <SelectTrigger className={errors?.school ? "border-red-500 text-black!" : "text-black!"}>
+              <SelectTrigger
+                className={
+                  errors?.school ? "border-red-500 text-black!" : "text-black!"
+                }
+              >
                 <SelectValue placeholder="اختر المدرسه" />
               </SelectTrigger>
               <SelectContent>
-                {allSchool?.schoolsWithCount?.map((sh) => (
-                  <SelectItem key={sh._id} value={sh._id}>{sh.name}</SelectItem>
+                {allSchool?.data?.map((sh) => (
+                  <SelectItem key={sh._id} value={sh._id}>
+                    {sh.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors?.school && <p className="text-red-500 text-sm">{errors.school}</p>}
+            {errors?.school && (
+              <p className="text-red-500 text-sm">{errors.school}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="studStatus" title="حاله الطالب" required />
@@ -437,24 +534,42 @@ onSubmit(value);
               value={value?.studStatus || ""}
               onValueChange={(val) => onChange("studStatus", val)}
             >
-              <SelectTrigger className={errors?.studStatus ? "border-red-500 text-black!" : "text-black!"}>
+              <SelectTrigger
+                className={
+                  errors?.studStatus
+                    ? "border-red-500 text-black!"
+                    : "text-black!"
+                }
+              >
                 <SelectValue placeholder="اختر الحاله" />
               </SelectTrigger>
               <SelectContent>
                 {studentStatus.map((stat) => (
-                  <SelectItem key={stat} value={stat}>{stat}</SelectItem>
+                  <SelectItem key={stat} value={stat}>
+                    {stat}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors?.studStatus && <p className="text-red-500 text-sm">{errors.studStatus}</p>}
+            {errors?.studStatus && (
+              <p className="text-red-500 text-sm">{errors.studStatus}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="stage_name" title="المرحله الدراسيه" required />
             <Select
               value={value?.current_stage?.stage_name || ""}
-              onValueChange={(val) => handleFieldChange("current_stage.stage_name", val)}
+              onValueChange={(val) =>
+                handleFieldChange("current_stage.stage_name", val)
+              }
             >
-              <SelectTrigger className={errors?.current_stage ? "border-red-500 text-black!" : "text-black!"}>
+              <SelectTrigger
+                className={
+                  errors?.current_stage
+                    ? "border-red-500 text-black!"
+                    : "text-black!"
+                }
+              >
                 <SelectValue placeholder="اختر النوع" />
               </SelectTrigger>
               <SelectContent>
@@ -463,7 +578,9 @@ onSubmit(value);
                 <SelectItem value="الصف الثالث">الصف الثالث</SelectItem>
               </SelectContent>
             </Select>
-            {errors?.current_stage && <p className="text-red-500 text-sm">{errors.current_stage}</p>}
+            {errors?.current_stage && (
+              <p className="text-red-500 text-sm">{errors.current_stage}</p>
+            )}
           </div>
           <div className="space-y-2">
             <LabelForm htmlFor="stdSpecial" title="التخصص" required />
@@ -472,64 +589,116 @@ onSubmit(value);
               onValueChange={(val) => onChange("stdSpecial", val)}
               disabled={!value?.school}
             >
-              <SelectTrigger className={errors?.stdSpecial ? "border-red-500 text-black!" : "text-black!"}>
+              <SelectTrigger
+                className={
+                  errors?.stdSpecial
+                    ? "border-red-500 text-black!"
+                    : "text-black!"
+                }
+              >
                 <SelectValue placeholder="اختر التخصص" />
               </SelectTrigger>
               <SelectContent>
                 {school?.special?.map((spec) => (
-                  <SelectItem key={spec._id} value={spec._id}>{spec.name}</SelectItem>
+                  <SelectItem key={spec._id} value={spec._id}>
+                    {spec.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors?.stdSpecial && <p className="text-red-500 text-sm">{errors.stdSpecial}</p>}
+            {errors?.stdSpecial && (
+              <p className="text-red-500 text-sm">{errors.stdSpecial}</p>
+            )}
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 mt-3">
             <LabelForm htmlFor="stdTrainningPlace" title="ورشه التدريب" />
-            <Select
-              value={value?.stdTrainningPlace || ""}
-              onValueChange={(val) => onChange("stdTrainningPlace", val)}
-            >
-              <SelectTrigger className="text-black!">
-                <SelectValue placeholder="اختر الورشه" />
-              </SelectTrigger>
-              <SelectContent>
-                {trainningPlaces?.map((trainnig) => (
-                  <SelectItem key={trainnig._id} value={trainnig._id}>{trainnig.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-75 justify-between text-black!"
+                >
+                  {selectedPlace?.name || "اختر الورشة"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0 overflow-hidden">
+                <Command>
+                  <CommandInput
+                    placeholder="ابحث عن ورشة..."
+                    onValueChange={setSearchTerm}
+                  />
+                  <CommandList>
+                    {trainningPlaces.length === 0 && (
+                      <CommandEmpty>لا توجد ورشة</CommandEmpty>
+                    )}
+                    <CommandGroup>
+                      {trainningPlaces.map((place) => (
+                        <CommandItem
+                          key={place._id}
+                          onSelect={() => {
+                            onChange("stdTrainningPlace", place._id);
+                            setOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              value.stdTrainningPlace === place._id
+                                ? "opacity-100"
+                                : "opacity-0",
+                            )}
+                          />
+                          {place.name}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="space-y-2">
-            <LabelForm htmlFor="intake" title="الدفعه" required/>
+            <LabelForm htmlFor="intake" title="الدفعه" required />
             <Select
               value={value?.intake || ""}
               onValueChange={(val) => onChange("intake", val)}
               disabled={!value?.school}
             >
-              <SelectTrigger className={errors?.intake ? "border-red-500 text-black!" : "text-black!"}>
+              <SelectTrigger
+                className={
+                  errors?.intake ? "border-red-500 text-black!" : "text-black!"
+                }
+              >
                 <SelectValue placeholder="اختر الدفعه" />
               </SelectTrigger>
               <SelectContent>
                 {school?.intakes?.map((int) => (
-                  <SelectItem key={int} value={int}>{int}</SelectItem>
+                  <SelectItem key={int} value={int}>
+                    {int}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {errors?.intake && <p className="text-red-500 text-sm">{errors.intake}</p>}
-
+            {errors?.intake && (
+              <p className="text-red-500 text-sm">{errors.intake}</p>
+            )}
           </div>
-        {id && <div className="space-y-2">
-            <LabelForm htmlFor="graduationYear" title="سنة التخرج" />
-            <Input
-              id="graduationYear"
-              value={value?.graduationYear || ""}
-              onChange={(e) => onChange("graduationYear", e.target.value)}
-              placeholder="2026"
-            />
-            {errors?.graduationYear && <p className="text-red-500 text-sm">{errors.graduationYear}</p>}
+          {id && (
+            <div className="space-y-2">
+              <LabelForm htmlFor="graduationYear" title="سنة التخرج" />
+              <Input
+                id="graduationYear"
+                value={value?.graduationYear || ""}
+                onChange={(e) => onChange("graduationYear", e.target.value)}
+                placeholder="2026"
+              />
+              {errors?.graduationYear && (
+                <p className="text-red-500 text-sm">{errors.graduationYear}</p>
+              )}
+            </div>
+          )}
 
-          </div> } 
-         
           <div className="space-y-2">
             <LabelForm htmlFor="current_class" title="الفصل" />
             <Input
@@ -538,8 +707,9 @@ onSubmit(value);
               onChange={(e) => onChange("current_class", e.target.value)}
               placeholder="1/2"
             />
-            {errors?.current_class && <p className="text-red-500 text-sm">{errors.current_class}</p>}
-
+            {errors?.current_class && (
+              <p className="text-red-500 text-sm">{errors.current_class}</p>
+            )}
           </div>
         </div>
       </section>

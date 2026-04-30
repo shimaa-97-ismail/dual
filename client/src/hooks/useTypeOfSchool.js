@@ -25,12 +25,8 @@ export const useTypeOfSchools = (filters) => {
     queryFn: async () => {
       try {
         let response = await typesApi.getAll();
-        console.log(response);
-        
         return response.data.data;
       } catch (error) {
-        console.log(error);
-        
         throw new Error(error.response?.data?.message || error.message);
       }
     },
@@ -74,9 +70,7 @@ export const useUpdateTypeOfSchool = () => {
   return useMutation({
     mutationFn: async ({ id, updateData }) => await typesApi.update(id, updateData),
     onSuccess: (data, variables) => {
-      // تحديث البيانات في cache
-      console.log(data,variables);
-      
+
       queryClient.setQueryData(typeOfSchoolKeys.detail(variables.id), data);
       // إبطال قائمة الاستعلامات
       queryClient.invalidateQueries({ queryKey: typeOfSchoolKeys.lists() });
@@ -111,14 +105,11 @@ export const useDeleteTypeOfSchool = () => {
 };
 
 export const useGetSchoolByType=(selectedType)=>{
-  console.log(selectedType);
     
     return useQuery({
       queryKey: typeOfSchoolKeys.schoolByType(selectedType),
       queryFn: async () => {
         const response = await typesApi.getSchoolByType(selectedType);
-        console.log(response.data.data);
-        
         return response.data.data;
 
       },

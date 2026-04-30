@@ -33,8 +33,7 @@ export function ExpensesOfStudent() {
 
   // Create initial enrollment for the student's current stage (if none exist)
   const createInitialEnrollment = async () => {
-    console.log(student.intake);
-
+   
     if (!student?.current_stage?.stage_name) {
       alert("لا يمكن تحديد المرحلة الدراسية للطالب");
       return;

@@ -110,7 +110,6 @@ export function Student() {
         }
       );
     } else {
-      console.log(formData.studID);
       createMutation.mutate(formData, {
         
         onSuccess: () => {

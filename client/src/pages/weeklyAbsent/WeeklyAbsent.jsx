@@ -9,7 +9,7 @@ export function WeeklyAbsent() {
   const navigate = useNavigate();
   const location = useLocation();
   const receivedData = location.state?.data || {};
-  console.log(receivedData);
+  
   const { data, isLoading, isError } = useStudentInClassesForAttendance({
     school: receivedData.school,
     intake: receivedData.intake,
@@ -20,7 +20,6 @@ export function WeeklyAbsent() {
     month: receivedData.month,
     startWeek: receivedData.startWeek,
   });
-  console.log(data);
 
   const handleChooseClass = () => {
       navigate("/choose-class", { state: { mode: "absence" } });

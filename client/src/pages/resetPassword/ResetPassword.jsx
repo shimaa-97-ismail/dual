@@ -18,7 +18,6 @@ export function ResetPassword() {
   const queryParams = new URLSearchParams(location.search);
   const token = queryParams.get("token");
 
-  console.log(token);
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };

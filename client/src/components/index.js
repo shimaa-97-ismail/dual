@@ -1,5 +1,5 @@
 import { StudentTable } from "../components/table/StudentTable";
-import { DropDown } from "../components/dropDown/DropDown";
+
 import { TrainningPlaceForm } from "../components/forms/TrainningPlaceForm";
 import { TrainningPlaceModel } from "../components/model/TrainnigPlaceModel";
 import { PaymentForm } from "../components/forms/Payment";
@@ -14,7 +14,6 @@ import {UserModel} from "./model/UserModel"
 export {
   StudentTable,
   SchoolCard,
-  DropDown,
   TrainningPlaceForm,
   TrainningPlaceModel,
   MainHeader,

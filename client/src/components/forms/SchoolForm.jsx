@@ -21,7 +21,6 @@ export function SchoolForm({
   specials,
   errors = {},
 }) {
-  console.log(data);
 
   return (
     <div className=" grid gap-4">

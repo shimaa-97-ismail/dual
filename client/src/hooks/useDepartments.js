@@ -147,8 +147,6 @@ export const useDeleteDepartment = () => {
   return useMutation({
     mutationFn: departmentsApi.delete,
     onMutate: async (id) => {
-      console.log(id);
-      
       await queryClient.cancelQueries(departmentKeys.all);
       
       const previousDepartments = queryClient.getQueryData(departmentKeys.list());

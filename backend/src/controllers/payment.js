@@ -137,9 +137,6 @@ export const getPaymentsSumByPeriod = async (req, res) => {
 export const getPaymentsByIntake = async (req, res) => {
   try {
     const { intake } = req.query; 
-    console.log(intake);
-    
-
     if (!intake) {
       return res.status(400).json({ error: "Intake parameter is required" });
     }
@@ -147,9 +144,6 @@ export const getPaymentsByIntake = async (req, res) => {
     // 1. Find all students with the given intake
     const students = await studentModel.find({ intake }).select("_id");
     const studentIds = students.map(s => s._id);
-console.log(students);
-console.log(studentIds);
-
 
     if (studentIds.length === 0) {
       return res.status(200).json({
@@ -172,9 +166,6 @@ console.log(studentIds);
         }
       }
     ]);
-    console.log(result);
-    
-
     const totals = result[0] || { totalAmountDueReceipt1: 0, totalAmountDueReceipt2: 0 };
 
     res.status(200).json({

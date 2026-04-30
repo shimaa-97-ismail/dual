@@ -197,12 +197,7 @@ const studentSchema = new mongoose.Schema(
     current_class: {
       type: String,
     },
-    //   current_class: {
-    //   class_id: ObjectId, // reference to classes
-    //   class_name_ar: String,
-    //   class_name_en: String,
-    //   class_code: String
-    // },
+  
     weekly_attendance: [
       {
         year: Number, // 2024

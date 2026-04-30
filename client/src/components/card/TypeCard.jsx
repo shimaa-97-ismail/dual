@@ -19,7 +19,6 @@ export function TypeCard({ data,onClick }) {
   const deleteMutation = useDeleteTypeOfSchool();
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  console.log(data);
 
   const handleUpdate = (updateData) => {
     updateMutation.mutate(

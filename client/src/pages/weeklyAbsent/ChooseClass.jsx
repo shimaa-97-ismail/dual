@@ -100,7 +100,7 @@ export const ChooseClass = () => {
       enabled: !!selectedClass,
     },
   );
-  console.log(student);
+
 
   const handleClassSelection = async (Class) => {
     setSelectedClass(Class);
@@ -174,7 +174,7 @@ if(schoolsError){
           <div className="step-content">
             <h3>اختر المدرسة</h3>
             <div className="cards-grid">
-              {schools?.schoolsWithCount?.map((school) => (
+              {schools?.data?.map((school) => (
                 <SchoolCard
                   key={school.id}
                   school={school}

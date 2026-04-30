@@ -18,14 +18,7 @@ export function JobField({
   fileValue,
   disabled = false,
 }) {
-  console.log(
-    label,
-    jobValue,
-    onJobChange,
-    detailsValue,
-    onDetailsChange,
-    onFileChange,
-  );
+ 
   const jobOptions = ["موظف", "معاش", "لا يعمل", "ربه منزل", "متوفى"];
   return (
     <div className="space-y-4 p-4 border rounded-lg bg-gray-50">

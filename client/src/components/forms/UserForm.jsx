@@ -9,8 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 export function UserForm({ data, onChange, errors = {},mode }) {
-  console.log(data);
-  
   const roles = [
   { value: 'admin', label: 'مسؤول النظام' },
   // { value: 'supervisor', label: 'مسؤول بيانات' },

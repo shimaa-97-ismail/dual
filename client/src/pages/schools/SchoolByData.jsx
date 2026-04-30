@@ -29,7 +29,7 @@ export function SchoolByData() {
   const addMutation = useCreateSchool();
 
   const { data: schools, isLoading, error } = fetchSchools(id);
-  console.log(schools);
+
 
   const handleAddSchool = async (formData) => {
     addMutation.mutate(formData, {

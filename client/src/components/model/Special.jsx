@@ -28,9 +28,7 @@ export function Special({
   const isUpdate = !!mode && mode === "edit";
   const schema = isUpdate ? updateSpecialSchema : addSpecialSchema;
   const handleChange = (field, value) => {
-    console.log(field, value);
-
-    setFormData((prev) => ({ ...prev, [field]: value }));
+      setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = () => {
@@ -39,7 +37,6 @@ export function Special({
       setErrors(validationErrors);
       return;
     } 
-    console.log("formData",formData);
     
     onSubmit(formData);
   };

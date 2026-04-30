@@ -9,8 +9,6 @@ import { schoolSchema, updateSchoolSchema } from "../../schemas/schoolSchemas";
 // import { toast } from "react-hot-toast";
 // Helper to convert populated data to form-friendly format
 const normalizeInitialData = (data) => {
-  console.log(data);
-  
   if (!data) return null;
   return {
     name: data.name || "",

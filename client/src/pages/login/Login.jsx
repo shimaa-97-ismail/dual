@@ -23,7 +23,6 @@ export function Login() {
         login(values);
       }
     } catch (err) {
-      console.log(err);
       toast.error(err.message || "فشل في تسجيل الدخول");
     }
   };

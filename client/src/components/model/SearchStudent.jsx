@@ -6,8 +6,6 @@ export function SearchStudent({ open, onOpenChange, onSubmit, isLoading }) {
     studentName: "",
   });
   const handleChange = (field, value) => {
-    console.log(field, value);
-
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 

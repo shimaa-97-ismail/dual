@@ -18,11 +18,8 @@ const hasAnyRole = (roles) => {
 };
 
   const login = async (data) => {
-    // console.log("data",data);
-    
     try {
       const response = await axioInstance.post("/user/login", { data });
-      console.log(response);
        if (response.status === 200) {
       toast.success("you are login !");
       localStorage.setItem("token", response.data.token);
@@ -33,7 +30,6 @@ const hasAnyRole = (roles) => {
       
     } catch (err) {
        toast.error(err.response?.data?.message);
-      // console.log(err.response?.data?.message);
     }
   };
 

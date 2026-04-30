@@ -22,22 +22,18 @@ import {
 import { useSchools } from "@/hooks/useSchools";
 import { useDepartments } from "@/hooks/useDepartments";
 import { useSpecials } from "@/hooks/useSpecial";
-import { useStudents,useGetPercentAbsence } from "@/hooks/useStudent";
+import { useStudents, useGetPercentAbsence } from "@/hooks/useStudent";
 import { useTrainningPlaces } from "@/hooks/useTrainngPlace";
 import { useStudentsBySchool } from "@/hooks/useStudentsBySchool";
-import {SearchStudent} from "@/components/model/SearchStudent"
+import { SearchStudent } from "@/components/model/SearchStudent";
 export function DashBoard() {
   const navigate = useNavigate();
   const [selectedSchool, setSelectedSchool] = useState("all");
-const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-const handleSearchSubmit = async (formData) => {
+  const handleSearchSubmit = async (formData) => {
     setIsLoading(true);
     try {
-      // هنا يمكنك إجراء استعلام حقيقي (مثل استدعاء API)
-      console.log("بيانات البحث:", formData.studentName);
-
-      // بعد نجاح البحث، يمكنك التوجيه إلى صفحة المصروفات مع تمرير قيمة البحث
       navigate(`/search?search=${formData.studentName}`);
 
       // إغلاق المودال بعد التوجيه
@@ -53,106 +49,150 @@ const handleSearchSubmit = async (formData) => {
   const { data: departments, isLoading: deptsLoading } = useDepartments();
   const { data: specials, isLoading: specialsLoading } = useSpecials();
   const { data: students, isLoading: studentsLoading } = useStudents();
-  const { data: trainingPlaces, isLoading: trainingLoading } = useTrainningPlaces();
-  const { data: percentAbsence, isLoading: percentAbsenceLoading } = useGetPercentAbsence();
-console.log(percentAbsence);
+  const { data: trainingPlaces, isLoading: trainingLoading } =
+    useTrainningPlaces();
+  const { data: percentAbsence, isLoading: percentAbsenceLoading } =
+    useGetPercentAbsence();
 
   // Additional data
-  const { data: studentsBySchool, isLoading: chartLoading } = useStudentsBySchool(selectedSchool);
-
-  
+  const { data: studentsBySchool, isLoading: chartLoading } =
+    useStudentsBySchool(selectedSchool);
 
   const isLoadingMetrics =
-    schoolsLoading || deptsLoading || specialsLoading || studentsLoading || trainingLoading ||percentAbsenceLoading || chartLoading  ;
+    schoolsLoading ||
+    deptsLoading ||
+    specialsLoading ||
+    studentsLoading ||
+    trainingLoading ||
+    percentAbsenceLoading ||
+    chartLoading;
 
-  if(isLoadingMetrics){
-    return <div className="text-center p-8">جاري تحميل بيانات ...</div>
+  if (isLoadingMetrics) {
+    return <div className="text-center p-8">جاري تحميل بيانات ...</div>;
   }
 
   return (
     <>
-    <div className="p-4 md:p-6 space-y-6">
-      {/* First Row of Metrics */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-  <MetricCard title="الإدارات التعليميه" value={departments?.length || 0} color="green" />
-  <MetricCard title="إجمالي المدارس" value={schools?.count || 0} color="blue" />
-  <MetricCard title="التخصصات المتاحة" value={specials?.length || 0} color="purple" />
-  <MetricCard title="إجمالي الطلاب" value={students?.count || 0} color="orange" />
-  <MetricCard
-    title={`نسبة الغياب ${percentAbsence?.[0]?.academicYear}`}
-    value={percentAbsence?.[0]?.absencePercentage + "%" || "0%"}
-    color="pink"
-  />
-  <MetricCard
-    title="إجمالي المنشأت التدريبيه"
-    value={trainingPlaces?.length || 0}
-    color="teal"
-  />
-  
-</div>
+      <div className="p-4 md:p-6 space-y-6">
+        {/* First Row of Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+          <MetricCard
+            title="الإدارات التعليميه"
+            value={departments?.length || 0}
+            color="green"
+          />
+          <MetricCard
+            title="إجمالي المدارس"
+            value={schools?.pagination?.total || 0}
+            color="blue"
+          />
+          <MetricCard
+            title="التخصصات المتاحة"
+            value={specials?.length || 0}
+            color="purple"
+          />
+          <MetricCard
+            title="إجمالي الطلاب"
+            value={students?.count || 0}
+            color="orange"
+          />
+          <MetricCard
+            title={`نسبة الغياب ${percentAbsence?.[0]?.academicYear}`}
+            value={percentAbsence?.[0]?.absencePercentage + "%" || "0%"}
+            color="pink"
+          />
+          <MetricCard
+            title="إجمالي المنشأت التدريبيه"
+            value={trainingPlaces?.length || 0}
+            color="teal"
+          />
+        </div>
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>إجراءات سريعة</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          <Button variant="outline" className="text-primary! border-primary hover:bg-primary hover:text-white! px-3" onClick={() => navigate("/school/student/add")}>+ طالب جديد</Button>
-          <Button variant="outline"   className="text-primary! border-primary hover:bg-primary hover:text-white! px-3" onClick={() => navigate("/weeklyAbsent")}>
-          الغياب الاسبوعى
-          </Button>
-          <Button variant="outline"  className="text-primary! border-primary hover:bg-primary hover:text-white! px-3" onClick={() => navigate("/schools")}>
-             المدارس
-          </Button>
-           <Button variant="outline"  className="text-primary! border-primary hover:bg-primary hover:text-white! px-3"  onClick={() => setIsModalOpen(true)}>
-             استعلام عن المصروفات
-          </Button>
-          <Button variant="outline"  className="text-primary! border-primary hover:bg-primary hover:text-white! px-3" onClick={() => navigate("/reports")}>
-            تقارير
-          </Button>
-        </CardContent>
-      </Card>
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>إجراءات سريعة</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              className="text-primary! border-primary hover:bg-primary hover:text-white! px-3"
+              onClick={() => navigate("/school/student/add")}
+            >
+              + طالب جديد
+            </Button>
+            <Button
+              variant="outline"
+              className="text-primary! border-primary hover:bg-primary hover:text-white! px-3"
+              onClick={() => navigate("/weeklyAbsent")}
+            >
+              الغياب الاسبوعى
+            </Button>
+            <Button
+              variant="outline"
+              className="text-primary! border-primary hover:bg-primary hover:text-white! px-3"
+              onClick={() => navigate("/schools")}
+            >
+              المدارس
+            </Button>
+            <Button
+              variant="outline"
+              className="text-primary! border-primary hover:bg-primary hover:text-white! px-3"
+              onClick={() => setIsModalOpen(true)}
+            >
+              استعلام عن المصروفات
+            </Button>
+            <Button
+              variant="outline"
+              className="text-primary! border-primary hover:bg-primary hover:text-white! px-3"
+              onClick={() => navigate("/reports")}
+            >
+              تقارير
+            </Button>
+          </CardContent>
+        </Card>
 
-      {/* Chart Section */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
-          <CardTitle>توزيع الطلاب حسب المدرسة</CardTitle>
-          {/* <Select value={selectedSchool} onValueChange={setSelectedSchool}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="اختر المدرسة" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">جميع المدارس</SelectItem>
-              {schools?.schoolsWithCount?.map((school) => (
-                <SelectItem key={school.id} value={school.id}>
-                  {school.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select> */}
-        </CardHeader>
-        <CardContent>
-          {chartLoading ? (
-            <Skeleton className="h-64 w-full" />
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={studentsBySchool}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#3b82f6" />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
-
-    </div>
-    <SearchStudent open={isModalOpen}
+        {/* Chart Section */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+            <CardTitle>توزيع الطلاب حسب المدرسة</CardTitle>
+            <Select value={selectedSchool} onValueChange={setSelectedSchool}>
+              <SelectTrigger className="w-[180px] text-black!">
+                <SelectValue placeholder="اختر المدرسة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">جميع المدارس</SelectItem>
+                {schools?.data?.map((school) => (
+                  <SelectItem key={school._id} value={school._id}>
+                    {school.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent>
+            {chartLoading ? (
+              <Skeleton className="h-64 w-full" />
+            ) : (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={studentsBySchool}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#3b82f6" />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      <SearchStudent
+        open={isModalOpen}
         onOpenChange={setIsModalOpen}
         onSubmit={handleSearchSubmit}
-        isLoading={isLoading}/>
+        isLoading={isLoading}
+      />
     </>
   );
 }

@@ -37,7 +37,6 @@ export function SetAbsencesTable() {
 
   // Generate 7 days starting from the given start date (no shift)
   const calculateWeekDays = (start) => {
-    console.log(start);
 
     if (!start) return [];
     const startDateObj = new Date(start);
@@ -48,7 +47,6 @@ export function SetAbsencesTable() {
       currentDay.setDate(startDateObj.getDate() + i);
       days.push(currentDay);
     }
-    console.log(days);
     
     return days;
   };
@@ -158,7 +156,6 @@ export function SetAbsencesTable() {
               const currentStatus = attendance[dateString] || "";
                   const currentReason = absenceReasons[dateString] || "";
                 const showReasonInput = currentStatus === "غائب" || currentStatus === "اجازه";
-              console.log(day, dateString, dayName);
               return (
                 <TableRow key={dateString}>
                   <TableCell className="font-medium text-center bg-gray-100">

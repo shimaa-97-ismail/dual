@@ -56,7 +56,6 @@ export function SpecialCard({ data ,onSpecialClick}) {
               <span
                 className={`text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-800`}
               >
-                {console.log(data?.is_active)     }
                 {data.is_active ? "نشط" : "غير نشط"}
               </span>
             </div>

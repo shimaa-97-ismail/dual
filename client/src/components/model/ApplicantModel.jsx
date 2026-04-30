@@ -3,6 +3,7 @@ import { BaseModel } from "./BaseModel";
 import { ApplicantForm } from "./../forms/Applicant";
 import { applicantSchema } from "@/schemas/applicantSchema";
 import { validateForm } from "../../utils/validateForm";
+import { toast } from "react-hot-toast";
 export function ApplicantModel({
   open,
   onOpenChange,
@@ -22,17 +23,10 @@ export function ApplicantModel({
   });
 
   const handleChange = (field, value) => {
-    console.log(field, value);
-
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
-  //   const handleBlur = (fieldName, value) => {
-  //   validateField(fieldName, value);
-  // };
-
+  
   const handleSubmit = async () => {
-    console.log(formData);
-
     const validationErrors = validateForm(formData, applicantSchema);
 
     if (Object.keys(validationErrors).length > 0) {
@@ -45,8 +39,10 @@ export function ApplicantModel({
       // Reset form after successful submission
       setFormData({}); // clear all fields
       setLocalErrors({});
-    } catch (errror) {
-      console.log(errror);
+      toast.success("تم حفظ بيانات المقدم بنجاح");
+    } catch (error) {
+   
+      toast.error(`حدث خطأ أثناء حفظ بيانات المقدم` + (error.message ? `: ${error.message}` : ""));
     }
   };
   return (

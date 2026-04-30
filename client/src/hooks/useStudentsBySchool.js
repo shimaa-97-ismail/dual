@@ -4,32 +4,43 @@ import { useStudents } from "./useStudent";
 import { useSchools } from "./useSchools";
 
 export function useStudentsBySchool(selectedSchool) {
-  const { data: students, isLoading: studentsLoading, error: studentsError } = useStudents();
-  const { data: schools, isLoading: schoolsLoading, error: schoolsError } = useSchools();
-  console.log(students,schools);
-  
+  // Fetch all students and schools (use large limit to get all)
+  const { data: studentsData, isLoading: studentsLoading, error: studentsError } = useStudents({ limit: 10000 });
+  const { data: schoolsData, isLoading: schoolsLoading, error: schoolsError } = useSchools({ limit: 10000 });
 
   const isLoading = studentsLoading || schoolsLoading;
   const error = studentsError || schoolsError;
 
-  const data = useMemo(() => {
-    if (!students?.data || !schools) return [];
+  const chartData = useMemo(() => {
+    const students = studentsData?.data || [];
+    const schools = schoolsData?.data || [];
 
-    const counts = {};
-    students?.data?.forEach((student) => {
-      counts[student.schoolId] = (counts[student.schoolId] || 0) + 1;
+    if (!students.length || !schools.length) return [];
+
+    // Count students per school _id
+    const countBySchool = {};
+    students.forEach((student) => {
+      // student.school can be an object or a string ID
+      const schoolId = typeof student.school === 'object' ? student.school?._id : student.school;
+      if (schoolId) {
+        countBySchool[schoolId] = (countBySchool[schoolId] || 0) + 1;
+      }
     });
 
+    // If a specific school is selected (not "all")
     if (selectedSchool !== "all") {
-      const school = schools.find((s) => s.id === selectedSchool);
-      return [{ name: school?.name, count: counts[selectedSchool] || 0 }];
+      const school = schools.find(s => s._id === selectedSchool);
+      if (!school) return [];
+      // Return a single bar with the selected school's total students
+      return [{ name: school.name, count: countBySchool[selectedSchool] || 0 }];
     }
 
-    return schools?.schoolsWithCount.map((school) => ({
+    // For "all schools": return one bar per school
+    return schools.map(school => ({
       name: school.name,
-      count:  school.studentCount,
+      count: countBySchool[school._id] || 0,
     }));
-  }, [students, schools, selectedSchool]);
+  }, [studentsData, schoolsData, selectedSchool]);
 
-  return { data, isLoading, error };
+  return { data: chartData, isLoading, error };
 }

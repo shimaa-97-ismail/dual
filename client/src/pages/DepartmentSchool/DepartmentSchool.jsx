@@ -25,8 +25,7 @@ const updateMutation=useUpdateSchool();
   // });
 const [isModalOpen, setIsModalOpen] = useState(false);
 const [selectedPlace, setSelectedPlace] = useState(null);
-  const { data, isLoading: deptLoading } = useDepartment(departmentId);
-  const [viewMode, setViewMode] = useState("grid");
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [schools, setSchools] = useState([]);
 
@@ -46,8 +45,7 @@ const [selectedPlace, setSelectedPlace] = useState(null);
    
   
   const handleEdit=(data)=>{
-    console.log(data);
-    
+
     // setShowAddModal(true);
     // setSelectedPlace(data)
   }
@@ -65,8 +63,7 @@ const [selectedPlace, setSelectedPlace] = useState(null);
             },
           });
     } else {
-      // Call edit function from the hook
-      console.log("update",data);
+  
       
     //  updateMutation.mutate(selectedPlace._id,data)
     }
@@ -79,7 +76,7 @@ const [selectedPlace, setSelectedPlace] = useState(null);
       const response = await dispatch(
         getSchoolByDepatment(departmentId)
       ).unwrap();
-      // console.log("Response:", response.data);
+     
       setSchools(response.data);
     } catch (error) {
       console.error("Error fetching schools:", error);
@@ -140,7 +137,7 @@ const [selectedPlace, setSelectedPlace] = useState(null);
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {schools?.map(
               (school) => (
-                // console.log(school),
+               
                 (<SchoolCard key={school._id} data={school} onEdit={handleEdit} />)
               )
             )}
@@ -165,88 +162,6 @@ const [selectedPlace, setSelectedPlace] = useState(null);
     </SchoolModel>
     </>
 
-    //   {/* عنوان الصفحة */}
-    //   <div className="mb-8">
-    //     <h1 className="text-2xl font-bold text-gray-800">
-    //       المدارس في إدارة {department?.name}
-    //     </h1>
-    //     <p className="text-gray-600 mt-2">
-    //       إجمالي المدارس: {schools?.length || 0} مدرسة
-    //     </p>
-    //   </div>
-
-    //   {/* إحصائيات سريعة */}
-    //   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-    //     <div className="bg-white p-4 rounded-lg shadow">
-    //       <h3 className="font-semibold">المدارس الحكومية</h3>
-    //       <p className="text-2xl">{schools?.filter(s => s.type === 'government').length}</p>
-    //     </div>
-    //     <div className="bg-white p-4 rounded-lg shadow">
-    //       <h3 className="font-semibold">المدارس الخاصة</h3>
-    //       <p className="text-2xl">{schools?.filter(s => s.type === 'private').length}</p>
-    //     </div>
-    //     <div className="bg-white p-4 rounded-lg shadow">
-    //       <h3 className="font-semibold">إجمالي الطلاب</h3>
-    //       <p className="text-2xl">
-    //         {schools?.reduce((sum, school) => sum + (school.totalStudents || 0), 0)}
-    //       </p>
-    //     </div>
-    //     <div className="bg-white p-4 rounded-lg shadow">
-    //       <h3 className="font-semibold">متوسط الطلاب</h3>
-    //       <p className="text-2xl">
-    //         {Math.round(schools?.reduce((sum, school) => sum + (school.totalStudents || 0), 0) / (schools?.length || 1))}
-    //       </p>
-    //     </div>
-    //   </div>
-
-    //   {/* أزرار التحكم */}
-    //   <div className="flex justify-between items-center mb-6">
-    //     <div className="flex space-x-2 rtl:space-x-reverse">
-    //       <button
-    //         onClick={() => refetch()}
-    //         className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
-    //       >
-    //         تحديث القائمة
-    //       </button>
-    //       <Link
-    //         to="/schools"
-    //         className="px-4 py-2 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-    //       >
-    //         عرض جميع المدارس
-    //       </Link>
-    //     </div>
-
-    //     <Link
-    //       to={`/schools/new?department=${departmentId}`}
-    //       className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-    //     >
-    //       + إضافة مدرسة جديدة
-    //     </Link>
-    //   </div>
-
-    //   {/* قائمة المدارس */}
-    //   {schools?.length === 0 ? (
-    //     <div className="text-center py-12 bg-white rounded-lg shadow">
-    //       <p className="text-gray-500">لا توجد مدارس في هذه الإدارة بعد</p>
-    //       <Link
-    //         to={`/schools/new?department=${departmentId}`}
-    //         className="mt-4 inline-block px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-    //       >
-    //         إضافة أول مدرسة
-    //       </Link>
-    //     </div>
-    //   ) : (
-    //     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    //       {schools?.map(school => (
-    //         <SchoolCard
-    //           key={school.id}
-    //           school={school}
-    //           showDepartment={false} // لا نعرض الإدارة لأننا بالفعل في صفحتها
-    //           onUpdate={() => refetch()}
-    //         />
-    //       ))}
-    //     </div>
-    //   )}
-    // </div>
+    
   );
 }

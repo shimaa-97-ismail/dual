@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { BaseModel } from './BaseModel';
-import { StudentForm } from '../forms/StudentForm';
-import { studentValidators } from '../../schemas/studentSchemas';
-import { toast } from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { BaseModel } from "./BaseModel";
+import { StudentForm } from "../forms/StudentForm";
+import { studentValidators } from "../../schemas/studentSchemas";
+import { toast } from "react-hot-toast";
 
 const DEFAULT_PHONES = [
   { number: "", type: "primary" },
@@ -42,7 +42,14 @@ const defaultFormState = {
   current_class: "",
 };
 
-export function StudentModel({ open, onOpenChange, mode, initialData, onSubmit, isLoading }) {
+export function StudentModel({
+  open,
+  onOpenChange,
+  mode,
+  initialData,
+  onSubmit,
+  isLoading,
+}) {
   const [formData, setFormData] = useState(defaultFormState);
   const [errors, setErrors] = useState({});
 
@@ -51,7 +58,9 @@ export function StudentModel({ open, onOpenChange, mode, initialData, onSubmit, 
     if (mode === "edit" && initialData) {
       setFormData({
         ...initialData,
-        phones: Array.isArray(initialData.phones) ? initialData.phones : DEFAULT_PHONES,
+        phones: Array.isArray(initialData.phones)
+          ? initialData.phones
+          : DEFAULT_PHONES,
         current_stage: initialData.current_stage || { stage_name: "" },
       });
     } else {
@@ -61,23 +70,13 @@ export function StudentModel({ open, onOpenChange, mode, initialData, onSubmit, 
   }, [mode, initialData, open]);
 
   const getNestedValue = (obj, path) => {
-    return path.split('.').reduce((o, key) => (o && o[key] !== undefined ? o[key] : undefined), obj);
+    return path
+      .split(".")
+      .reduce(
+        (o, key) => (o && o[key] !== undefined ? o[key] : undefined),
+        obj,
+      );
   };
-
-  // const validateField = (field, value, fullFormData) => {
-  //   const validator = studentValidators[field];
-  //   if (validator) {
-  //     let result;
-  //     if (field === 'fatherJobDetails' || field === 'motherJobDetails') {
-  //       result = validator(value, fullFormData);
-  //     } else {
-  //       result = validator(value);
-  //     }
-  //     setErrors(prev => ({ ...prev, [field]: result.isValid ? null : result.error }));
-  //     return result.isValid;
-  //   }
-  //   return true;
-  // };
 
   const validateForm = () => {
     const newErrors = {};
@@ -85,13 +84,13 @@ export function StudentModel({ open, onOpenChange, mode, initialData, onSubmit, 
 
     for (const [field, validator] of Object.entries(studentValidators)) {
       let value;
-      if (field.includes('.')) {
+      if (field.includes(".")) {
         value = getNestedValue(formData, field);
       } else {
         value = formData[field];
       }
       let result;
-      if (field === 'fatherJobDetails' || field === 'motherJobDetails') {
+      if (field === "fatherJobDetails" || field === "motherJobDetails") {
         result = validator(value, formData);
       } else {
         result = validator(value);
@@ -105,19 +104,16 @@ export function StudentModel({ open, onOpenChange, mode, initialData, onSubmit, 
     return isValid;
   };
 
-// StudentModel.jsx – inside the component
-const handleChange = (field, value) => {
-  console.log(field, value);
-
+  // StudentModel.jsx – inside the component
+  const handleChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-};
-  
-  
+  };
+
   const handleSubmit = () => {
     if (validateForm()) {
       onSubmit(formData);
     } else {
-      toast.error('يرجى تصحيح الأخطاء في النموذج');
+      toast.error("يرجى تصحيح الأخطاء في النموذج");
     }
   };
 

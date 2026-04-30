@@ -1,7 +1,7 @@
-import { SchoolCard } from "@/components/card/SchoolCard";
+
 import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-// import { useDepartment } from "@/hooks/useDepartments";
+
 import {
   useSchoolById,
   useSchoolByintake,
@@ -12,23 +12,15 @@ import {
 import { MainHeader } from "@/components";
 import { StudentTable } from "@/components/table/StudentTable";
 import { useNavigate } from "react-router-dom";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Class } from "./Class";
+
 export function SchoolDetails() {
   const navigate = useNavigate();
   const printRef = useRef();
   const { schoolId } = useParams();
-  // departmentId
-  // const { data: department } = useDepartment(departmentId);
+ 
   const { data: schools } = useSchools();
   const { data: school } = useSchoolById(schoolId);
-console.log(school);
+
 
   // const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSchool, setSelectedSchool] = useState("");
@@ -43,7 +35,7 @@ console.log(school);
   const {
     data: batches = [],
   } = useSchoolByintake(schoolId || selectedSchool);
-  console.log(selectedSchool);
+
   const [showCheckbox, setShowCheckbox] = useState(false);
 
   const toggleCheckbox = () => {
@@ -101,14 +93,14 @@ console.log(school);
      enabled: !!selectedClass,
     },
   );
-  console.log(data);
+ 
   
 
   useEffect(() => {
-    console.log(data);
+    
     if (data) {
       setStudentInClass(data);
-      console.log(data);
+    
     }
   }, [data]);
 
@@ -151,7 +143,6 @@ console.log(school);
                   schools.length > 0 &&
                   schools.map(
                     (school, index) => (
-                      console.log(school),
                       (
                         <option key={index} value={school._id}>
                           {school.name}
@@ -180,7 +171,6 @@ console.log(school);
               {!schoolId &&
                 school?.special?.map(
                   (special) => (
-                    console.log("kkkk"),
                     (
                       <option key={special._id} value={special._id}>
                         {special?.name}

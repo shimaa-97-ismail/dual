@@ -47,8 +47,6 @@ export const DepatmentCard = memo(({ data }) => {
   };
 
     const handleDelete = async () => {
-      console.log(data._id);
-      
       deleteMutation.mutate( data._id ),{
       onSuccess:()=>{
         toast.success("تم حذف الإدارة بنجاح");
@@ -56,14 +54,7 @@ export const DepatmentCard = memo(({ data }) => {
         setDeleteModalOpen(false);
 
       }}
-      // try {
-      //   await dispatch(deleteSchool(data._id)).unwrap();
-      //   toast.success("تم حذف المدرسة بنجاح");
-      //   setDeleteModalOpen(false);
-      // } catch (error) {
-      //   toast.error("فشل في حذف المدرسة");
-      //   console.error("Delete error:", error);
-      // }
+      
     };
   return (
     <>

@@ -24,7 +24,6 @@ export const useIntakes = (filters) => {
                 let response = await intakeApi.getAll();
                 return response.data.data;
             } catch (error) {
-                console.log(error);
                 throw new Error(error.response?.data?.message || error.message);
             }
         },

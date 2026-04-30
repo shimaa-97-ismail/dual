@@ -1,17 +1,6 @@
 import { departmentModel } from "../models/department.js";
 import { schoolModel } from "../models/school.js";
-// export const getDepatement=async(req,res)=>{
 
-//       try {
-//     const departement = await departmentModel.find();
-//     const count = await departmentModel.countDocuments();
-   
-    
-//     res.status(200).json({success:true,data: departement, count });
-//   } catch (error) {
-//     res.status(404).json({ message: error.message });
-//   }
-// }
 export const getDepatement = async (req, res) => {
   try {
     const aggregatedDepartments = await departmentModel.aggregate([
@@ -21,21 +10,23 @@ export const getDepatement = async (req, res) => {
           let: { departmentId: "$_id" },
           pipeline: [
             { $match: { $expr: { $eq: ["$departement", "$$departmentId"] } } },
-            { $count: "count" }
+            { $count: "count" },
           ],
-          as: "schoolCounts"
-        }
+          as: "schoolCounts",
+        },
       },
       {
         $addFields: {
-          schoolCount: { $ifNull: [{ $arrayElemAt: ["$schoolCounts.count", 0] }, 0] }
-        }
+          schoolCount: {
+            $ifNull: [{ $arrayElemAt: ["$schoolCounts.count", 0] }, 0],
+          },
+        },
       },
       {
         $project: {
-          schoolCounts: 0
-        }
-      }
+          schoolCounts: 0,
+        },
+      },
     ]);
 
     // If you want to keep the same structure as before, with a count of departments
@@ -43,44 +34,44 @@ export const getDepatement = async (req, res) => {
 
     res.status(200).json({ success: true, data: aggregatedDepartments, count });
   } catch (error) {
-    res.status(404).json({ success:false,message: error.message });
+    res.status(404).json({ success: false, message: error.message });
   }
 };
-export const createDepartement=async(req,res)=>{{
-    const  departementData  = req.body;    
-  try {
-    const newDepartement = new departmentModel(departementData);
-     await newDepartement.save();
-    res.status(201).json({success:true,data:newDepartement});
-  }
-    catch (error) { 
-       if (error.code === 11000) {
-
-      return res.status(400).json({
+export const createDepartement = async (req, res) => {
+  {
+    const departementData = req.body;
+    try {
+      const newDepartement = new departmentModel(departementData);
+      await newDepartement.save();
+      res.status(201).json({ success: true, data: newDepartement });
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(400).json({
+          success: false,
+          message: "اسم الاداره موجود بالفعل",
+        });
+      }
+      res.status(400).json({
         success: false,
-        message: 'اسم الاداره موجود بالفعل',
+        message: error.message,
       });
     }
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
-  };
-}};
-export const updateDepartement=async(req,res)=>{
-    const { id } = req.params;
-    const  data = req.body;
-    
-    try {
+  }
+};
+export const updateDepartement = async (req, res) => {
+  const { id } = req.params;
+  const data = req.body;
+
+  try {
     const updatedDepartement = await departmentModel.findByIdAndUpdate(
       id,
       data,
-      { new: true ,runValidators: true}
+      { new: true, runValidators: true },
     );
     if (!updatedDepartement) {
       return res.status(404).json({ message: "الاداره غير موجود" });
     }
-    res.status(200).json({success:true,data:updatedDepartement});
+    res.status(200).json({ success: true, data: updatedDepartement });
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -88,16 +79,14 @@ export const updateDepartement=async(req,res)=>{
     });
   }
 };
-export const deleteDepartement=async(req,res)=>{
-    const { id } = req.params;
-    console.log(id);
-    
-    try {
+export const deleteDepartement = async (req, res) => {
+  const { id } = req.params;
+  try {
     const deletedDepartement = await departmentModel.findByIdAndDelete(id);
     if (!deletedDepartement) {
       return res.status(404).json({ message: "الاداره غير موجود" });
     }
-    res.status(200).json({success:true,message: "تم حذف الاداره بنجاح" });
+    res.status(200).json({ success: true, message: "تم حذف الاداره بنجاح" });
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -105,15 +94,15 @@ export const deleteDepartement=async(req,res)=>{
     });
   }
 };
-export const getDepartementById=async(req,res)=>{
-    const { id } = req.params;
-    try {
+export const getDepartementById = async (req, res) => {
+  const { id } = req.params;
+  try {
     const departement = await departmentModel.findById(id);
     if (!departement) {
       return res.status(404).json({ message: "الاداره غير موجود" });
     }
 
-    res.status(200).json({success:true,data:departement});
+    res.status(200).json({ success: true, data: departement });
   } catch (error) {
     res.status(500).json({
       success: false,

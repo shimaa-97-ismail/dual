@@ -1,12 +1,4 @@
-// import React from 'react'
-// import { Navigate,Outlet } from 'react-router-dom';
 
-// export function ProtectedRoute() {
-//    const token = localStorage.getItem("token");
-//   return token ? <Outlet /> : <Navigate to="/login" />;
-// }
-
-// ProtectedRoute.jsx
 import { Navigate, Outlet } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/Auth/AuthContext';

@@ -34,11 +34,8 @@ import { toast } from "react-hot-toast";
 // import { updateSchool } from "./../../store/slices/schools";
 
 export const SchoolCard = memo(({ data }) => {
-  console.log(data);
 
   const { departmentId } = useParams();
-  console.log(departmentId);
-
   const queryClient = useQueryClient();
   const updateMutation = useUpdateSchool();
   const deleteMutation = useDeleteSchool();
@@ -47,7 +44,6 @@ export const SchoolCard = memo(({ data }) => {
 
   // معالجة التعديل
   const handleUpdate = (updateData) => {
-    console.log(updateData);
 
     updateMutation.mutate(
       { id: data._id, updateData, departmentId },
@@ -273,7 +269,6 @@ export const SchoolCard = memo(({ data }) => {
         isLoading={deleteMutation.isLoading}
       />
     </>
-    //   );
-    // }
+
   );
 });

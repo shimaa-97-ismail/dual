@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useTrainningPlaces } from "../../hooks/useTrainningPlaces";
+import { useTrainningPlaces } from "../../hooks/useTrainngPlace";
 import { TrainningPlaceModel, TrainningPlaceForm } from "@/components";
 import ConfirmationModal from "../../components/common/ConfirmationModel";
 import { toast } from "react-hot-toast";
@@ -14,7 +14,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import EmptyState from "@/components/common/EmptyState";
-import { MainHeader } from "@/components";
 import {
   Pencil,
   Trash2,
@@ -24,119 +23,116 @@ import {
   Phone,
   User,
   Building,
-  FileText,
   Search,
-  Filter,
 } from "lucide-react";
 import { FaFacebook, FaInstagram } from "react-icons/fa";
 export const TrainningPlacesList = () => {
   const navigate = useNavigate();
+  // Pagination & search state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setPage(1); // reset to first page on new search
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
   const {
-    trainningPlaces,
+    data: trainningPlaces,
+    pagination,
     isLoading,
-    getTrainningPlaces,
-    removeTrainningPlace,
-    // deleteSuccess,
-    // deleteError,
-    // resetStatus,
     addTrainningPlace,
     editTrainningPlace,
-  } = useTrainningPlaces();
-  const icons = {
-    facebook: "📘",
-    instagram: "📷",
-    whatsapp: "💬",
-    link: "🔗",
-  };
-  // const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    removeTrainningPlace,
+    refetch,
+  } = useTrainningPlaces({
+    page,
+    limit,
+    search: debouncedSearch,
+  });
+
   const [selectedPlace, setSelectedPlace] = useState(null);
-  // const [isDeleting, setIsDeleting] = useState(false);
-  // const [searchTerm, setSearchTerm] = useState("");
-  // const [filterSupervisor, setFilterSupervisor] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  // Fetch places on component mount
-  useEffect(() => {
-    getTrainningPlaces();
-  }, [getTrainningPlaces]);
 
-  //add new one
   const handleAddNew = () => {
     setSelectedPlace(null);
     setIsModalOpen(true);
   };
-  //edit place
+
   const handleEdit = (place) => {
     setSelectedPlace(place);
     setIsModalOpen(true);
   };
-  //submit form
+
   const handleSubmit = async (data) => {
     setIsModalOpen(false);
-    // If selectedPlace is null, it's a new place
-    if (!selectedPlace) {
-      // Call add function from the hook
-      await addTrainningPlace(data);
-    } else {
-      // Call edit function from the hook
-      await editTrainningPlace(selectedPlace._id, data);
+    try {
+      if (!selectedPlace) {
+        await addTrainningPlace(data);
+        toast.success("تم إضافة المنشأة بنجاح");
+      } else {
+        await editTrainningPlace(selectedPlace._id, data);
+        toast.success("تم تعديل المنشأة بنجاح");
+      }
+      // Refetch after mutation (query invalidation inside hook does this)
+      refetch();
+    } catch (error) {
+      toast.error(selectedPlace ? "فشل في التعديل" : "فشل في الإضافة");
+      console.error(error);
     }
-    // Refresh the list after adding/editing
-    getTrainningPlaces();
   };
 
   const handleDeleteClick = (place) => {
     setSelectedPlace(place);
     setDeleteModalOpen(true);
   };
+
   const confirmDelete = async () => {
     try {
-      console.log(selectedPlace);
-
-      await removeTrainningPlace(selectedPlace._id);
+      await removeTrainningPlace(selectedPlace?._id);
       toast.success("تم حذف مكان التدريب بنجاح");
       setDeleteModalOpen(false);
+      refetch();
     } catch (error) {
       toast.error("فشل في حذف مكان التدريب");
-      console.error("Delete error:", error);
+      console.error(error);
     }
   };
 
-  // // Filter and search logic
-  // const filteredPlaces = trainningPlaces.filter((place) => {
-  //   const matchesSearch =
-  //     place.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     place.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //     place.owner?.toLowerCase().includes(searchTerm.toLowerCase());
+  // Pagination helpers
+  const totalPages = pagination?.totalPages || 0;
+  const currentPage = pagination?.page || page;
+  const totalItems = pagination?.total || 0;
 
-  //   const matchesFilter =
-  //     filterSupervisor === "all" ||
-  //     (filterSupervisor === "with" && place.supervisorName) ||
-  //     (filterSupervisor === "without" && !place.supervisorName);
+  const goToPage = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) setPage(newPage);
+  };
 
-  //   return matchesSearch && matchesFilter;
-  // });
-
-  // Extract unique supervisors for filtering
-  // const supervisors = [
-  //   ...new Set(
-  //     trainningPlaces
-  //       .filter((p) => p.supervisorName)
-  //       .map((p) => p.supervisorName.name)
-  //   ),
-  // ];
+  const nextPage = () => goToPage(currentPage + 1);
+  const prevPage = () => goToPage(currentPage - 1);
+  const changeLimit = (newLimit) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
 
   return (
     <div className="container mx-auto p-4 md:p-6">
-      {/* Header with search and filters */}
+      {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">المنشأت التدريبيه</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            المنشأت التدريبيه
+          </h1>
           <p className="text-gray-600 mt-2">
             جميع المنشأت التدريبيه في محافظة قنا تحت نظام التعليم الفنى المزدوج
           </p>
         </div>
-
         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
           <Button className="gap-2" onClick={handleAddNew}>
             <Plus className="h-4 w-4" />
@@ -144,253 +140,293 @@ export const TrainningPlacesList = () => {
           </Button>
         </div>
       </div>
-  
+
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <input
+            type="text"
+            placeholder="بحث باسم المنشأة..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+
       {/* Loading State */}
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
-            <p className="mt-4 text-gray-600">جاري تحميل المنشأت التدريبيه...</p>
+            <p className="mt-4 text-gray-600">
+              جاري تحميل المنشأت التدريبيه...
+            </p>
           </div>
         </div>
       ) : (
         <>
-          {/* Empty State */}
           {trainningPlaces.length === 0 ? (
             <EmptyState
               title="لا توجد منشأت تدريبيه"
-              description={ "لم يتم إضافة أي منشأت تدريبيه بعد. ابدأ بإضافة أول منشأه تدريبيه."
+              description={
+                debouncedSearch
+                  ? `لا توجد نتائج لـ "${debouncedSearch}"`
+                  : "لم يتم إضافة أي منشأت تدريبيه بعد. ابدأ بإضافة أول منشأه تدريبيه."
               }
               actionText="إضافة منشأه تدريبيه"
               onAction={handleAddNew}
             />
           ) : (
-            /* Cards Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {trainningPlaces.map(
-                (place) => (
-                  console.log(place),
-                  (
-                    <Card
-                      key={place._id}
-                      className="hover:shadow-lg transition-shadow duration-300"
-                    >
-                      <CardHeader className="">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <CardTitle
-                              className="text-xl cursor-pointer"
-                              onClick={() =>
-                                navigate(
-                                  `/trainning-place/${place._id}/details`,
-                                )
-                              }
-                            >
-                              {place.name}
-                            </CardTitle>
-                            <CardDescription className="mt-1">
-                              {place.commercialRegister ? (
-                                <a
-                                  href={place.commercialRegister}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                                >
-                                  {icons.link} عرض السجل التجاري
-                                </a>
-                              ) : (
-                                "بدون سجل تجاري"
-                              )}
-                              <br />
-                              {place.taxFile ? (
-                                <a
-                                  href={place.taxFile}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline inline-flex items-center gap-1"
-                                >
-                                  {icons.file || icons.link} عرض الملف الضريبي
-                                </a>
-                              ) : (
-                                "بدون ملف ضريبي"
-                              )}
-                            </CardDescription>
-                          </div>
-                          <div className="mt-3">
-                            <a
-                              href={place.socialMedia}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-block text-primary hover:text-blue-800 transition"
-                            >
-                              {" "}
-                              {place.socialMedia &&
-                              (place.socialMedia.includes("facebook.com") ||
-                                place.socialMedia.includes("fb.com")) ? (
-                                <FaFacebook className="h-5 w-5" />
-                              ) : place.socialMedia &&
-                                (place.socialMedia.includes("instagram.com") ||
-                                  place.socialMedia.includes("insta.com")) ? (
-                                <FaInstagram className="h-5 w-5" />
-                              ) : null}
-                            </a>
-                          </div>
-                        
+            <>
+              {/* Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {trainningPlaces.map((place) => (
+                  <Card
+                    key={place._id}
+                    className="hover:shadow-lg transition-shadow duration-300"
+                  >
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <CardTitle
+                            className="text-xl cursor-pointer"
+                            onClick={() =>
+                              navigate(`/trainning-place/${place._id}/details`)
+                            }
+                          >
+                            {place.name}
+                          </CardTitle>
+                          <CardDescription className="mt-1">
+                            {place.commercialRegister ? (
+                              <a
+                                href={place.commercialRegister}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                              >
+                                عرض السجل التجاري
+                              </a>
+                            ) : (
+                              "بدون سجل تجاري"
+                            )}
+                            <br />
+                            {place.taxFile ? (
+                              <a
+                                href={place.taxFile}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline inline-flex items-center gap-1"
+                              >
+                                عرض الملف الضريبي
+                              </a>
+                            ) : (
+                              "بدون ملف ضريبي"
+                            )}
+                          </CardDescription>
                         </div>
-                      </CardHeader>
+                        <div className="mt-3">
+                          <a
+                            href={place.socialMedia}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block text-primary hover:text-blue-800 transition"
+                          >
+                            {place.socialMedia &&
+                            (place.socialMedia.includes("facebook.com") ||
+                              place.socialMedia.includes("fb.com")) ? (
+                              <FaFacebook className="h-5 w-5" />
+                            ) : place.socialMedia &&
+                              (place.socialMedia.includes("instagram.com") ||
+                                place.socialMedia.includes("insta.com")) ? (
+                              <FaInstagram className="h-5 w-5" />
+                            ) : null}
+                          </a>
+                        </div>
+                      </div>
+                    </CardHeader>
 
-                      <CardContent className="space-y-4">
-                        {/* Address */}
-                        <div className="flex items-start gap-3">
-                          <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                    <CardContent className="space-y-4">
+                      {/* Address */}
+                      <div className="flex items-start gap-3">
+                        <MapPin className="h-5 w-5 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-700">
+                            العنوان
+                          </p>
+                          <p className="text-gray-600">
+                            {place.address || "لم يتم تحديد العنوان"}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Phone */}
+                      {place.phone && (
+                        <div className="flex items-center gap-3">
+                          <Phone className="h-5 w-5 text-gray-400" />
                           <div>
                             <p className="text-sm font-medium text-gray-700">
-                              العنوان
+                              الهاتف
                             </p>
-                            <p className="text-gray-600">
-                              {place.address || "لم يتم تحديد العنوان"}
-                            </p>
+                            <a
+                              href={`tel:${place.phone}`}
+                              className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                            >
+                              {place.phone}
+                            </a>
                           </div>
                         </div>
+                      )}
 
-                        {/* Phone */}
-                        {place.phone && (
+                      {/* Supervisor */}
+                      {place.supervisorName && (
+                        <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-3">
-                            <Phone className="h-5 w-5 text-gray-400" />
+                            <User className="h-6 w-6 text-gray-400" />
                             <div>
                               <p className="text-sm font-medium text-gray-700">
-                                الهاتف
+                                المشرف المسؤول
                               </p>
-                              <a
-                                href={`tel:${place.supervisorName.phone}`}
-                                className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                              >
-                                {place.phone}
-                              </a>
-                             
+                              <p className="text-gray-600">
+                                {place.supervisorName.username}
+                              </p>
                             </div>
                           </div>
-                        )}
+                          <div className="flex gap-2 mt-5">
+                            <Phone className="h-5 w-4 text-gray-400" />
+                            <a
+                              href={`tel:${place.supervisorName.phone}`}
+                              className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                            >
+                              {place.supervisorName.phone}
+                            </a>
+                          </div>
+                        </div>
+                      )}
 
-                        {/* Supervisor */}
-                        {place.supervisorName && (
+                      {/* Owner */}
+                      {place.owner && (
+                        <>
                           <div className="flex items-center justify-between gap-3">
                             <div className="flex items-center gap-3">
-                              <User className="h-6 w-6 text-gray-400" />
+                              <Building className="h-5 w-5 text-gray-400" />
                               <div>
                                 <p className="text-sm font-medium text-gray-700">
-                                  المشرف المسؤول
+                                  المالك
                                 </p>
-                                <div className="flex items-end gap-3">
-                                  {/* <User className="h-5 w-5 text-gray-400" /> */}
-                                  <div>
-                                    <p className="text-gray-600">
-                                      {place.supervisorName}
-                                    </p>
-                                  </div>
-                                </div>
+                                <p className="text-gray-600">
+                                  {place.owner}
+                                </p>
                               </div>
                             </div>
-
-                            <div className=" flex gap-2  mt-5">
+                            <div className="flex gap-2 ms-6 mt-5">
                               <Phone className="h-5 w-4 text-gray-400" />
                               <a
-                                href={`tel:${place.supervisorPhone}`}
-                                className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                                href={`tel:${place.ownerPhone}`}
+                                className="text-sm font-medium text-blue-600 hover:text-blue-800"
                               >
-                                {place.supervisorPhone}
+                                {place.ownerPhone}
                               </a>
                             </div>
                           </div>
-                        )}
-
-                        {/* Owner */}
-                        {place.owner && (
-                          <>
-                            <div className="flex items-center justify-between  gap-3">
-                              <div className="flex items-center gap-3">
-                                <Building className="h-5 w-5 text-gray-400" />
-                                <div>
-                                  <p className="text-sm font-medium text-gray-700">
-                                    المالك
-                                  </p>
-                                  <p className="text-gray-600">{place.owner}</p>
-                                </div>
-                              </div>
-                              <div className=" flex gap-2 ms-6 mt-5">
-                                <Phone className="h-5 w-4 text-gray-400" />
-                                <a
-                                  href={`tel:${place.ownerPhone}`}
-                                  className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                                >
-                                  {place.ownerPhone}
-                                </a>
-                              </div>
-                            </div>
+                          {place.idCard && (
                             <div className="flex items-center gap-3">
-                              {place.idCard && (
-                                <a
-                                target="_black"
-                                  href={`${place.idCard}`}
-                                  className="text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors"
-                                >
-                                  البطاقة الشخصية للمالك
-                                </a>
-                              )}
+                              <a
+                                target="_blank"
+                                href={place.idCard}
+                                className="text-sm font-medium text-blue-600 hover:text-blue-800"
+                              >
+                                البطاقة الشخصية للمالك
+                              </a>
                             </div>
-                          </>
-                        )}
-                      </CardContent>
+                          )}
+                        </>
+                      )}
+                    </CardContent>
 
-                      <CardFooter className="flex justify-between border-t pt-4">
-                        <div className="text-sm text-gray-500">
-                          آخر تحديث: {new Date().toLocaleDateString("ar-EG")}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className=" border-green-500 text-green-600! hover:bg-green-50"
-                            onClick={() => {
-                              handleEdit(place);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4 ml-1" />
-                            تعديل
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-red-500 text-red-600! hover:bg-red-50"
-                            onClick={() => handleDeleteClick(place)}
-                            // onClick={() => setDeleteModalOpen(true)}
-                          >
-                            <Trash2 className="h-4 w-4 ml-1" />
-                            حذف
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
-                  )
-                ),
+                    <CardFooter className="flex justify-end border-t pt-4">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-green-500 text-green-600! hover:bg-green-50"
+                          onClick={() => handleEdit(place)}
+                        >
+                          <Pencil className="h-4 w-4 ml-1" />
+                          تعديل
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="border-red-500 text-red-600! hover:bg-red-50"
+                          onClick={() => handleDeleteClick(place)}
+                        >
+                          <Trash2 className="h-4 w-4 ml-1" />
+                          حذف
+                        </Button>
+                      </div>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="flex flex-wrap items-center justify-between gap-4 mt-8">
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm">عدد العناصر:</label>
+                    <select
+                      value={limit}
+                      onChange={(e) => changeLimit(Number(e.target.value))}
+                      className="border rounded px-2 py-1"
+                    >
+                      <option value={5}>5</option>
+                      <option value={10}>10</option>
+                      <option value={20}>20</option>
+                      <option value={50}>50</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={prevPage}
+                      disabled={currentPage === 1}
+                      className="px-3 py-1 border rounded disabled:opacity-50 text-black!"
+                    >
+                      السابق
+                    </button>
+                    <span className="mx-2">
+                      صفحة {currentPage} من {totalPages}
+                    </span>
+                    <button
+                      onClick={nextPage}
+                      disabled={currentPage === totalPages}
+                      className="px-3 py-1 border rounded disabled:opacity-50 text-black!"
+                    >
+                      التالي
+                    </button>
+                  </div>
+
+                  <div className="text-sm text-gray-500">
+                    إجمالي: {totalItems} منشأة
+                  </div>
+                </div>
               )}
-            </div>
+            </>
           )}
         </>
       )}
 
-    
-
+      {/* Modals */}
       <ConfirmationModal
         open={deleteModalOpen}
         onOpenChange={setDeleteModalOpen}
-        title="تأكيد  حذف مكان التدريب"
-        description={`هل أنت متأكد من  حذف مكان التدريب "${selectedPlace?.name}}"؟ هذا الإجراء لا يمكن التراجع عنه.`}
+        title="تأكيد حذف مكان التدريب"
+        description={`هل أنت متأكد من حذف مكان التدريب "${selectedPlace?.name}"؟ هذا الإجراء لا يمكن التراجع عنه.`}
         confirmText="نعم، احذف"
         cancelText="إلغاء"
         onConfirm={confirmDelete}
         variant="destructive"
-        
       />
 
       <TrainningPlaceModel
@@ -399,7 +435,9 @@ export const TrainningPlacesList = () => {
           setIsModalOpen(false);
           setSelectedPlace(null);
         }}
-        title={selectedPlace ? "تعديل المنشأه التدريبيه" : "إضافة منشأه تدريبيه جديد"}
+        title={
+          selectedPlace ? "تعديل المنشأه التدريبيه" : "إضافة منشأه تدريبيه جديد"
+        }
       >
         <TrainningPlaceForm
           onSubmit={handleSubmit}

@@ -15,7 +15,7 @@ export function ForgetPassword() {
     setError("");
     try {
       const res = await axioInstance.post("/user/forget-password", { email });
-      console.log(res);
+   
 
       if (res.status === 200) {
         setMessage(res.data.message);

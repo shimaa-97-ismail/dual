@@ -1,8 +1,7 @@
 export const validateSelect = (value, options = {}) => {
   const { required = false } = options;
   const errors = [];
-  console.log(value);
-  
+    
   if (required && (!value || value === '')) {
     errors.push('يرجى اختيار قيمة');
   }

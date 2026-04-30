@@ -18,18 +18,16 @@ export function ChangeStatusOfStudentModel({
   open,
   onOpenChange,
   selectedStudentIds,
-  currentStage ,          
-  currentAcademicYear
+  currentStage,
+  currentAcademicYear,
 }) {
-  console.log("currentAcademicYear", currentAcademicYear);
-  
   const mutation = useChangeStatusOfStudents();
-const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     studStatus: "",
     stage_name: "",
     current_class: "",
-    academicYear:"",
+    academicYear: "",
   });
 
   // Reset form when modal opens (optional)
@@ -39,8 +37,7 @@ const queryClient = useQueryClient();
         studStatus: "",
         stage_name: "",
         current_class: "",
-        academicYear:"",
-        
+        academicYear: "",
       });
     }
   }, [open]);
@@ -51,8 +48,6 @@ const queryClient = useQueryClient();
         stage_name: "",
         current_class: "",
       }));
-      console.log("asd asd");
-      
     }
   }, [formData.studStatus]);
 
@@ -60,86 +55,78 @@ const queryClient = useQueryClient();
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-// Helper to get next stage
-const getNextStage = (currentStage) => {
-  const stageOrder = ["الصف الأول", "الصف الثاني", "الصف الثالث"];
-  const idx = stageOrder.indexOf(currentStage);
-  return idx !== -1 && idx + 1 < stageOrder.length ? stageOrder[idx + 1] : null;
-};
+  // Helper to get next stage
+  const getNextStage = (currentStage) => {
+    const stageOrder = ["الصف الأول", "الصف الثاني", "الصف الثالث"];
+    const idx = stageOrder.indexOf(currentStage);
+    return idx !== -1 && idx + 1 < stageOrder.length
+      ? stageOrder[idx + 1]
+      : null;
+  };
 
-// // Helper to get next academic year (e.g., "2024/2025" -> "2025/2026")
-// const getNextAcademicYear = (currentAcademicYear) => {
-//   console.log("currentAcademicYear",currentAcademicYear);
-  
-//   const [start, end] = currentAcademicYear.split("/");
-//   console.log(start);
-  
-//   console.log(`${parseInt(end) }/${parseInt(end) + 1}`);
-  
-//   return `${parseInt(end)}/${parseInt(end) + 1}`;
-// };
-
-const handleSubmit = () => {
-  if (selectedStudentIds.length === 0) {
-    toast.error("لم يتم اختيار أي طالب");
-    return;
-  }
-
-  const updates = {};
-
-  // 1. Status
-  if (formData.studStatus) updates.studStatus = formData.studStatus;
-
-  // 2. Handle promotion and repeat separately
-  if (formData.studStatus === "ناجح منقول") {
-    const nextStage = getNextStage(currentStage);
-    if (!nextStage) {
-      toast.error("لا يمكن ترقية الطالب من الصف الثالث");
+  const handleSubmit = () => {
+    if (selectedStudentIds.length === 0) {
+      toast.error("لم يتم اختيار أي طالب");
       return;
     }
-    updates.stage_name = nextStage;                 // send NEW stage
-    updates.academicYear =currentAcademicYear; // next year
-    updates.current_class = formData.current_class;                    // reset class for new stage
-  } 
-  else if (formData.studStatus === "باقى لأعاده (راسب)") {
-    updates.stage_name = currentStage;              // same stage
-    updates.academicYear = currentAcademicYear;     // same year
-    updates.current_class = formData.current_class;                    // reset class for new stage
- 
-  }
-  else {
-    // Normal update (status change only, or user‑selected stage/class)
-    if (formData.studStatus !== "متخرج") {
-      if (formData.stage_name) updates.stage_name = formData.stage_name;
-      if (formData.current_class) updates.current_class = formData.current_class;
+
+    const updates = {};
+
+    // 1. Status
+    if (formData.studStatus) updates.studStatus = formData.studStatus;
+
+    // 2. Handle promotion and repeat separately
+    if (formData.studStatus === "ناجح منقول") {
+      const nextStage = getNextStage(currentStage);
+      if (!nextStage) {
+        toast.error("لا يمكن ترقية الطالب من الصف الثالث");
+        return;
+      }
+      updates.stage_name = nextStage; // send NEW stage
+      updates.academicYear = currentAcademicYear; // next year
+      updates.current_class = formData.current_class; // reset class for new stage
+    } else if (formData.studStatus === "باقى لأعاده (راسب)") {
+      updates.stage_name = currentStage; // same stage
+      updates.academicYear = currentAcademicYear; // same year
+      updates.current_class = formData.current_class; // reset class for new stage
+    } else {
+      // Normal update (status change only, or user‑selected stage/class)
+      if (formData.studStatus !== "متخرج") {
+        if (formData.stage_name) updates.stage_name = formData.stage_name;
+        if (formData.current_class)
+          updates.current_class = formData.current_class;
+      }
     }
-  }
 
-  if (Object.keys(updates).length === 0) {
-    toast.error("يرجى اختيار بيانات للتحديث");
-    return;
-  }
+    if (Object.keys(updates).length === 0) {
+      toast.error("يرجى اختيار بيانات للتحديث");
+      return;
+    }
 
-  console.log("Sending updates:", updates);
-  console.log("🔵 updates object:", JSON.stringify(updates, null, 2));
-  mutation.mutate(
-    { studentIds: selectedStudentIds, updates },
-    {
-      onSuccess: () => {
-        toast.success("تم تحديث حالات الطلاب بنجاح");
-        onOpenChange(false);
-        queryClient.invalidateQueries({ queryKey: studentKeys.all });
+    mutation.mutate(
+      { studentIds: selectedStudentIds, updates },
+      {
+        onSuccess: () => {
+          toast.success("تم تحديث حالات الطلاب بنجاح");
+          onOpenChange(false);
+          queryClient.invalidateQueries({ queryKey: studentKeys.all });
           setTimeout(() => {
-        window.location.reload();
-      }, 100);
+            window.location.reload();
+          }, 200);
+        },
+        onError: (error) => {
+          toast.error("فشل التحديث: " + error.message);
+        },
       },
-      onError: (error) => {
-        toast.error("فشل التحديث: " + error.message);
-      },
-    }
-  );
-};
-  const studentStatus = ["مستجد", "محول", "باقى لأعاده (راسب)", "ناجح منقول","متخرج"];
+    );
+  };
+  const studentStatus = [
+    "مستجد",
+    "محول",
+    "باقى لأعاده (راسب)",
+    "ناجح منقول",
+    "متخرج",
+  ];
   const isGraduated = formData.studStatus === "متخرج";
 
   return (
@@ -155,10 +142,14 @@ const handleSubmit = () => {
       <div className="flex flex-col space-y-4">
         <div className="flex items-center ">
           <div className="m-3 mt-6">
-          <LabelForm htmlFor="studStatus" title="حاله الطالب" required={true} />
+            <LabelForm
+              htmlFor="studStatus"
+              title="حاله الطالب"
+              required={true}
+            />
           </div>
           <Select
-          className=""
+            className=""
             value={formData.studStatus}
             onValueChange={(value) => handleChange("studStatus", value)}
           >
@@ -177,7 +168,11 @@ const handleSubmit = () => {
         {!isGraduated && (
           <div className="flex items-center">
             <div className="m-3 mt-6">
-              <LabelForm htmlFor="stage_name" title="المرحله الدراسيه" required={true} />
+              <LabelForm
+                htmlFor="stage_name"
+                title="المرحله الدراسيه"
+                required={true}
+              />
             </div>
             <Select
               value={formData.stage_name}
@@ -194,10 +189,14 @@ const handleSubmit = () => {
             </Select>
           </div>
         )}
-{!isGraduated && (
+        {!isGraduated && (
           <div className="flex items-center">
             <div className="m-3 mt-3">
-              <LabelForm htmlFor="current_class" title="الفصل" required={true} />
+              <LabelForm
+                htmlFor="current_class"
+                title="الفصل"
+                required={true}
+              />
             </div>
             <Input
               id="current_class"

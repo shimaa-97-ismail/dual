@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/table";
 import "./table.css";
 export function StudentReregistrationTable({ isRegister, applicant, student }) {
-  console.log(student);
 
   return (
     <Table style={{ width: "70%" }}>

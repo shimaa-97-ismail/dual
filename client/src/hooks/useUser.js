@@ -21,8 +21,6 @@ export const userKeys = {
 };
 
  const updateUser = async ({ id, ...userData }) => {
-
-  console.log(id,userData);
   
   const { data } = await axioInstance.put(`/user/${id}`, userData);
   return data.data;

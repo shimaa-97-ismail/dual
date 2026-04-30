@@ -54,8 +54,6 @@ export const getSchoolSpecials = async (req, res) => {
     }
 };
 export const createSchoolSpecial = async (req, res) => {
-   console.log(req.body);
-   
     const newSpecial = new schoolSpecialModel(req.body);
     try {
         await newSpecial.save();
@@ -67,8 +65,6 @@ export const createSchoolSpecial = async (req, res) => {
 export const updateSchoolSpecial = async (req, res) => {
     const { id } = req.params;
     const special = req.body;
-     console.log(req.body);
-    console.log( req.params,special);
     
     try {
         const updatedSpecial = await schoolSpecialModel.findByIdAndUpdate(id, special, { new: true });
