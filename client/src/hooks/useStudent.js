@@ -120,6 +120,8 @@ export const useChangeStatusOfStudents = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ studentIds, updates }) => {
+      console.log(studentIds, updates );
+      
       const response = await axioInstance.patch("/student/bulk-update", {
         studentIds,
         updates,

@@ -7,7 +7,7 @@ export const schoolsApi = {
   create: (data) => axioInstance.post("school", data),
   update: (id, data) => axioInstance.put(`school/${id}`, data),
   delete: (id) => axioInstance.delete(`school/${id}`),
-  getByDept: (deptID) => axioInstance.get(`school/${deptID}`),
+  getByDept: (deptID) => axioInstance.get(`school/by-department/${deptID}`),
   getByIntakes:(id)=>axioInstance.get(`school/intakes/${id}`),
   getSpecialBySchool:(id)=>axioInstance.get(`school/special/${id}`),
   getClasses:(filters)=>axioInstance.get("school/classes",{ params: filters }),
@@ -164,6 +164,7 @@ export const useDeleteSchool = () => {
   });
 };
 export const useSchoolsByDept = (deptID) => {
+  console.log(deptID)
   return useQuery({
     queryKey: schoolKeys.byDept(deptID), // استخدام المفتاح الجديد
     queryFn: async () => await schoolsApi.getByDept(deptID), // نفترض وجود هذه الدالة في الـ API

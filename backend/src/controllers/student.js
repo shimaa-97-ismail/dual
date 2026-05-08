@@ -28,6 +28,7 @@ const stageMonths = {
 
 export const createStudent = async (req, res) => {
   try {
+   console.log("create");
    
     // Extract files by field name
     let studentImageUrl, fatherDeathCertUrl, motherDeathCertUrl;
@@ -554,6 +555,7 @@ export const absence_Percentage = async (req, res) => {
 export const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(id)
     let updateData = req.body;
 
     // Parse JSON fields
@@ -834,6 +836,8 @@ export const searchStudents = async (req, res) => {
 // controllers/studentController.js
 export const bulkUpdateStudents = async (req, res) => {
   try {
+console.log("here");
+
     const { studentIds, updates } = req.body;
 
     if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
@@ -856,6 +860,7 @@ export const bulkUpdateStudents = async (req, res) => {
         updateData[field] = updates[field];
       }
     }
+console.log(updateData);
 
     if (Object.keys(updateData).length === 0 && !updates.academicYear) {
       return res.status(400).json({
@@ -988,7 +993,12 @@ export const bulkUpdateStudents = async (req, res) => {
         }
         // Do NOT update the student's stage – it stays the same
       }
-    }
+    }else if(newStatus==="متخرج"){
+         await studentModel.updateMany(
+             { _id: { $in: studentIds } },
+    { $set: updateData },  // updateData contains studStatus, possibly stage_name, etc.
+    { runValidators: true } )
+      }
 
     // Run graduation check for all affected students
     for (const studentId of studentIds) {

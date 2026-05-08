@@ -130,7 +130,7 @@ const studentSchema = new mongoose.Schema(
       max_repetitions_allowed: { type: Number, default: 2 }, // الحد الأقصى للتكرار
     },
     graduationYear: {
-      type: Number,
+      type: String,
       default: null,
     },
     academicYear: {

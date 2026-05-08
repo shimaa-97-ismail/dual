@@ -98,10 +98,16 @@ export function ChangeStatusOfStudentModel({
       }
     }
 
+    if (formData.studStatus === "متخرج") {
+  updates.studStatus = "متخرج";
+  // Do NOT add stage_name or current_class
+}
+
     if (Object.keys(updates).length === 0) {
       toast.error("يرجى اختيار بيانات للتحديث");
       return;
     }
+console.log(updates);
 
     mutation.mutate(
       { studentIds: selectedStudentIds, updates },
@@ -112,7 +118,7 @@ export function ChangeStatusOfStudentModel({
           queryClient.invalidateQueries({ queryKey: studentKeys.all });
           setTimeout(() => {
             window.location.reload();
-          }, 200);
+          }, 250);
         },
         onError: (error) => {
           toast.error("فشل التحديث: " + error.message);
@@ -208,41 +214,7 @@ export function ChangeStatusOfStudentModel({
             />
           </div>
         )}
-        {/* <div className="flex items-center ">
-          <div className="m-3 mt-6">
-          <LabelForm htmlFor="stage_name" title="المرحله الدراسيه" required={true} />
-
-          </div>
-          <Select
-            value={formData.stage_name}
-            onValueChange={(value) => handleChange("stage_name", value)}
-          >
-            <SelectTrigger className="w-[150px] text-black!">
-              <SelectValue placeholder="اختر المرحله" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="الصف الأول">الصف الأول</SelectItem>
-              <SelectItem value="الصف الثاني">الصف الثاني</SelectItem>
-              <SelectItem value="الصف الثالث">الصف الثالث</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex items-center">
-          <div className="m-3 mt-3">
-          <LabelForm htmlFor="current_class" title="الفصل" required={true} />
-
-          </div>
-          <Input
-            id="current_class"
-            type="text"
-            className="w-[100px] text-black!"
-            value={formData.current_class}
-            onChange={(e) => handleChange("current_class", e.target.value)}
-            placeholder="1/2"
-            required
-          />
-        </div> */}
+       
       </div>
     </BaseModel>
   );

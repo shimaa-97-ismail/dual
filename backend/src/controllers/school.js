@@ -119,6 +119,8 @@ export const deleteSchool = async (req, res) => {
 
 export const getSchoolsByDepartment = async (req, res) => {
   const { departmentId } = req.params;
+  console.log(departmentId);
+  
   try {
     const schools = await schoolModel
       .find({ departement: departmentId })

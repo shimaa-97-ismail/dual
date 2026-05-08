@@ -97,8 +97,8 @@ export function DashBoard() {
             color="orange"
           />
           <MetricCard
-            title={`نسبة الغياب ${percentAbsence?.[0]?.academicYear}`}
-            value={percentAbsence?.[0]?.absencePercentage + "%" || "0%"}
+            title={`نسبة الغياب ${percentAbsence?.[0]?.academicYear ?? ""}`}
+            value={`${percentAbsence?.[0]?.absencePercentage ?? 0}%`}
             color="pink"
           />
           <MetricCard

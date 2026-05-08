@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { validators } from '../store/validators';
+// import { validators } from '../store/validators';
 
 export const useFormValidation = (initialValues = {}) => {
   const [values, setValues] = useState(initialValues);
@@ -7,9 +7,9 @@ export const useFormValidation = (initialValues = {}) => {
   const [touched, setTouched] = useState({});
 
   const validateField = (name, value) => {
-    if (validators[name]) {
-      return validators[name](value);
-    }
+    // if (validators[name]) {
+    //   return validators[name](value);
+    // }
     return null;
   };
 
