@@ -86,19 +86,18 @@ const studentSchema = new mongoose.Schema(
 
     code: {
       type: String,
-      unique: true,
-      sparse: true,
-      index: {
-        partialFilterExpression: { code: { $ne: "" } },
+         index: {
+         unique: true,
+        partialFilterExpression: { code: {$type :"string"} },
       },
     },
     email: {
       type: String,
-      unique: true,
-      sparse: true,
-      index: {
-        partialFilterExpression: { email: { $ne: "" } },
-      },
+      // unique: true,
+      // sparse: true,
+      // index: {
+      //   partialFilterExpression: { email: { $ne: "" } },
+      // },
     },
     password: {
       type: String,

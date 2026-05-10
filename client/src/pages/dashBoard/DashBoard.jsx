@@ -49,7 +49,7 @@ export function DashBoard() {
   const { data: departments, isLoading: deptsLoading } = useDepartments();
   const { data: specials, isLoading: specialsLoading } = useSpecials();
   const { data: students, isLoading: studentsLoading } = useStudents();
-  const { data: trainingPlaces, isLoading: trainingLoading } =
+  const { pagination: trainingPlaces, isLoading: trainingLoading } =
     useTrainningPlaces();
   const { data: percentAbsence, isLoading: percentAbsenceLoading } =
     useGetPercentAbsence();
@@ -103,7 +103,7 @@ export function DashBoard() {
           />
           <MetricCard
             title="إجمالي المنشأت التدريبيه"
-            value={trainingPlaces?.length || 0}
+            value={trainingPlaces?.total || 0}
             color="teal"
           />
         </div>
